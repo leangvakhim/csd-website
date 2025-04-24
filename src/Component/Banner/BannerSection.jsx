@@ -22,13 +22,8 @@ const childVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const AdmissionBanner = ({ section }) => {
-  const [bannerData, setBannerData] = useState({
-    title: "Admission Requirements",
-    subtitle:
-      "Apply now and take the first step toward your future. Check out for the important dates, deadlines, requirements, and a set of rules to get into CS.",
-    image: null,
-  });
+const BannerSection = ({ section }) => {
+  const [bannerData, setBannerData] = useState({});
 
   // Fetch banner data from API
   useEffect(() => {
@@ -58,21 +53,21 @@ const AdmissionBanner = ({ section }) => {
             setBannerData(filteredBanners[0]);
           } else {
             console.log(
-              "AdmissionBanner: No valid banners found for section_id",
+              "Banner: No valid banners found for section_id",
               section.sec_id
             );
           }
         })
         .catch((err) => {
-          console.error("AdmissionBanner: Error fetching banner data", err);
+          console.error("Banner: Error fetching banner data", err);
         });
     } else {
-      console.log("AdmissionBanner: No section.sec_id provided, using fallback data");
+      console.log("Banner: No section.sec_id provided, using fallback data");
     }
   }, [section]);
 
   if (!bannerData.image) {
-    console.log("AdmissionBanner: No banner image available, using fallback");
+    console.log("Banner: No banner image available, using fallback");
   }
 
   return (
@@ -116,4 +111,4 @@ const AdmissionBanner = ({ section }) => {
   );
 };
 
-export default AdmissionBanner;
+export default BannerSection;

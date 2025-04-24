@@ -7,10 +7,11 @@ import ServiceSection from './Services/ServiceSection';
 import ProgramSection from './Program/ProgramSection';
 import AcademicSection from './Academic/AcademicSection';
 import PartnershipSection from './Partnership/PartnershipSection';
-import AdmissionBanner from './Banner/AdmissionBannerSection';
+import AdmissionBanner from './Banner/BannerSection';
 import BasicRequirements from './Requirement/BasicRequirements';
 import ApplySection from './ApplySection/ApplySection';
 import ImportantSection from './Important/ImportantSection';
+import BannerSection from './Banner/BannerSection';
 
 const PageRenderer = ({ page }) => {
     const [sections, setSections] = useState([]);
@@ -57,7 +58,9 @@ const PageRenderer = ({ page }) => {
     console.log("PageRenderer: Rendering sections:", sections);
     return (
         <>
+         <div className="sticky top-0 z-50">
             <PageHeader />
+            </div>
             {sections.map((section) => {
                 switch (section.sec_type) {
                     case 'Slideshow':
@@ -71,7 +74,7 @@ const PageRenderer = ({ page }) => {
                     case 'Partner':
                         return <PartnershipSection key={section.sec_id} section={section} />;
                     case 'Banner':
-                        return <AdmissionBanner key={section.sec_id} section={section} />;
+                        return <BannerSection key={section.sec_id} section={section} />;
                     case 'Requirement':
                         return <BasicRequirements key={section.sec_id} section={section} />;
                     case 'Apply':

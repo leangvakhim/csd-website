@@ -2,20 +2,22 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { IoMdSearch } from "react-icons/io";
 import { FaBars, FaTimes } from "react-icons/fa";
+import { FiChevronDown } from "react-icons/fi";
+import { motion } from "framer-motion";
 import PageSearch from "./PageSearch";
-import PageNavbar from "./PageNavbar";
 import { API_ENDPOINTS } from "../Service/APIconfig";
+import PageNavbar from './PageNavbar'
 import axios from "axios";
 
 const PageHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [menus, setMenus] = useState([]);
-  
+  const [activeMenu, setActiveMenu] = useState(null);
+
   const searchContainerRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
-  // Fetch menu data
   useEffect(() => {
     axios.get(API_ENDPOINTS.getMenu)
       .then((res) => {
@@ -24,7 +26,7 @@ const PageHeader = () => {
         const filteredMenus = data
           .filter(menu => menu.lang === selectedLang)
           .filter(display => display.display === 1)
-          .sort((a, b) => b.menu_order - a.menu_order); // Descending order
+          .sort((a, b) => b.menu_order - a.menu_order);
         setMenus(filteredMenus);
       })
       .catch((err) => {
@@ -49,14 +51,13 @@ const PageHeader = () => {
     }
   };
 
-  // Close dropdown or mobile menu when clicking outside
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <div className="relative bg-white shadow-md">
+    <div className="bg-white shadow-md sticky top-0">
       {/* Search Bar */}
       {isSearchOpen && (
         <div className="absolute top-0 left-0 w-full bg-red-800 py-4 z-50">
@@ -73,13 +74,20 @@ const PageHeader = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <div className="w-14 h-14 bg-gray-200" />
-              <h2  className="lg:text-lg font-normal text-sm uppercase hidden sm:block ">Faculty of Science <br /> Department of Computer Science</h2>
+              <h2 className="lg:text-lg font-normal text-sm uppercase hidden sm:block">
+                Faculty of Science <br /> Department of Computer Science
+              </h2>
             </Link>
 
             {/* Desktop Navigation and Actions */}
             <div className="flex items-center space-x-4">
               <div className="hidden xl:block">
-                <PageNavbar menus={menus} />
+                <PageNavbar
+                  menus={menus}
+                  activeMenu={activeMenu}
+                  onMenuClick={setActiveMenu}
+                  isMobileMenuOpen={isMobileMenuOpen}
+                />
               </div>
 
               {/* Actions */}
@@ -102,10 +110,11 @@ const PageHeader = () => {
       {isMobileMenuOpen && (
         <div ref={mobileMenuRef} className="xl:hidden fixed top-0 left-0 w-full h-full bg-white shadow-md z-40 overflow-y-auto">
           <div className="p-6">
-            {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <div className="w-14 h-14 bg-gray-200" />
-              <h2 className="text-sm font-normal uppercase">Faculty of Science <br /> Department of Computer Science</h2>
+              <h2 className="text-sm font-normal uppercase">
+                Faculty of Science <br /> Department of Computer Science
+              </h2>
             </Link>
 
             <button onClick={toggleMobileMenu} className="absolute right-6 top-4 text-gray-600 hover:text-red-800">
@@ -113,11 +122,35 @@ const PageHeader = () => {
             </button>
 
             <div className="flex flex-col space-y-4 mt-10">
-              <Link to="/" className="py-2" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
-              {menus.map(menu => (
-                <Link key={menu.menu_id} to={`/${menu.title.toLowerCase()}`} className="py-2" onClick={() => setIsMobileMenuOpen(false)}>
-                  {menu.title}
-                </Link>
+              <Link to="/" className="py-2" onClick={() => setIsMobileMenuOpen(false)}>
+                Home
+              </Link>
+              {menus.map((menu) => (
+                <div key={menu.menu_id}>
+                  <Link
+                    to={`/${menu.title.toLowerCase()}`}
+                    className="py-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {menu.title}
+                  </Link>
+                  {menu.children && activeMenu === menu.menu_id && (
+                    <div className="ml-4">
+                      {menu.children
+                        .filter((child) => child.display === 1)
+                        .map((child) => (
+                          <Link
+                            key={child.menu_id}
+                            to={`/${child.title.toLowerCase()}`}
+                            className="block py-2"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            {child.title}
+                          </Link>
+                        ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -126,5 +159,6 @@ const PageHeader = () => {
     </div>
   );
 };
+
 
 export default PageHeader;
