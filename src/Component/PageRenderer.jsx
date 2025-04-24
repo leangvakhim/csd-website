@@ -5,6 +5,12 @@ import { API_ENDPOINTS } from '../Service/APIconfig';
 import Slideshow from './Slideshow/Slideshow';
 import ServiceSection from './Services/ServiceSection';
 import ProgramSection from './Program/ProgramSection';
+import AcademicSection from './Academic/AcademicSection';
+import PartnershipSection from './Partnership/PartnershipSection';
+import AdmissionBanner from './Banner/AdmissionBannerSection';
+import BasicRequirements from './Requirement/BasicRequirements';
+import ApplySection from './ApplySection/ApplySection';
+import ImportantSection from './Important/ImportantSection';
 
 const PageRenderer = ({ page }) => {
     const [sections, setSections] = useState([]);
@@ -60,8 +66,18 @@ const PageRenderer = ({ page }) => {
                         return <ServiceSection key={section.sec_id} section={section} />;
                     case 'Programs':
                         return <ProgramSection key={section.sec_id} section={section} />;
-                    // case '':
-                    //     return <ProgramSection key={section.sec_id} section={section} />;
+                    case 'Academic':
+                        return <AcademicSection key={section.sec_id} section={section} />;
+                    case 'Partner':
+                        return <PartnershipSection key={section.sec_id} section={section} />;
+                    case 'Banner':
+                        return <AdmissionBanner key={section.sec_id} section={section} />;
+                    case 'Requirement':
+                        return <BasicRequirements key={section.sec_id} section={section} />;
+                    case 'Apply':
+                        return <ApplySection key={section.sec_id} section={section} />;
+                    case 'Important':
+                        return <ImportantSection key={section.sec_id} section={section} />;
                     default:
                         console.log("PageRenderer: Unknown section type:", section.sec_type);
                         return (

@@ -42,7 +42,7 @@ const ServiceSection = ({ section }) => {
             }));
           setServices(formatted);
         })
-       
+
     } else {
       console.log("ServiceSection: No section.sec_id provided, skipping API call");
     }
@@ -64,11 +64,16 @@ const ServiceSection = ({ section }) => {
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+        <div
+          className="grid gap-8 justify-items-center"
+          style={{
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          }}
+        >
           {services.map((service, index) => (
             <motion.div
               key={index}
-              className="bg-white p-6 rounded-lg shadow-lg w-full hover:shadow-xl transition-shadow duration-300"
+              className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full"
               variants={cardVariants}
               transition={{ duration: 0.6 }}
             >
