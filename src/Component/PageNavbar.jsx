@@ -22,7 +22,7 @@ const PageNavbar = ({ menus }) => {
 
   return (
     <nav
-      className="container mx-auto relative xl:flex xl:space-x-6 text-sm 2xl:text-base"
+      className="container mx-auto relative lg:flex lg:space-x-6 text-sm 2xl:text-base"
       ref={navbarRef}
     >
       <div className="lg:flex space-x-6 uppercase">

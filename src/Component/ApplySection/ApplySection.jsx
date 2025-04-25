@@ -34,30 +34,14 @@ const cardVariants = {
 };
 
 const ApplySection = ({ section }) => {
-  const [sectionData, setSectionData] = useState({
-    title: "",
-    image: null,
-    ha_id: null,
-  });
-  const [steps, setSteps] = useState([]);
+  const [sectionData, setSectionData] = useState([]);
   const [contactInfo, setContactInfo] = useState({
     semesterInfo: { title: "", text: "", date: "" },
     contactDetails: { phone: "", email: "", socialLinks: [] },
   });
-
-  // Static fallback data
-  const fallbackSteps = [
-    "Must be a high school graduate or hold an equivalent qualification.",
-    "Successfully pass the admission entrance exam.",
-    "Complete the registration process and submit the tuition payment.",
-  ];
+  const [steps, setSteps] = useState([]);  // Added state for steps
 
   const fallbackContactInfo = {
-    semesterInfo: {
-      title: "New Semester Start Now",
-      text: "Bachelor program is now available. Apply now",
-      date: "21 Jan",
-    },
     contactDetails: {
       phone: "885 234 876 987",
       email: "rupp@email.edu.kh",
@@ -76,63 +60,39 @@ const ApplySection = ({ section }) => {
       axios
         .get(`${API_ENDPOINTS.getApply}?section_id=${section.sec_id}`)
         .then((res) => {
-          const data = res.data?.data || {};
+          const data = res.data?.data || [];
+          console.log("Fetched section data:", data);  // Check the data structure
 
-          // Format section data
-          const formattedSection = {
-            title: data.ha_title || "Step By Step: How to Apply to Computer Science Department",
-            image: data.image?.img ? `${API}/storage/uploads/${data.image.img}` : null,
-            ha_id: data.ha_id || null,
-          };
-          setSectionData(formattedSection);
+          if (data.length > 0) {
+            const sectionData = data[0];  // Assuming you want the first section
+
+            // Format section data
+            const formattedSection = {
+              ha_title: sectionData.ha_title || "Default Title",
+              ha_tagtitle: sectionData.ha_tagtitle || "",
+              ha_subtitletag: sectionData.ha_subtitletag || "",
+              ha_date: sectionData.ha_date || "",
+              image: sectionData.image?.img ? `${API}/storage/uploads/${sectionData.image.img}` : null,
+              ha_id: sectionData.ha_id || null,
+            };
+
+            console.log("Formatted Section:", formattedSection);  // Check formatted section data
+            setSectionData(formattedSection); // This updates the sectionData state
+          }
+
 
           // Fetch steps (assuming a separate endpoint)
           axios
-            .get(`${API_ENDPOINTS.getApply}?ha_id=${data.ha_id}`)
+            .get(`${API_ENDPOINTS.getSubApply}?ha_id=${data.ha_id}`)
             .then((stepRes) => {
               const stepsData = stepRes.data?.data || [];
               const formattedSteps = stepsData
                 .filter((step) => step.display === 1)
-                .map((step) => step.description) || fallbackSteps;
-              setSteps(formattedSteps);
+                .map((step) => step.sha_title) || [];
+              setSteps(formattedSteps);  // Set the fetched steps
             })
             .catch((error) => {
               console.error("Error fetching steps:", error);
-              setSteps(fallbackSteps);
-            });
-
-          // Fetch contact info (assuming a separate endpoint)
-          axios
-            .get(`${API_ENDPOINTS.getApplyContact}?ha_id=${data.ha_id}`)
-            .then((contactRes) => {
-              const contactData = contactRes.data?.data || {};
-              const formattedContactInfo = {
-                semesterInfo: {
-                  title: contactData.semesterInfo?.title || fallbackContactInfo.semesterInfo.title,
-                  text: contactData.semesterInfo?.text || fallbackContactInfo.semesterInfo.text,
-                  date: contactData.semesterInfo?.date || fallbackContactInfo.semesterInfo.date,
-                },
-                contactDetails: {
-                  phone: contactData.contactDetails?.phone || fallbackContactInfo.contactDetails.phone,
-                  email: contactData.contactDetails?.email || fallbackContactInfo.contactDetails.email,
-                  socialLinks: contactData.contactDetails?.socialLinks?.map((link) => ({
-                    icon: (
-                      {
-                        facebook: <FaFacebookF />,
-                        twitter: <FaTwitter />,
-                        instagram: <FaInstagram />,
-                        linkedin: <FaLinkedin />,
-                      }[link.platform] || <FaFacebookF />
-                    ),
-                    link: link.url,
-                  })) || fallbackContactInfo.contactDetails.socialLinks,
-                },
-              };
-              setContactInfo(formattedContactInfo);
-            })
-            .catch((error) => {
-              console.error("Error fetching contact info:", error);
-              setContactInfo(fallbackContactInfo);
             });
         })
         .catch((error) => {
@@ -142,7 +102,6 @@ const ApplySection = ({ section }) => {
             image: null,
             ha_id: null,
           });
-          setSteps(fallbackSteps);
           setContactInfo(fallbackContactInfo);
         });
     } else {
@@ -152,15 +111,9 @@ const ApplySection = ({ section }) => {
         image: null,
         ha_id: null,
       });
-      setSteps(fallbackSteps);
       setContactInfo(fallbackContactInfo);
     }
   }, [section]);
-
-  if (!sectionData.title && steps.length === 0 && !contactInfo.semesterInfo.title) {
-    console.log("ApplySection: No data to render");
-    return <div className="text-center py-8 text-gray-600">No application information available for this section.</div>;
-  }
 
   return (
     <div className="my-16">
@@ -174,7 +127,7 @@ const ApplySection = ({ section }) => {
         <div className="flex flex-col xl:flex-row gap-8 items-center justify-between">
           {/* Left Side: Steps */}
           <motion.div
-            className="xl:w-1/2 mb-8 xl:mb-0"
+            className="lg:w-1/2 mb-8 xl:mb-0"
             variants={cardVariants}
             transition={{ duration: 0.6 }}
           >
@@ -183,7 +136,7 @@ const ApplySection = ({ section }) => {
               variants={cardVariants}
               transition={{ duration: 0.6 }}
             >
-              {sectionData.title}
+              {sectionData.ha_title} {/* Displaying title here */}
             </motion.h2>
             <div className="space-y-4">
               {steps.map((step, index) => (
@@ -194,7 +147,7 @@ const ApplySection = ({ section }) => {
                   transition={{ duration: 0.6 }}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="xl:text-xl text-md">{step}</span>
+                    <span className="lg:text-xl text-md">{step}</span>
                     <FaArrowRight className="ml-2" />
                   </div>
                 </motion.div>
@@ -215,11 +168,11 @@ const ApplySection = ({ section }) => {
             >
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-semibold mb-4">{contactInfo.semesterInfo.title}</h3>
-                  <p className="mb-4">{contactInfo.semesterInfo.text}</p>
+                  <h3 className="text-xl font-semibold mb-4">{sectionData.ha_tagtitle}</h3>
+                  <p className="mb-4">{sectionData.ha_subtitletag}</p>
                   <p className="text-center text-lg xl:text-xl">
                     <FaCalendarAlt className="inline-block mr-2" />
-                    {contactInfo.semesterInfo.date}
+                    {sectionData.ha_date}
                   </p>
                 </div>
                 <div className="py-6 px-4 bg-red-900 text-white shadow-lg rounded-lg">
@@ -250,7 +203,7 @@ const ApplySection = ({ section }) => {
             </motion.div>
             {sectionData.image && (
               <motion.div
-                className="xl:w-1/2 order-2 xl:order-1"
+                className="lg:w-1/2 order-2 lg:order-1 shadow-2xs bg-white"
                 variants={cardVariants}
                 transition={{ duration: 0.6 }}
               >

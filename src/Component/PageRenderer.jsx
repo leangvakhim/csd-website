@@ -12,6 +12,9 @@ import BasicRequirements from './Requirement/BasicRequirements';
 import ApplySection from './ApplySection/ApplySection';
 import ImportantSection from './Important/ImportantSection';
 import BannerSection from './Banner/BannerSection';
+import GallerySection from './Gallery/GallerySection';
+import Overview from './Overview/overviewContent';
+import FacilitiesSection from './Facilities/FacilitiesSection';
 
 const PageRenderer = ({ page }) => {
     const [sections, setSections] = useState([]);
@@ -58,8 +61,8 @@ const PageRenderer = ({ page }) => {
     console.log("PageRenderer: Rendering sections:", sections);
     return (
         <>
-         <div className="sticky top-0 z-50">
-            <PageHeader />
+            <div className="sticky top-0 z-50">
+                <PageHeader />
             </div>
             {sections.map((section) => {
                 switch (section.sec_type) {
@@ -81,6 +84,13 @@ const PageRenderer = ({ page }) => {
                         return <ApplySection key={section.sec_id} section={section} />;
                     case 'Important':
                         return <ImportantSection key={section.sec_id} section={section} />;
+                    case 'Gallery':
+                        return <GallerySection key={section.sec_id} section={section} />;
+                    case 'Information':
+                        return <Overview key={section.sec_id} section={section} />;
+                    case 'Facilities':
+                        return <FacilitiesSection key={section.sec_id} section={section} />;
+
                     default:
                         console.log("PageRenderer: Unknown section type:", section.sec_type);
                         return (

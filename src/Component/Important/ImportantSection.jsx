@@ -23,26 +23,65 @@ const cardVariants = {
 };
 
 const ImportantSection = ({ section }) => {
-    const [items, setItems] = useState([]);
+    const [sectionData, setSectionData] = useState(null);
+    const [dates, setDates] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+
+                // Fetch section data
+                const sectionRes = await axios.get(
+                    `${API_ENDPOINTS.getImportant}?section_id=${section.sec_id}`
+                );
+
+                if (sectionRes.data?.data?.length) {
+                    setSectionData(sectionRes.data.data[0]);
+
+                    // Fetch dates if needed (assuming a different endpoint for dates)
+                    try {
+                        const datesRes = await axios.get(
+                            `${API_ENDPOINTS.getSubImportant}?section_id=${section.sec_id}`
+                        );
+                        setDates(datesRes.data?.data || []);
+                    } catch (datesError) {
+                        console.warn("Could not fetch dates:", datesError);
+                        setDates([]);
+                    }
+                } else {
+                    setSectionData(null);
+                    setDates([]);
+                }
+            } catch (err) {
+                console.error("ImportantSection API error", err);
+                setError("Failed to load important dates");
+                setSectionData(null);
+                setDates([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         if (section?.sec_id) {
-            axios
-                .get(`${API_ENDPOINTS.getImportant}?section_id=${section.sec_id}`)
-                .then((res) => {
-                    setItems(res.data?.data || []);
-                })
-                .catch((err) => console.error("ImportantSection API error", err));
+            fetchData();
         }
     }, [section]);
 
-    if (!items.length) {
-        return <div className="text-center py-8 text-gray-600">No important dates available.</div>;
+    if (loading) {
+        return <div className="text-center py-8 text-gray-600">Loading important dates...</div>;
     }
 
-    // The API returns a single section object with no individual date entries
-    // If your API only returns section info, you might need another endpoint for dates
-    const sectionData = items[0];
+    if (error) {
+        return <div className="text-center py-8 text-red-600">{error}</div>;
+    }
+
+    if (!sectionData && !dates.length) {
+        return <div className="text-center py-8 text-gray-600">No important dates available.</div>;
+    }
 
     return (
         <div className="my-16">
@@ -54,32 +93,38 @@ const ImportantSection = ({ section }) => {
                 viewport={{ once: true, amount: 0.5 }}
             >
                 <div className='flex flex-col lg:flex-row gap-6'>
-                    <motion.div className="mb-8" variants={cardVariants}>
-                        <motion.h2 className="text-3xl font-semibold mb-4" variants={cardVariants}>
-                            {sectionData.idd_title}
-                        </motion.h2>
-                        <motion.p className="text-gray-800" variants={cardVariants}>
-                            {sectionData.idd_subtitle}
-                        </motion.p>
-                    </motion.div>
+                    {sectionData && (
+                        <motion.div className="mb-8" variants={cardVariants}>
+                            <motion.h2 className="text-3xl font-semibold mb-4" variants={cardVariants}>
+                                {sectionData.idd_title}
+                            </motion.h2>
+                            <motion.p className="text-gray-800" variants={cardVariants}>
+                                {sectionData.idd_subtitle}
+                            </motion.p>
+                        </motion.div>
+                    )}
 
-                    {/* If you had individual dates, map them here. */}
-
-                    {/* Example static mapping of dates if present */}
-                    {sectionData.dates && (
-                        <div className="space-y-4">
-                            {sectionData.dates.map((item, index) => (
-                                <motion.div key={index} variants={cardVariants} className="bg-white rounded-lg shadow-md p-6">
+                    {dates.length > 0 && (
+                        <div className="space-y-4 w-full">
+                            {dates.map((item, index) => (
+                                <motion.div
+                                    key={index}
+                                    variants={cardVariants}
+                                    className="bg-white rounded-lg shadow-md p-6"
+                                >
                                     <div className="grid lg:grid-cols-12 items-center gap-4">
                                         <div className="bg-pink-100 px-4 py-2 flex flex-col items-center xl:col-span-4 col-span-12">
-                                            <h3 className="text-lg font-normal mb-2">{item.title}</h3>
+                                            <h3 className="text-lg font-normal mb-2">{item.sidd_tag}</h3>
                                             <span className="text-pink-700 text-lg text-center rounded-md font-semibold">
-                                                {new Date(item.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                                                {item.sidd_date ? new Date(item.sidd_date).toLocaleDateString(undefined, {
+                                                    day: 'numeric',
+                                                    month: 'short'
+                                                }) : 'Date not specified'}
                                             </span>
                                         </div>
-                                        <div className="xl:col-span-8 col-span-12">
-                                            <h4 className="text-xl font-semibold mt-2">{item.subtitle}</h4>
-                                            <p className="text-gray-800">{item.description}</p>
+                                        <div className="lg:col-span-8 col-span-12">
+                                            <h6 className="text-lg font-semibold mt-2">{item.sidd_title}</h6>
+                                            <p className="text-gray-800">{item.sidd_subtitle}</p>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -88,7 +133,6 @@ const ImportantSection = ({ section }) => {
                     )}
                 </div>
             </motion.section>
-
         </div>
     );
 };
