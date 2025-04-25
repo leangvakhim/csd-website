@@ -15,6 +15,7 @@ import BannerSection from './Banner/BannerSection';
 import GallerySection from './Gallery/GallerySection';
 import Overview from './Overview/overviewContent';
 import FacilitiesSection from './Facilities/FacilitiesSection';
+import StudySection from './Study/StudySection';
 
 const PageRenderer = ({ page }) => {
     const [sections, setSections] = useState([]);
@@ -90,6 +91,8 @@ const PageRenderer = ({ page }) => {
                         return <Overview key={section.sec_id} section={section} />;
                     case 'Facilities':
                         return <FacilitiesSection key={section.sec_id} section={section} />;
+                    case 'Study':
+                        return <StudySection key={section.sec_id} section={section} />;
 
                     default:
                         console.log("PageRenderer: Unknown section type:", section.sec_type);
