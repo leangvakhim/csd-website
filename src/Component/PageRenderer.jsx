@@ -16,6 +16,13 @@ import GallerySection from './Gallery/GallerySection';
 import Overview from './Overview/overviewContent';
 import FacilitiesSection from './Facilities/FacilitiesSection';
 import StudySection from './Study/StudySection';
+import FAQSection from './FAQ/FAQSection';
+import Introduction from './Introduction/IntroductionSection';
+import InnovationSection from './Innovation/InnovationSection';
+import FeeSection from './Fee/FeeSection';
+import FutureSection from './Future/FutureSection';
+import TestimonialSection from './Testimonial/TestimonialSection';
+import TypeSection from './Type/TypeSection';
 
 const PageRenderer = ({ page }) => {
     const [sections, setSections] = useState([]);
@@ -93,6 +100,24 @@ const PageRenderer = ({ page }) => {
                         return <FacilitiesSection key={section.sec_id} section={section} />;
                     case 'Study':
                         return <StudySection key={section.sec_id} section={section} />;
+                    case 'Introduction':
+                        return <Introduction key={section.sec_id} section={section} />;
+                    case 'Innovation':
+                        return <InnovationSection key={section.sec_id} section={section} />;
+                    case 'Fee':
+                        return <FeeSection key={section.sec_id} section={section} />;
+                    case 'Future':
+                        return <FutureSection key={section.sec_id} section={section} />;
+                    case 'Testimonial':
+                        return <TestimonialSection key={section.sec_id} section={section} />;
+                    case 'Type':
+                        return <TypeSection key={section.sec_id} section={section} />;
+                    case 'Criteria':
+                        return <BasicRequirements key={section.sec_id} section={section} />;
+                    // case 'Question':
+                    //     return <ApplySection key={section.sec_id} section={section} />;
+                    case 'FAQ':
+                        return <FAQSection key={section.sec_id} section={section} />;
 
                     default:
                         console.log("PageRenderer: Unknown section type:", section.sec_type);
