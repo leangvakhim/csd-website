@@ -1,187 +1,95 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import axios from "axios";
-import { FaChevronDown } from "react-icons/fa";
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { API_ENDPOINTS } from "../../Service/APIconfig";
 
-// Animation variants
-const sectionVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      when: "beforeChildren",
-      staggerChildren: 0.2,
-    },
-  },
-};
+const TypeScholar = ({ section }) => {
+  const [scholarships, setScholarships] = useState([]);
+  const [mainTitle, setMainTitle] = useState('');
+  const [description, setDescription] = useState('');
 
-const cardVariants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: { opacity: 1, scale: 1 },
-};
+  // Fetching Scholarship Types (Full-Funded, Merit-Based, etc.)
+  useEffect(() => {
+    if (section && section.sec_id) {
+      // Fetch data for both API endpoints
+      fetch(`${API_ENDPOINTS.getSubType}?section_id=${section.sec_id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const scholarshipData = data?.data;
+          if (scholarshipData) {
+            setScholarships(scholarshipData);
+          }
+        })
+        .catch((error) => console.error("Error fetching scholarships from getSubType:", error));
 
-const TypeSection = ({ section }) => {
-  const [openIndex, setOpenIndex] = useState(null);
-  const [typeItems, setTypeItems] = useState([]);
-  const [content, setContent] = useState({
-    title: "Type Section Title",
-    description: "Description related to the type section.",
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+      fetch(`${API_ENDPOINTS.getType}?section_id=${section.sec_id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const scholarshipData = data?.data;
+          if (scholarshipData && scholarshipData.length > 0) {
+            const mainData = scholarshipData[0];
+            setMainTitle(mainData?.text?.title || 'Default Title');
+            setDescription(mainData?.text?.desc || 'No description available.');
+          }
+        })
+        .catch((error) => console.error("Error fetching scholarships from getType:", error));
+    }
+  }, [section]);  // Fetch scholarships when `section` is available or changes
 
-  const toggleType = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
+  const containerVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
 
-  useEffect(() => {
-    setIsLoading(true);
-    setError(null);
-
-    // Fetch the type data from the respective API endpoint
-    Promise.all([axios.get(API_ENDPOINTS.getType), axios.get(API_ENDPOINTS.getSubType)])
-      .then(([typeRes, subTypeRes]) => {
-        console.log("getTypeSection response:", typeRes.data);
-        console.log("getSubTypeSection response:", subTypeRes.data);
-
-        if (!typeRes.data?.data || !subTypeRes.data?.data) {
-          throw new Error("Invalid API response structure");
-        }
-
-        const typeData = typeRes.data.data;
-        const subTypeData = subTypeRes.data.data;
-
-        // Find the section based on the 'section' prop
-        const typeSection = typeData.find((item) => item.section?.sec_type === "Type");
-
-        // Set title and description for the type section
-        if (typeSection) {
-          setContent({
-            title: typeSection.type_title || content.title,
-            description: typeSection.type_subtitle || content.description,
-          });
-        } else {
-          setContent({
-            title: content.title,
-            description: content.description,
-          });
-        }
-
-        // Filter sub-type items based on the section id if needed, or simply display all active ones
-        const subTypeItems = subTypeData
-          .filter((item) => item.display === 1 && item.active === 1)
-          .map((item) => ({
-            question: item.type_question,
-            answer: item.type_answer,
-            order: item.type_order,
-          }))
-          .sort((a, b) => a.order - b.order);
-
-        console.log("subTypeItems:", subTypeItems);
-
-        if (subTypeItems.length === 0) {
-          setError("No type items found");
-        } else {
-          setTypeItems(subTypeItems);
-        }
-
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error("API error:", err);
-        setError("Failed to load type content");
-        setIsLoading(false);
-      });
-  }, [section]);
-
-  if (isLoading) {
-    return <div className="text-center py-8 text-gray-600">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center py-8 text-gray-600">{error}</div>;
-  }
+  const itemVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
+  };
 
   return (
-    <div className="my-16 py-4">
-      <motion.section
+    <div className="my-16">
+      <motion.div
         className="container mx-auto px-4"
-        variants={sectionVariants}
+        variants={containerVariants}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.5 }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column: Title and Description */}
-          <div className="text-start">
-            <motion.h1
-              variants={cardVariants}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-3xl font-bold text-gray-800 mb-6 text-start"
-            >
-              {content.title}
-            </motion.h1>
-            <motion.p
-              variants={cardVariants}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="text-gray-800 xl:text-lg text-[12px] mb-12 text-start"
-            >
-              {content.description}
-            </motion.p>
-          </div>
+        <div className="mb-8 flex flex-col xl:flex-row xl:justify-between xl:items-start gap-6">
+          {/* Title */}
+          <h2 className="text-3xl font-bold">{mainTitle}</h2>
 
-          {/* Right Column: Type Accordion */}
-          <div className="max-w-full">
-            {typeItems.length > 0 ? (
-              typeItems.map((type, index) => (
-                <motion.div
-                  key={index}
-                  variants={cardVariants}
-                  transition={{ duration: 0.5, delay: index * 0.2 }}
-                  className="bg-white p-6 rounded-lg shadow-md cursor-pointer mb-4"
-                  onClick={() => toggleType(index)}
-                >
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg lg:text-2xl font-bold text-gray-800">
-                      {type.question}
-                    </h3>
-                    <motion.div
-                      animate={{ rotate: openIndex === index ? 180 : 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <FaChevronDown className="text-gray-600" />
-                    </motion.div>
-                  </div>
-                  {openIndex === index && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="text-gray-800 text-sm lg:text-lg mt-4 text-justify"
-                    >
-                      {type.answer}
-                    </motion.p>
-                  )}
-                </motion.div>
-              ))
-            ) : (
-              <motion.div
-                variants={cardVariants}
-                transition={{ duration: 0.5 }}
-                className="bg-white p-6 rounded-lg shadow-md"
-              >
-                <p className="text-gray-800">
-                  No type items available for this degree.
-                </p>
-              </motion.div>
-            )}
-          </div>
+          {/* Description */}
+          <p className="text-gray-800 max-w-2xl">{description}</p>
         </div>
-      </motion.section>
+
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4"
+          variants={containerVariants}
+        >
+          {scholarships.length > 0 ? (
+            scholarships.map((scholarship, index) => (
+              <motion.div
+                key={index}
+                className={`rounded-lg p-6 shadow-lg border ${index % 2 === 1 ? 'bg-red-800 text-white' : 'bg-white text-gray-800'}`}
+                variants={itemVariants}
+              >
+                {/* Title */}
+                <h3 className="text-xl font-semibold">{scholarship.stse_title}</h3>
+
+                {/* Content Section */}
+                <div className="space-y-4">
+                  <div className="flex items-start gap-2 mb-4">
+                    <p className="text-lg" dangerouslySetInnerHTML={{ __html: scholarship.stse_detail }} />
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <p className="text-lg">No scholarships available at the moment.</p>
+          )}
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
 
-export default TypeSection;
+export default TypeScholar;

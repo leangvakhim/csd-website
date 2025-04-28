@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
@@ -26,74 +26,112 @@ const FacilitiesSection = ({ section }) => {
     title: "",
     description: "",
     image: "",
+    id: null,
   });
-  const [facilities, setFacilities] = useState([]);
+  const [subservices, setSubservices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const fetchFacilities = useCallback(async () => {
     if (!section?.sec_page) {
       setError("Missing page ID");
       setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
-    axios
-      .get(`${API_ENDPOINTS.getFacilitie}?page_id=${section.sec_page}`)
-      .then((res) => {
-        const data = res.data?.data || [];
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const validItems = data.filter(
-          (item) =>
-            item.section?.sec_page === section.sec_page &&
-            item.section?.display === 1 &&
-            item.section?.active === 1 &&
-            item.section?.sec_type === "Facilities"
-        );
+      // Fetch facilities data
+      const facilitiesRes = await axios.get(
+        `${API_ENDPOINTS.getAcadFacilities}?page_id=${section.sec_page}`
+      );
 
-        if (validItems.length === 0) {
-          setError("No facilities found for this page.");
-          setIsLoading(false);
-          return;
-        }
+      const data = facilitiesRes.data?.data || [];
+      const validItems = data.filter(
+        (item) =>
+          item.section?.sec_page === section.sec_page &&
+          item.section?.display === 1 &&
+          item.section?.active === 1 &&
+          item.section?.sec_type === "Facilities"
+      );
 
-        const facilitiesItem = validItems[0];
-
-        const imagePath = facilitiesItem.image?.img
-          ? `${API}/storage/uploads/${facilitiesItem.image.img}`
-          : "";
-
-        setFacilityData({
-          title: facilitiesItem.text?.title || "Facilities",
-          description: facilitiesItem.text?.desc || "",
-          image: imagePath,
-        });
-
-        // If you want multiple items in future, adjust this accordingly.
-        setFacilities([
-          {
-            title: facilitiesItem.text?.title || "Facility Title",
-            description: facilitiesItem.text?.desc || "Facility Description",
-            image: imagePath,
-          },
-        ]);
-
+      if (validItems.length === 0) {
+        setError("No facilities found for this page.");
         setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error("FacilitiesSection API error:", err);
-        setError("Failed to load facilities");
-        setIsLoading(false);
-      });
+        return;
+      }
+
+      const facilityItem = validItems[0];
+      const imagePath = facilityItem.image?.img
+        ? `${API}/storage/uploads/${facilityItem.image.img}`
+        : "";
+
+      const newFacilityData = {
+        title: facilityItem.text?.title || "Facilities",
+        description: facilityItem.text?.desc || "",
+        image: imagePath,
+        id: facilityItem.af_id || null, // Use af_id from JSON
+      };
+
+      setFacilityData(newFacilityData);
+
+      // Fetch subservices for this facility
+      const subserviceRes = await axios.get(
+        `${API_ENDPOINTS.getSubserviceAF}?af_id=${facilityItem.af_id}`
+      );
+
+      const subserviceData = (subserviceRes.data?.data || []).filter(
+        (subservice) => subservice.ss_af === facilityItem.af_id // Filter by ss_af
+      );
+
+      setSubservices(
+        subserviceData.map((subservice) => ({
+          ss_id: subservice.ss_id,
+          title: subservice.ss_title || "Untitled Subservice",
+          description: subservice.ss_subtitle || "No description available",
+          icon: subservice.image?.img
+            ? `${API}/storage/uploads/${subservice.image.img}`
+            : "",
+        }))
+      );
+      console.log("Subservices:", subserviceData);
+    } catch (err) {
+      console.error("API error:", err);
+      setError(err.response?.data?.message || "Failed to load data");
+    } finally {
+      setIsLoading(false);
+    }
   }, [section]);
 
+  useEffect(() => {
+    fetchFacilities();
+  }, [fetchFacilities]);
+
   if (isLoading) {
-    return <div className="text-center py-8 text-gray-600">Loading facilities...</div>;
+    return (
+      <div className="text-center py-8 text-gray-600">
+        <div className="animate-pulse flex space-x-4">
+          <div className="flex-1 space-y-4 py-1">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  if (error || !facilityData.image || facilities.length === 0) {
-    return <div className="text-center py-8 text-gray-600">{error || "No facilities available"}</div>;
+  if (error) {
+    return <div className="text-center py-8 text-red-600">Error: {error}</div>;
+  }
+
+  if (!facilityData.title && !facilityData.description && !facilityData.image) {
+    return (
+      <div className="text-center py-8 text-gray-600">
+        No facilities available
+      </div>
+    );
   }
 
   return (
@@ -106,20 +144,30 @@ const FacilitiesSection = ({ section }) => {
         viewport={{ once: true, amount: 0.5 }}
       >
         <div className="flex flex-col lg:flex-row gap-6 items-center">
-          {/* Image */}
+          {/* Image Section */}
           <motion.div
             variants={cardVariants}
             transition={{ duration: 0.6 }}
             className="w-full xl:w-[651px] h-full xl:h-[615px] flex justify-center lg:justify-start"
           >
-            <img
-              src={facilityData.image}
-              alt={facilityData.title}
-              className="w-full h-full object-contain"
-            />
+            <div className="relative w-full h-full">
+              {facilityData.image ? (
+                <img
+                  src={facilityData.image}
+                  alt={facilityData.title}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/placeholder-facility.jpg";
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 rounded"></div>
+              )}
+            </div>
           </motion.div>
 
-          {/* Content */}
+          {/* Content Section */}
           <motion.div
             variants={cardVariants}
             transition={{ duration: 0.6 }}
@@ -132,30 +180,47 @@ const FacilitiesSection = ({ section }) => {
               {facilityData.description}
             </p>
 
-            {/* Facilities List */}
+            {/* Subservices List */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {facilities.map((facility, index) => (
-                <motion.div
-                  key={index}
-                  variants={cardVariants}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="bg-white rounded-lg p-6 shadow-lg flex items-center gap-4 hover:shadow-xl hover:scale-105 transition duration-300"
-                >
-                  {facility.image && (
-                    <div className="w-16 h-16 flex items-center justify-center rounded-lg bg-gray-100">
-                      <img
-                        src={facility.image}
-                        alt={facility.title}
-                        className="w-full h-full object-contain"
-                      />
+              {subservices.length > 0 ? (
+                subservices.map((subservice) => (
+                  <motion.div
+                    key={subservice.ss_id} // Use ss_id for unique key
+                    variants={cardVariants}
+                    transition={{ duration: 0.6 }}
+                    className="bg-white rounded-lg p-6 shadow-lg flex items-center gap-4 hover:shadow-xl hover:scale-105 transition duration-300"
+                  >
+                    {/* Icon Section */}
+                    <div className="p-2 flex items-center justify-center rounded-lg bg-red-800 min-w-[50px]">
+                      {subservice.icon ? (
+                        <img
+                          src={subservice.icon}
+                          alt={subservice.title}
+                          className="w-8 h-8 object-contain"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "/placeholder-icon.png";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-8 h-8 bg-white rounded"></div>
+                      )}
                     </div>
-                  )}
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-800">{facility.title}</h3>
-                    <p className="text-gray-600">{facility.description}</p>
-                  </div>
-                </motion.div>
-              ))}
+
+                    {/* Text Section */}
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-800">
+                        {subservice.title}
+                      </h3>
+                      <p className="text-gray-600">{subservice.description}</p>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-2 text-center text-gray-500 py-4">
+                  No subservices available for this facility
+                </div>
+              )}
             </div>
           </motion.div>
         </div>

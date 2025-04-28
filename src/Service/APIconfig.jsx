@@ -106,6 +106,9 @@ const API_ENDPOINTS = {
     // year(sub studydegree)
     getSubStudyDegree: `${API_BASEURL}/year`,
 
+    // setting
+    getSetting: `${API_BASEURL}/setting2`,
+
     // subservice
     getSubserviceAF: `${API_BASEURL}/subservice`,
 
@@ -161,4 +164,4 @@ const API_ENDPOINTS = {
     getPartnership: `${API_BASEURL}/partnership`,
 };
 
-export {API_BASEURL, API_ENDPOINTS, API};
+export { API_BASEURL, API_ENDPOINTS, API };

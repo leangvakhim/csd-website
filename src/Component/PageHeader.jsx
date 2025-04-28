@@ -3,38 +3,115 @@ import { Link, useLocation } from "react-router-dom";
 import { IoMdSearch } from "react-icons/io";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { FiChevronDown } from "react-icons/fi";
-import { motion } from "framer-motion";
 import PageSearch from "./PageSearch";
-import { API_ENDPOINTS } from "../Service/APIconfig";
+import { API_ENDPOINTS, API } from "../Service/APIconfig";
 import PageNavbar from "./PageNavbar";
 import axios from "axios";
+import Flag from "react-world-flags";
 
 const PageHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [menus, setMenus] = useState([]);
+  const [settings, setSettings] = useState({
+    facultyTitle: "",
+    departmentTitle: "",
+    logoUrl: "/placeholder-icon.png", // Store resolved URL
+  });
   const [activeMenu, setActiveMenu] = useState(null);
-  const [mobileDropdowns, setMobileDropdowns] = useState({}); 
+  const [mobileDropdowns, setMobileDropdowns] = useState({});
+  const [currentLang, setCurrentLang] = useState(1); // Default to English (1)
 
   const searchContainerRef = useRef(null);
   const mobileMenuRef = useRef(null);
-  const location = useLocation(); // ✅ For active link detection
+  const location = useLocation();
+
+  // Function to get the logo URL based on the image ID
+  const getLogoUrl = async (imageId) => {
+    if (!imageId) {
+      console.warn("No imageId provided for logo");
+      return "/placeholder-icon.png";
+    }
+    try {
+      console.log(`Fetching logo for imageId: ${imageId}`);
+      const res = await axios.get(`${API_ENDPOINTS.getImage}?id=${imageId}`);
+      console.log("Image API response:", res.data);
+      // Handle various response formats
+      const filename =
+        res.data?.img ||
+        res.data?.image_url ||
+        res.data?.image?.img ||
+        res.data?.filename ||
+        res.data?.image?.filename;
+      if (!filename) {
+        console.warn("No valid filename or URL in image API response:", res.data);
+        return "/placeholder-icon.png";
+      }
+      const url = filename.startsWith("http")
+        ? filename
+        : `${API}/storage/uploads/${filename}`;
+      console.log(`Resolved logo URL: ${url}`);
+      return url;
+    } catch (err) {
+      console.error(`Error fetching logo URL for imageId ${imageId}:`, err);
+      return "/placeholder-icon.png";
+    }
+  };
 
   useEffect(() => {
-    axios.get(API_ENDPOINTS.getMenu)
+    // Fetch menus
+    axios
+      .get(API_ENDPOINTS.getMenu)
       .then((res) => {
         const data = res.data?.data || [];
-        const selectedLang = 1;
         const filteredMenus = data
-          .filter(menu => menu.lang === selectedLang)
-          .filter(display => display.display === 1)
+          .filter((menu) => menu.lang === currentLang)
+          .filter((display) => display.display === 1)
           .sort((a, b) => b.menu_order - a.menu_order);
         setMenus(filteredMenus);
       })
       .catch((err) => {
         console.error("Error fetching menu data:", err);
       });
-  }, []);
+
+    // Fetch settings and resolve logo URL
+    axios
+      .get(API_ENDPOINTS.getSetting)
+      .then(async (res) => {
+        console.log("Settings API response:", res.data);
+        const data = res.data?.data;
+        if (data && Array.isArray(data)) {
+          const langSettings = data.find((item) => item.lang === currentLang) || data[0];
+          if (langSettings) {
+            const logoUrl = await getLogoUrl(langSettings.set_logo);
+            setSettings({
+              facultyTitle: langSettings.set_facultytitle || "",
+              departmentTitle: langSettings.set_facultydep || "",
+              logoUrl: logoUrl || "/placeholder-icon.png",
+            });
+          } else {
+            console.warn("No settings found for current language or default");
+            setSettings((prev) => ({
+              ...prev,
+              logoUrl: "/placeholder-icon.png",
+            }));
+          }
+        } else {
+          console.warn("Settings data is not an array:", data);
+          setSettings((prev) => ({
+            ...prev,
+            logoUrl: "/placeholder-icon.png",
+          }));
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching settings:", err);
+        setSettings((prev) => ({
+          ...prev,
+          logoUrl: "/placeholder-icon.png",
+        }));
+      });
+  }, [currentLang]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -51,6 +128,10 @@ const PageHeader = () => {
     if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target)) {
       setIsMobileMenuOpen(false);
     }
+  };
+
+  const toggleLanguage = () => {
+    setCurrentLang((prevLang) => (prevLang === 1 ? 2 : 1));
   };
 
   useEffect(() => {
@@ -82,9 +163,17 @@ const PageHeader = () => {
           <div className="flex justify-between items-center py-2">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-14 h-14 bg-gray-200" />
+              <img
+                src={settings.logoUrl}
+                alt="Logo"
+                className="w-14 h-14 object-contain"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/placeholder-icon.png";
+                }}
+              />
               <h2 className="lg:text-lg font-normal text-sm uppercase hidden sm:block">
-                Faculty of Science <br /> Department of Computer Science
+                {settings.facultyTitle} <br /> {settings.departmentTitle}
               </h2>
             </Link>
 
@@ -101,12 +190,26 @@ const PageHeader = () => {
 
               {/* Actions */}
               <div className="flex items-center space-x-4">
+                <button
+                  onClick={toggleLanguage}
+                  className="p-2 text-sm bg-gray-100 rounded hover:bg-gray-200 flex items-center space-x-2"
+                >
+                  <Flag
+                    code={currentLang === 1 ? "KH" : "GB"}
+                    alt={currentLang === 1 ? "Khmer" : "English"}
+                    className="w-6 h-4"
+                  />
+                  <span>{currentLang === 1 ? "KH" : "EN"}</span>
+                </button>
                 {!isSearchOpen && (
                   <button onClick={toggleSearchBar} className="p-2 text-gray-600 hover:text-red-800">
                     <IoMdSearch className="text-3xl" />
                   </button>
                 )}
-                <button onClick={toggleMobileMenu} className="lg:hidden text-gray-600 hover:text-red-800 p-2">
+                <button
+                  onClick={toggleMobileMenu}
+                  className="lg:hidden text-gray-600 hover:text-red-800 p-2"
+                >
                   {isMobileMenuOpen ? <FaTimes className="text-3xl" /> : <FaBars className="text-3xl" />}
                 </button>
               </div>
@@ -123,13 +226,24 @@ const PageHeader = () => {
         >
           <div className="p-6">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-14 h-14 bg-gray-200" />
+              <img
+                src={settings.logoUrl}
+                alt="Logo"
+                className="w-14 h-14 object-contain"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/placeholder-icon.png";
+                }}
+              />
               <h2 className="text-sm font-normal uppercase">
-                Faculty of Science <br /> Department of Computer Science
+                {settings.facultyTitle} <br /> {settings.departmentTitle}
               </h2>
             </Link>
 
-            <button onClick={toggleMobileMenu} className="absolute right-6 top-4 text-gray-600 hover:text-red-800">
+            <button
+              onClick={toggleMobileMenu}
+              className="absolute right-6 top-4 text-gray-600 hover:text-red-800"
+            >
               <FaTimes className="text-3xl" />
             </button>
 
@@ -145,10 +259,13 @@ const PageHeader = () => {
                     <div key={menu.menu_id}>
                       <div
                         onClick={() => toggleMobileDropdown(menu.menu_id)}
-                        className="flex items-center justify-between">
+                        className="flex items-center justify-between"
+                      >
                         <Link
                           to={`/${menu.title.toLowerCase()}`}
-                          className={`uppercase hover:text-red-800 ${isActive ? "text-red-900 font-bold" : ""}`}
+                          className={`uppercase hover:text-red-800 ${
+                            isActive ? "text-red-900 font-bold" : ""
+                          }`}
                           onClick={toggleMobileMenu}
                         >
                           {menu.title}
@@ -156,7 +273,9 @@ const PageHeader = () => {
                         {hasChildren && (
                           <button>
                             <FiChevronDown
-                              className={`transition-transform ${mobileDropdowns[menu.menu_id] ? "rotate-180" : ""}`}
+                              className={`transition-transform ${
+                                mobileDropdowns[menu.menu_id] ? "rotate-180" : ""
+                              }`}
                             />
                           </button>
                         )}
@@ -168,8 +287,11 @@ const PageHeader = () => {
                             <Link
                               key={child.menu_id}
                               to={`/${child.title.toLowerCase()}`}
-                              className={`block hover:text-red-800 ${location.pathname === `/${child.title.toLowerCase()}` ? "text-red-900 font-bold" : ""
-                                }`}
+                              className={`block hover:text-red-800 ${
+                                location.pathname === `/${child.title.toLowerCase()}`
+                                  ? "text-red-900 font-bold"
+                                  : ""
+                              }`}
                               onClick={toggleMobileMenu}
                             >
                               {child.title}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import PageHeader from './PageHeader';
+import Footer from '../Component/footer/Footer'
 import { API_ENDPOINTS } from '../Service/APIconfig';
 import Slideshow from './Slideshow/Slideshow';
 import ServiceSection from './Services/ServiceSection';
@@ -23,6 +24,8 @@ import FeeSection from './Fee/FeeSection';
 import FutureSection from './Future/FutureSection';
 import TestimonialSection from './Testimonial/TestimonialSection';
 import TypeSection from './Type/TypeSection';
+import AboutSection from './About/AboutSection';
+import QuestionSection from './Question/QuestionSection';
 
 const PageRenderer = ({ page }) => {
     const [sections, setSections] = useState([]);
@@ -114,8 +117,10 @@ const PageRenderer = ({ page }) => {
                         return <TypeSection key={section.sec_id} section={section} />;
                     case 'Criteria':
                         return <BasicRequirements key={section.sec_id} section={section} />;
-                    // case 'Question':
-                    //     return <ApplySection key={section.sec_id} section={section} />;
+                    case 'Question':
+                        return <QuestionSection key={section.sec_id} section={section} />;
+                    case 'About':
+                        return <AboutSection key={section.sec_id} section={section} />;
                     case 'FAQ':
                         return <FAQSection key={section.sec_id} section={section} />;
 
@@ -128,6 +133,10 @@ const PageRenderer = ({ page }) => {
                         );
                 }
             })}
+
+            <div>
+                <Footer />
+            </div>
         </>
     );
 };
