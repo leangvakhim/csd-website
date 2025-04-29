@@ -16,8 +16,6 @@ const DeputyHeadofDepartment = () => {
             try {
             const res = await axios.get(API_ENDPOINTS.getFaculty);
             const allFaculty = res.data?.data || [];
-            console.log("allFaculty is:",allFaculty);
-            // const deputies = allFaculty.filter(item => item.f_order === 2 || item.f_order === 3);
             const deputies = allFaculty.filter(item =>
                 [2, 3].includes(item.f_order) &&
                 item.display === 1 &&
@@ -34,8 +32,6 @@ const DeputyHeadofDepartment = () => {
                 facebook: '#', // You can update later if real links are provided
                 telegram: '#',
             }));
-
-            console.log("formattedDeputies is: ",formattedDeputies);
 
             setDeputyData(formattedDeputies);
             } catch (error) {
@@ -119,7 +115,7 @@ const DeputyHeadofDepartment = () => {
 
                                         <p className='text-left'>{deputy.bio}</p>
                                         <Link
-                                            to={`/deputy/${deputy.id}`} // Use dynamic route to navigate to the detail page
+                                            to={`/faculty/${deputy.id}`}
                                         >
                                             <button className='bg-red-900 px-6 py-2 text-gray-50 rounded-2xl'>
                                                 View

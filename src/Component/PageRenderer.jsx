@@ -35,6 +35,7 @@ import FacultyCarouselSection from './Carousel/FacultyCarouselSection';
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
     const [sections, setSections] = useState([]);
     const [error, setError] = useState(null);
+    const [onlyContentMode, setOnlyContentMode] = useState(false);
 
     useEffect(() => {
         if (page?.p_id) {
@@ -77,73 +78,82 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
     // console.log("PageRenderer: Rendering sections:", sections);
     return (
         <>
+
             <div className="sticky top-0 z-50">
                 <PageHeader currentLang={currentLang} setCurrentLang={setCurrentLang} settings={settings} setSettings={setSettings}/>
             </div>
-            {sections.map((section) => {
-                switch (section.sec_type) {
-                    case 'Slideshow':
-                        return <Slideshow key={section.sec_id} section={section} />;
-                    case 'Service':
-                        return <ServiceSection key={section.sec_id} section={section} />;
-                    case 'Programs':
-                        return <ProgramSection key={section.sec_id} section={section} />;
-                    case 'Academic':
-                        return <AcademicSection key={section.sec_id} section={section} />;
-                    case 'Partner':
-                        return <PartnerControllSection key={section.sec_id} section={section} />;
-                    case 'Banner':
-                        return <BannerSection key={section.sec_id} section={section} />;
-                    case 'Requirement':
-                        return <BasicRequirements key={section.sec_id} section={section} />;
-                    case 'Apply':
-                        return <ApplySection key={section.sec_id} section={section} />;
-                    case 'Important':
-                        return <ImportantSection key={section.sec_id} section={section} />;
-                    case 'Gallery':
-                        return <GallerySection key={section.sec_id} section={section} />;
-                    case 'Information':
-                        return <Overview key={section.sec_id} section={section} />;
-                    case 'Facilities':
-                        return <FacilitiesSection key={section.sec_id} section={section} />;
-                    case 'Study':
-                        return <StudySection key={section.sec_id} section={section} />;
-                    case 'Introduction':
-                        return <Introduction key={section.sec_id} section={section} />;
-                    case 'Innovation':
-                        return <InnovationSection key={section.sec_id} section={section} />;
-                    case 'Fee':
-                        return <FeeSection key={section.sec_id} section={section} />;
-                    case 'Future':
-                        return <FutureSection key={section.sec_id} section={section} />;
-                    case 'Testimonial':
-                        return <TestimonialSection key={section.sec_id} section={section} />;
-                    case 'Type':
-                        return <TypeSection key={section.sec_id} section={section} />;
-                    case 'Criteria':
-                        return <BasicRequirements key={section.sec_id} section={section} />;
-                    case 'Question':
-                        return <QuestionSection key={section.sec_id} section={section} />;
-                    case 'About':
-                        return <AboutSection key={section.sec_id} section={section} />;
-                    case 'Contact':
-                        return <ContactSection key={section.sec_id} section={section} />;
-                    case 'FAQ':
-                        return <FAQSection key={section.sec_id} section={section} />;
-                    case 'Faculty':
-                        return <FacultyCarouselSection key={section.sec_id} section={section} />;
 
-                    default:
-                        console.log("PageRenderer: Unknown section type:", section.sec_type);
-                        return (
-                            <div key={section.sec_id} className="text-center py-4">
-                                Unknown section type: {section.sec_type}
-                            </div>
-                        );
-                }
-            })}
+            {!onlyContentMode && (
+                <>
+                    {sections.map((section) => {
+                    switch (section.sec_type) {
+                        case 'Slideshow':
+                            return <Slideshow key={section.sec_id} section={section} />;
+                        case 'Service':
+                            return <ServiceSection key={section.sec_id} section={section} />;
+                        case 'Programs':
+                            return <ProgramSection key={section.sec_id} section={section} />;
+                        case 'Academic':
+                            return <AcademicSection key={section.sec_id} section={section} />;
+                        case 'Partner':
+                            return <PartnerControllSection key={section.sec_id} section={section} />;
+                        case 'Banner':
+                            return <BannerSection key={section.sec_id} section={section} />;
+                        case 'Requirement':
+                            return <BasicRequirements key={section.sec_id} section={section} />;
+                        case 'Apply':
+                            return <ApplySection key={section.sec_id} section={section} />;
+                        case 'Important':
+                            return <ImportantSection key={section.sec_id} section={section} />;
+                        case 'Gallery':
+                            return <GallerySection key={section.sec_id} section={section} />;
+                        case 'Information':
+                            return <Overview key={section.sec_id} section={section} />;
+                        case 'Facilities':
+                            return <FacilitiesSection key={section.sec_id} section={section} />;
+                        case 'Study':
+                            return <StudySection key={section.sec_id} section={section} />;
+                        case 'Introduction':
+                            return <Introduction key={section.sec_id} section={section} />;
+                        case 'Innovation':
+                            return <InnovationSection key={section.sec_id} section={section} />;
+                        case 'Fee':
+                            return <FeeSection key={section.sec_id} section={section} />;
+                        case 'Future':
+                            return <FutureSection key={section.sec_id} section={section} />;
+                        case 'Testimonial':
+                            return <TestimonialSection key={section.sec_id} section={section} />;
+                        case 'Type':
+                            return <TypeSection key={section.sec_id} section={section} />;
+                        case 'Criteria':
+                            return <BasicRequirements key={section.sec_id} section={section} />;
+                        case 'Question':
+                            return <QuestionSection key={section.sec_id} section={section} />;
+                        case 'About':
+                            return <AboutSection key={section.sec_id} section={section} />;
+                        case 'Contact':
+                            return <ContactSection key={section.sec_id} section={section} />;
+                        case 'FAQ':
+                            return <FAQSection key={section.sec_id} section={section} />;
+                        case 'Faculty':
+                            return <Faculty key={section.sec_id} section={section} />;
 
-            <SectionInjector alias={page?.p_alias} />
+
+                        default:
+                            console.log("PageRenderer: Unknown section type:", section.sec_type);
+                            return (
+                                <div key={section.sec_id} className="text-center py-4">
+                                    Unknown section type: {section.sec_type}
+                                </div>
+                            );
+                        }
+                    })}
+                </>
+            )}
+
+            {page?.p_alias === '/faculty' && (
+                <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
+            )}
 
             <div>
                 <Footer />
