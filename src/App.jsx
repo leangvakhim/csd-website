@@ -28,6 +28,7 @@ function App() {
           setSettings({
             facultyTitle: langSetting.set_facultytitle || "",
             departmentTitle: langSetting.set_facultydep || "",
+            baseUrl: langSetting.set_baseurl || "",
             logoUrl: langSetting.logo?.img
               ? `${API}/storage/uploads/${langSetting.logo.img}`
               : "/placeholder-icon.png"
@@ -36,22 +37,32 @@ function App() {
       })
       .catch(err => console.error("Error fetching settings:", err));
   }, [currentLang]);
-
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/home" replace />} />
-        {pages.map(page => (
-          <Route
-            key={page.p_id}
-            path={page.p_alias}
-            settings={settings}
-            element={<PageRenderer page={page} currentLang={currentLang} setCurrentLang={setCurrentLang} settings={settings} setSettings={setSettings}/>}
-          />
-        ))}
-      </Routes>
+      {settings ? (
+        <Routes>
+          <Route path="/" element={<Navigate to={settings.baseUrl} replace />} />
+          {pages.map(page => (
+            <Route
+              key={page.p_id}
+              path={page.p_alias}
+              element={
+                <PageRenderer
+                  page={page}
+                  currentLang={currentLang}
+                  setCurrentLang={setCurrentLang}
+                  settings={settings}
+                  setSettings={setSettings}
+                />
+              }
+            />
+          ))}
+        </Routes>
+      ) : (
+        <div className="text-center py-8">Loading...</div> // ✅ Show a loading message
+      )}
     </Router>
-  )
+  );
 }
 
 export default App
