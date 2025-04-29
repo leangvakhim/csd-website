@@ -30,6 +30,7 @@ import ContactSection from './Contact/ContactSection';
 import Faculty from './Faculty/Faculty';
 import PartnerControllSection from './Partnership/PartnerControllSection';
 import SectionInjector from './SectionInjector';
+import FacultyCarouselSection from './Carousel/FacultyCarouselSection';
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
     const [sections, setSections] = useState([]);
@@ -81,6 +82,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
             <div className="sticky top-0 z-50">
                 <PageHeader currentLang={currentLang} setCurrentLang={setCurrentLang} settings={settings} setSettings={setSettings}/>
             </div>
+
             {!onlyContentMode && (
                 <>
                     {sections.map((section) => {
@@ -135,6 +137,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             return <FAQSection key={section.sec_id} section={section} />;
                         case 'Faculty':
                             return <Faculty key={section.sec_id} section={section} />;
+
 
                         default:
                             console.log("PageRenderer: Unknown section type:", section.sec_type);

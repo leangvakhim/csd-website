@@ -1,3 +1,4 @@
+
 import React, {useEffect, useState} from 'react'
 import axios from 'axios'
 import { API_ENDPOINTS, API } from '../../Service/APIconfig'
@@ -115,4 +116,4 @@ const FacultyMemeber = () => {
     );
 }
 
-export default FacultyMemeber
+export default FacultyMembers;

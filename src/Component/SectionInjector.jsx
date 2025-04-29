@@ -10,12 +10,14 @@ const SectionInjector = ({alias, setOnlyContentMode}) => {
 
     switch (alias){
         case '/faculty':
+
             if (lastSegment && lastSegment !== 'faculty') {
                 setOnlyContentMode(true);
                 return <FacultyDetail facultyId={lastSegment} />;
             }
             setOnlyContentMode(false);
             return <FacultyDepartment />
+
         default:
             setOnlyContentMode(false);
             return null;
