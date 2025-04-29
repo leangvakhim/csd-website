@@ -16,8 +16,6 @@ const DeputyHeadofDepartment = () => {
             try {
             const res = await axios.get(API_ENDPOINTS.getFaculty);
             const allFaculty = res.data?.data || [];
-            console.log("allFaculty is:",allFaculty);
-            // const deputies = allFaculty.filter(item => item.f_order === 2 || item.f_order === 3);
             const deputies = allFaculty.filter(item =>
                 [2, 3].includes(item.f_order) &&
                 item.display === 1 &&

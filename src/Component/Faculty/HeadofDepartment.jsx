@@ -15,7 +15,12 @@ const HeadofDepartment = () => {
             try {
                 const res = await axios.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = res.data?.data || [];
-                const filteredHead = allFaculty.find(item => item.f_order === 1);
+                // const filteredHead = allFaculty.find(item => item.f_order === 1);
+                const filteredHead = allFaculty.filter(item =>
+                    [1].includes(item.f_order) &&
+                    item.display === 1 &&
+                    item.active === 1
+                );
 
                 if (filteredHead) {
                     setHead({
