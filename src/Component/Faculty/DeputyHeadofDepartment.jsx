@@ -32,8 +32,6 @@ const DeputyHeadofDepartment = () => {
                 telegram: '#',
             }));
 
-            console.log("formattedDeputies is: ",formattedDeputies);
-
             setDeputyData(formattedDeputies);
             } catch (error) {
             console.error("Error fetching deputy heads:", error);
@@ -116,7 +114,7 @@ const DeputyHeadofDepartment = () => {
 
                                         <p className='text-left'>{deputy.bio}</p>
                                         <Link
-                                            to={`/deputy/${deputy.id}`} // Use dynamic route to navigate to the detail page
+                                            to={`/faculty/${deputy.id}`}
                                         >
                                             <button className='bg-red-900 px-6 py-2 text-gray-50 rounded-2xl'>
                                                 View

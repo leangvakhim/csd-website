@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { API_ENDPOINTS, API } from './Service/APIconfig';
 import axios from 'axios';
 import PageRenderer from './Component/PageRenderer';
-import Faculty from './Component/Faculty/Faculty';
+import Faculty from './Component/Faculty/FacultyDepartment';
 
 function App() {
   const [pages, setPages] = useState([]);
@@ -43,11 +43,11 @@ function App() {
       {settings ? (
         <Routes>
           <Route path="/" element={<Navigate to={settings.baseUrl} replace />} />
-          {/* <Route path="/faculty" element={<Faculty/>}/> */}
           {pages.map(page => (
             <Route
               key={page.p_id}
-              path={page.p_alias}
+              // path={page.p_alias}
+              path={page.p_alias === '/faculty' ? '/faculty/*' : page.p_alias}
               element={
                 <PageRenderer
                   page={page}

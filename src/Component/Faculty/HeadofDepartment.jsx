@@ -15,20 +15,20 @@ const HeadofDepartment = () => {
             try {
                 const res = await axios.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = res.data?.data || [];
-                // const filteredHead = allFaculty.find(item => item.f_order === 1);
                 const filteredHead = allFaculty.filter(item =>
-                    [1].includes(item.f_order) &&
+                    item.f_order === 1 &&
                     item.display === 1 &&
                     item.active === 1
                 );
 
-                if (filteredHead) {
+                if (filteredHead.length > 0) {
+                    const headData = filteredHead[0];
                     setHead({
-                        id: filteredHead.f_id,
-                        name: filteredHead.f_name,
-                        bio: filteredHead.f_portfolio || 'No bio available.',
-                        image: filteredHead.img?.img
-                            ? `${API}/storage/uploads/${filteredHead.img.img}`
+                        id: headData.f_id,
+                        name: headData.f_name,
+                        bio: headData.f_portfolio || 'No bio available.',
+                        image: headData.img?.img
+                            ? `${API}/storage/uploads/${headData.img.img}`
                             : "/placeholder-icon.png",
                         socialLinks: {
                             facebook: '#',
@@ -107,8 +107,10 @@ const HeadofDepartment = () => {
                                         </div>
                                     </div>
                                     <p>{head.bio}</p>
-                                    <Link to={`/head/${head.id}`}>
-                                        <button className='bg-red-900 px-6 py-2 text-gray-50 rounded-2xl' id="view-button">View</button>
+                                    <Link to={`/faculty/${head.id}`}>
+                                        <button className='bg-red-900 px-6 py-2 text-gray-50 rounded-2xl' id="view-button">
+                                            View
+                                        </button>
                                     </Link>
                                 </div>
                             </div>
