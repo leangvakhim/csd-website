@@ -44,7 +44,9 @@ const AboutSection = ({ section }) => {
         axios
             .get(API_ENDPOINTS.getSetting)
             .then((res) => {
-                const data = res.data?.data; // single object, no map needed
+                const settings = res.data?.data || [];
+                const data = settings.find(item => item.lang === 1);
+                // const data = res.data?.data; // single object, no map needed
                 if (!data) throw new Error("Invalid API response");
                 const formattedStats = [
                     { value: data.set_amstu.toLocaleString(), rank: "Students" },
@@ -66,6 +68,7 @@ const AboutSection = ({ section }) => {
                 setIsLoading(false);
             });
 
+            // console.log("response is: ",response);
     }, [section]);
 
     if (isLoading) return <div className="text-center py-8 text-gray-600">Loading...</div>;

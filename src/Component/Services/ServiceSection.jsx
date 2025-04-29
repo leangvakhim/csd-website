@@ -50,11 +50,11 @@ const ServiceSection = ({ section }) => {
 
 
   if (services.length === 0) {
-    console.log("ServiceSection: No services to render (services array is empty)");
+    // console.log("ServiceSection: No services to render (services array is empty)");
     return <div className="text-center py-8 text-gray-600">No services available for this section.</div>;
   }
 
-  console.log("ServiceSection: Rendering services:", services);
+  // console.log("ServiceSection: Rendering services:", services);
   return (
     <div className="my-16">
       <motion.section
