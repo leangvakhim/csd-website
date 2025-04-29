@@ -81,6 +81,9 @@ const API_ENDPOINTS = {
 
     // ras(specialization)
     getSpecialization: `${API_BASEURL}/ras`,
+    
+     // faculty
+     getFaculty: `${API_BASEURL}/faculty`,
 
     // tse(type)
     getType: `${API_BASEURL}/tse`,
@@ -108,6 +111,13 @@ const API_ENDPOINTS = {
 
     // setting
     getSetting: `${API_BASEURL}/setting2`,
+
+    // socialsetting
+    getSocialSetting: `${API_BASEURL}/settingsocial`,
+
+    // contact
+    getContact: `${API_BASEURL}/contact`,
+
 
     // subservice
     getSubserviceAF: `${API_BASEURL}/subservice`,

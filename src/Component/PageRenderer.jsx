@@ -26,6 +26,9 @@ import TestimonialSection from './Testimonial/TestimonialSection';
 import TypeSection from './Type/TypeSection';
 import AboutSection from './About/AboutSection';
 import QuestionSection from './Question/QuestionSection';
+import ContactSection from './Contact/ContactSection';
+import Faculty from './Faculty/Faculty';
+import PartnerControllSection from './Partnership/PartnerControllSection';
 
 const PageRenderer = ({ page }) => {
     const [sections, setSections] = useState([]);
@@ -86,7 +89,7 @@ const PageRenderer = ({ page }) => {
                     case 'Academic':
                         return <AcademicSection key={section.sec_id} section={section} />;
                     case 'Partner':
-                        return <PartnershipSection key={section.sec_id} section={section} />;
+                        return <PartnerControllSection key={section.sec_id} section={section} />;
                     case 'Banner':
                         return <BannerSection key={section.sec_id} section={section} />;
                     case 'Requirement':
@@ -121,8 +124,12 @@ const PageRenderer = ({ page }) => {
                         return <QuestionSection key={section.sec_id} section={section} />;
                     case 'About':
                         return <AboutSection key={section.sec_id} section={section} />;
+                    case 'Contact':
+                        return <ContactSection key={section.sec_id} section={section} />;
                     case 'FAQ':
                         return <FAQSection key={section.sec_id} section={section} />;
+                    case 'Faculty':
+                        return <Faculty key={section.sec_id} section={section} />;
 
                     default:
                         console.log("PageRenderer: Unknown section type:", section.sec_type);

@@ -27,29 +27,37 @@ const UniPartnerships = ({ section }) => {
 
   useEffect(() => {
     axios
-      .get(API_ENDPOINTS.getPartner)
+      .get(`${API_ENDPOINTS.getPartnership}?section_id=${section.sec_id}`)
       .then((res) => {
         let data = res.data?.data ?? [];
-        if (data && !Array.isArray(data)) data = [data];
+
+        // Ensure data is an array
+        if (data && !Array.isArray(data)) {
+          data = [data];
+        }
 
         const formatted = data
-          .filter((partner) => partner.active === 1)
+          .filter((partner) => partner.active === 1) // Filter active partners
           .map((partner) => ({
-            src: partner.ps_img ? `${API}/storage/uploads/${partner.ps_img}` : null,
-            alt: partner.ps_title || 'Partner Logo',
+            src: partner.ps_img
+              ? `${API}/storage/uploads/${partner.ps_id}`
+              : null, // Fallback to null if no image ID
+            alt: partner.ps_title || 'Partner Logo', 
           }));
+        console.log('Formatted partners:', formatted);
 
         setPartners(formatted);
       })
       .catch((error) => {
-        console.error('UniPartnerships: Error fetching partners:', error);
+        console.error('PartnershipSection: Error fetching partners:', error);
+        setPartners([]); // Reset state on error
       });
   }, [section]);
 
   if (partners.length === 0) {
     return (
       <div className="text-center py-8 text-gray-600">
-        No partners to display.
+        No Partnerships With Universities to display.
       </div>
     );
   }

@@ -3,18 +3,12 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
 import {
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaLinkedin,
   FaPhoneAlt,
   FaEnvelope,
   FaArrowRight,
   FaCalendarAlt,
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
 
-// Animation variants for the section
 const sectionVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -27,78 +21,132 @@ const sectionVariants = {
   },
 };
 
-// Animation variants for individual cards
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 };
 
 const ApplySection = ({ section }) => {
-  const [sectionData, setSectionData] = useState([]);
+  const [sectionData, setSectionData] = useState({});
   const [contactInfo, setContactInfo] = useState({
-    semesterInfo: { title: "", text: "", date: "" },
-    contactDetails: { phone: "", email: "", socialLinks: [] },
+    contactDetails: {
+      phone: "",
+      email: "",
+    },
   });
-  const [steps, setSteps] = useState([]);  // Added state for steps
+  const [socialData, setSocialData] = useState({
+    contactDetails: {
+      socialLinks: [],
+    },
+  });
+  const [steps, setSteps] = useState([]);
 
   const fallbackContactInfo = {
     contactDetails: {
       phone: "885 234 876 987",
       email: "rupp@email.edu.kh",
       socialLinks: [
-        { icon: <FaFacebookF />, link: "https://www.facebook.com/your-page" },
-        { icon: <FaTwitter />, link: "https://twitter.com/your-profile" },
-        { icon: <FaInstagram />, link: "https://www.instagram.com/your-profile" },
-        { icon: <FaLinkedin />, link: "https://www.linkedin.com/in/your-profile" },
+        {
+          title: "telegram",
+          link: "https://t.me/university_channel",
+          image: "telegram-university.png",
+        },
       ],
     },
   };
 
-  // Fetch data based on section.sec_id
   useEffect(() => {
     if (section?.sec_id) {
       axios
         .get(`${API_ENDPOINTS.getApply}?section_id=${section.sec_id}`)
         .then((res) => {
           const data = res.data?.data || [];
-          console.log("Fetched section data:", data);  // Check the data structure
-
           if (data.length > 0) {
-            const sectionData = data[0];  // Assuming you want the first section
-
-            // Format section data
+            const sectionData = data[0];
             const formattedSection = {
               ha_title: sectionData.ha_title || "Default Title",
               ha_tagtitle: sectionData.ha_tagtitle || "",
               ha_subtitletag: sectionData.ha_subtitletag || "",
               ha_date: sectionData.ha_date || "",
-              image: sectionData.image?.img ? `${API}/storage/uploads/${sectionData.image.img}` : null,
+              image: sectionData.image?.img
+                ? `${API}/storage/uploads/${sectionData.image.img}`
+                : null,
               ha_id: sectionData.ha_id || null,
             };
+            setSectionData(formattedSection);
 
-            console.log("Formatted Section:", formattedSection);  // Check formatted section data
-            setSectionData(formattedSection); // This updates the sectionData state
-          }
+            // Fetch social settings
+            axios
+              .get(`${API_ENDPOINTS.getSocialSetting}?section_id=${section.sec_id}`)
+              .then((socialRes) => {
+                const socialData = socialRes.data?.data || [];
+                const contactDetails = {
+                  socialLinks: socialData.map((item) => ({
+                    title: item.setsoc_title || "",
+                    link: item.setsoc_link || "", // setsoc_link is null, so fallback to empty string
+                    image: item.img?.img ? `${API}/storage/uploads/${item.img.img}` : "",
+                  })),
+                };
+                setSocialData({ contactDetails });
+              })
+              .catch((error) => {
+                console.error("Error fetching social settings:", error);
+                setSocialData(fallbackContactInfo);
+              });
 
 
-          // Fetch steps (assuming a separate endpoint)
-          axios
-            .get(`${API_ENDPOINTS.getSubApply}?ha_id=${data.ha_id}`)
-            .then((stepRes) => {
-              const stepsData = stepRes.data?.data || [];
-              const formattedSteps = stepsData
-                .filter((step) => step.display === 1)
-                .map((step) => step.sha_title) || [];
-              setSteps(formattedSteps);  // Set the fetched steps
-            })
-            .catch((error) => {
-              console.error("Error fetching steps:", error);
+            // Fetch contact info
+            axios
+              .get(`${API_ENDPOINTS.getContact}?section_id=${section.sec_id}`)
+              .then((contactRes) => {
+                const contactData = contactRes.data?.data || [];
+                const contactDetails = {
+                  phone: contactData.contact_phone || "",
+                  email: contactData.contact_email || "",
+                };
+                setContactInfo((prev) => ({
+                  ...prev,
+                  contactDetails,
+                }));
+              })
+              .catch((error) => {
+                console.error("Error fetching contact info:", error);
+                setContactInfo(fallbackContactInfo);
+              });
+
+            // Fetch steps
+            axios
+              .get(`${API_ENDPOINTS.getSubApply}?ha_id=${sectionData.ha_id}`)
+              .then((stepRes) => {
+                const stepsData = stepRes.data?.data || [];
+                const formattedSteps = stepsData
+                  .filter((step) => step.display === 1)
+                  .map((step) => step.sha_title);
+                setSteps(formattedSteps);
+              })
+              .catch((error) => {
+                console.error("Error fetching steps:", error);
+                setSteps([]);
+              });
+          } else {
+            setSectionData({
+              ha_title: "Step By Step: How to Apply to Computer Science Department",
+              ha_tagtitle: "",
+              ha_subtitletag: "",
+              ha_date: "",
+              image: null,
+              ha_id: null,
             });
+            setContactInfo(fallbackContactInfo);
+          }
         })
         .catch((error) => {
           console.error("Error fetching apply section data:", error);
           setSectionData({
-            title: "Step By Step: How to Apply to Computer Science Department",
+            ha_title: "Step By Step: How to Apply to Computer Science Department",
+            ha_tagtitle: "",
+            ha_subtitletag: "",
+            ha_date: "",
             image: null,
             ha_id: null,
           });
@@ -107,13 +155,16 @@ const ApplySection = ({ section }) => {
     } else {
       console.log("ApplySection: No section.sec_id provided, skipping API call");
       setSectionData({
-        title: "Step By Step: How to Apply to Computer Science Department",
+        ha_title: "Step By Step: How to Apply to Computer Science Department",
+        ha_tagtitle: "",
+        ha_subtitletag: "",
+        ha_date: "",
         image: null,
         ha_id: null,
       });
       setContactInfo(fallbackContactInfo);
     }
-  }, [section]);
+  }, [section?.sec_id]);
 
   return (
     <div className="my-16">
@@ -136,7 +187,7 @@ const ApplySection = ({ section }) => {
               variants={cardVariants}
               transition={{ duration: 0.6 }}
             >
-              {sectionData.ha_title} {/* Displaying title here */}
+              {sectionData.ha_title}
             </motion.h2>
             <div className="space-y-4">
               {steps.map((step, index) => (
@@ -186,16 +237,22 @@ const ApplySection = ({ section }) => {
                     {contactInfo.contactDetails.email}
                   </p>
                   <div className="flex space-x-4">
-                    {contactInfo.contactDetails.socialLinks.map((link, index) => (
-                      <Link
+                    {socialData.contactDetails.socialLinks.map((link, index) => (
+                      <a
                         key={index}
-                        to={link.link}
+                        href={link.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-gray-50 p-2 rounded-lg text-red-700"
+                        className="bg-gray-50 p-2 rounded-lg"
                       >
-                        {link.icon}
-                      </Link>
+                        {link.image && (
+                          <img
+                            src={link.image}
+                            alt={link.title}
+                            className="w-6 h-6 object-contain"
+                          />
+                        )}
+                      </a>
                     ))}
                   </div>
                 </div>

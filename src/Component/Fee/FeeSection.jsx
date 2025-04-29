@@ -61,7 +61,7 @@ const FeeSection = ({ section }) => {
   return (
     <div className="my-8 sm:my-12 lg:my-16">
       <motion.section
-        className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24"
+        className="container mx-auto px-4 sm:px-6 lg:px-8 "
         variants={sectionVariants}
         initial="hidden"
         whileInView="visible"
