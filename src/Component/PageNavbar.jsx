@@ -44,7 +44,8 @@ const PageNavbar = ({ menus }) => {
               >
                 {/* Parent Menu Item as Link */}
                 <Link
-                  to={`/${menu.title.toLowerCase()}`}
+                  // to={`/${menu.title.toLowerCase()}`}
+                  to={menu.p_alias}
                   className={`flex items-center uppercase hover:text-red-900 ${
                     isActive ? "text-red-900 font-bold" : ""
                   }`}

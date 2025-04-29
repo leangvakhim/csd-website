@@ -21,7 +21,8 @@ const PageHeader = () => {
   const [activeMenu, setActiveMenu] = useState(null);
   const [mobileDropdowns, setMobileDropdowns] = useState({});
   const [currentLang, setCurrentLang] = useState(1); // Default to English (1)
-
+  const [pages, setPages] = useState([]);
+  const [menusWithAlias, setMenusWithAlias] = useState([]);
   const searchContainerRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const location = useLocation();
@@ -58,60 +59,72 @@ const PageHeader = () => {
     }
   };
 
-  useEffect(() => {
-    // Fetch menus
-    axios
-      .get(API_ENDPOINTS.getMenu)
-      .then((res) => {
-        const data = res.data?.data || [];
-        const filteredMenus = data
-          .filter((menu) => menu.lang === currentLang)
-          .filter((display) => display.display === 1)
-          .sort((a, b) => b.menu_order - a.menu_order);
-        setMenus(filteredMenus);
-      })
-      .catch((err) => {
-        console.error("Error fetching menu data:", err);
-      });
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // Fetch menus, settings, and pages at the same time
+      const [menuRes, settingRes, pageRes] = await Promise.all([
+        axios.get(API_ENDPOINTS.getMenu),
+        axios.get(API_ENDPOINTS.getSetting),
+        axios.get(API_ENDPOINTS.getPage),
+      ]);
 
-    // Fetch settings and resolve logo URL
-    axios
-      .get(API_ENDPOINTS.getSetting)
-      .then(async (res) => {
-        console.log("Settings API response:", res.data);
-        const data = res.data?.data;
-        if (data && Array.isArray(data)) {
-          const langSettings = data.find((item) => item.lang === currentLang) || data[0];
-          if (langSettings) {
-            const logoUrl = await getLogoUrl(langSettings.set_logo);
-            setSettings({
-              facultyTitle: langSettings.set_facultytitle || "",
-              departmentTitle: langSettings.set_facultydep || "",
-              logoUrl: logoUrl || "/placeholder-icon.png",
-            });
-          } else {
-            console.warn("No settings found for current language or default");
-            setSettings((prev) => ({
-              ...prev,
-              logoUrl: "/placeholder-icon.png",
-            }));
-          }
+      // Handle menus
+      const menuData = menuRes.data?.data || [];
+      const filteredMenus = menuData
+        .filter((menu) => menu.lang === currentLang)
+        .filter((menu) => menu.display === 1)
+        .sort((a, b) => b.menu_order - a.menu_order);
+      setMenus(filteredMenus);
+
+      // Handle settings and resolve logo
+      const settingData = settingRes.data?.data;
+      if (settingData && Array.isArray(settingData)) {
+        const langSettings = settingData.find((item) => item.lang === currentLang) || settingData[0];
+        if (langSettings) {
+          const logoUrl = await getLogoUrl(langSettings.set_logo);
+          setSettings({
+            facultyTitle: langSettings.set_facultytitle || "",
+            departmentTitle: langSettings.set_facultydep || "",
+            logoUrl: logoUrl || "/placeholder-icon.png",
+          });
         } else {
-          console.warn("Settings data is not an array:", data);
+          console.warn("No settings found for current language or default");
           setSettings((prev) => ({
             ...prev,
             logoUrl: "/placeholder-icon.png",
           }));
         }
-      })
-      .catch((err) => {
-        console.error("Error fetching settings:", err);
+      } else {
+        console.warn("Settings data is not an array:", settingData);
         setSettings((prev) => ({
           ...prev,
           logoUrl: "/placeholder-icon.png",
         }));
+      }
+
+      // Handle pages and combine alias with menu
+      const pageData = pageRes.data?.data || [];
+      const combinedMenus = filteredMenus.map(menu => {
+        const matchedPage = pageData.find(page => page.p_menu === menu.menu_id);
+        return {
+          ...menu,
+          p_alias: matchedPage ? matchedPage.p_alias : null,
+        };
       });
-  }, [currentLang]);
+      setMenusWithAlias(combinedMenus);
+
+    } catch (err) {
+      console.error("Error fetching menus, settings, or pages:", err);
+      setSettings((prev) => ({
+        ...prev,
+        logoUrl: "/placeholder-icon.png",
+      }));
+    }
+  };
+
+  fetchData();
+}, [currentLang]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -181,7 +194,8 @@ const PageHeader = () => {
             <div className="flex items-center space-x-4">
               <div className="hidden lg:block">
                 <PageNavbar
-                  menus={menus}
+                  // menus={menus}
+                  menus={menusWithAlias}
                   activeMenu={activeMenu}
                   onMenuClick={setActiveMenu}
                   isMobileMenuOpen={isMobileMenuOpen}
