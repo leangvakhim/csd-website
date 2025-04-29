@@ -118,7 +118,6 @@ const API_ENDPOINTS = {
     // contact
     getContact: `${API_BASEURL}/contact`,
 
-
     // subservice
     getSubserviceAF: `${API_BASEURL}/subservice`,
 
@@ -136,7 +135,6 @@ const API_ENDPOINTS = {
     getSectionByPage: `${API_BASEURL}/section/by-page`,
 
     // faculty
-    getFaculty: `${API_BASEURL}/faculty`,
 
     // faculty-contact
     getFacultyContact: `${API_BASEURL}/faculty-contact`,
@@ -179,14 +177,7 @@ const API_ENDPOINTS = {
     // developersocial
     getSocialDeveloper: `${API_BASEURL}/developersocial`,
 
-    // setting
-    getSetting: `${API_BASEURL}/setting2`,
-
-    // settingsocial
-    getSocialSetting: `${API_BASEURL}/settingsocial`,
-
-    // contact
-    getContact: `${API_BASEURL}/contact`,
+   
 
     // subcontact
     getSubContact: `${API_BASEURL}/subcontact`,
