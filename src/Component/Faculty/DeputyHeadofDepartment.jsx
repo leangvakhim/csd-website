@@ -21,7 +21,8 @@ const DeputyHeadofDepartment = () => {
             const deputies = allFaculty.filter(item =>
                 [2, 3].includes(item.f_order) &&
                 item.display === 1 &&
-                item.active === 1
+                item.active === 1 && 
+                item.lang === 1 // Assuming 1 is the current language ID
             );
             const formattedDeputies = deputies.map(deputy => ({
                 id: deputy.f_id,

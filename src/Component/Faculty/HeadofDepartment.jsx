@@ -10,12 +10,14 @@ import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 const HeadofDepartment = () => {
     const [head, setHead] = useState(null);
 
+    const currentLang = 1; // Assuming 1 is the current language ID
     useEffect(() => {
         const fetchHead = async () => {
             try {
                 const res = await axios.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = res.data?.data || [];
-                const filteredHead = allFaculty.find(item => item.f_order === 1);
+                const filteredHead = allFaculty.find(item => item.f_order === 1 &&
+                item.lang === currentLang);
 
                 if (filteredHead) {
                     setHead({
