@@ -1,182 +1,226 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { RiDoubleQuotesR } from "react-icons/ri";
+import { FaArrowRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { SlSocialFacebook } from "react-icons/sl";
+import { PiTelegramLogoDuotone } from "react-icons/pi";
 
-const DeputyHeadofDepartment = ({ language = "en" }) => {
-  const [deputyData, setDeputyData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+// Animation variants
+const sectionVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      when: "beforeChildren",
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const FacultyCarousel = () => {
+  const [headerSection, setHeaderSection] = useState({
+    title: "",
+    subtitle: "",
+  });
+  const [facultyMembers, setFacultyMembers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    setIsLoading(true);
-    axios
-      .get(`${API_ENDPOINTS.getFaculty}`)
-      .then((res) => {
-        const data = res.data?.data || [];
-        const filteredData = data
-          .filter(
-            (faculty) =>
-              (language === "km"
-                ? faculty.f_position === "អនុប្រធានដេប៉ាតឺម៉ង់"
-                : faculty.f_position.toLowerCase() === "deputy head of department") &&
-              faculty.f_order > 0 &&
-              faculty.display === 1 &&
-              faculty.active === 1 &&
-              faculty.lang === (language === "km" ? 2 : 1)
-          )
-          .sort((a, b) => a.f_order - b.f_order)
-          .map((faculty) => ({
-            id: faculty.f_id,
-            name: faculty.f_name,
-            image: faculty.img?.img ? `${API}/storage/uploads/${faculty.img.img}` : "",
-            bio: faculty.f_portfolio || "No biography available.",
-            facebook: faculty.facebook || "#",
-            telegram: faculty.telegram || "#",
-            facebook_image: faculty.facebook_image
-              ? `${API}/storage/uploads/${faculty.facebook_image}`
-              : "https://via.placeholder.com/24?text=FB",
-            telegram_image: faculty.telegram_image
-              ? `${API}/storage/uploads/${faculty.telegram_image}`
-              : "https://via.placeholder.com/24?text=TG",
-          }));
-        setDeputyData(filteredData);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching faculty data:", error);
-        setError("Failed to load deputy head data.");
-        setIsLoading(false);
+  const fetchFacultyData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Fetch header section
+      const headerRes = await axios.get(API_ENDPOINTS.getHeaderSection);
+      const headerData = headerRes.data?.data;
+
+      if (!headerData) {
+        throw new Error("Invalid API response structure for header section");
+      }
+
+      setHeaderSection({
+        title: headerData.hsec_title || "Our Faculty",
+        subtitle: headerData.hsec_subtitle || "",
       });
-  }, [language]);
+
+      // Fetch faculty members
+      const facultyRes = await axios.get(API_ENDPOINTS.getFaculty);
+      const facultyData = facultyRes.data?.data || [];
+
+      if (!facultyData.length) {
+        throw new Error("No faculty members found");
+      }
+
+      setFacultyMembers(
+        facultyData.map((faculty) => ({
+          id: faculty.f_id,
+          name: faculty.f_name || "Unknown Faculty",
+          position: faculty.f_position || "No position",
+          image: faculty.img?.img
+            ? `${API}/storage/uploads/${faculty.img.img}`
+            : "/placeholder-faculty.jpg",
+        }))
+      );
+    } catch (err) {
+      console.error("API error:", err);
+      setError(err.response?.data?.message || "Failed to load faculty data");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchFacultyData();
+  }, [fetchFacultyData]);
 
   if (isLoading) {
     return (
-      <div className="my-16 text-center">
-        <p>{language === "km" ? "កំពុងផ្ទុកព័ត៌មានអនុប្រធានដេប៉ាតឺម៉ង់..." : "Loading deputy head information..."}</p>
+      <div className="text-center py-8 text-gray-600">
+        <div className="animate-pulse flex space-x-4">
+          <div className="flex-1 space-y-4 py-1">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (error || deputyData.length === 0) {
+  if (error) {
+    return <div className="text-center py-8 text-red-600">Error: {error}</div>;
+  }
+
+  if (!facultyMembers.length && !headerSection.title) {
     return (
-      <div className="my-16 text-center">
-        <p>{language === "km" ? "មិនមានព័ត៌មានអនុប្រធានដេប៉ាតឺម៉ង់ទេ។" : "No deputy head information available."}</p>
+      <div className="text-center py-8 text-gray-600">
+        No faculty data available
       </div>
     );
   }
 
   return (
-    <div className="my-16">
-      <div className="container mx-auto px-4">
-        <div className="space-y-10">
-          <div>
-            <h1 className="text-2xl font-semibold mb-4">
-              {language === "km" ? "អនុប្រធានដេប៉ាតឺម៉ង់" : "Deputy Head of Department"}
-            </h1>
-          </div>
-          <div className="flex flex-col xl:flex-row xl:flex-wrap gap-8 justify-center">
-            {deputyData.map((deputy, index) => (
-              <div
-                key={deputy.id}
-                className={`
-                  shadow-lg rounded-2xl p-4 
-                  xl:w-[calc(50%-1rem)]
-                  ${
-                    index === deputyData.length - 1 && deputyData.length % 2 !== 0
-                      ? "xl:mx-auto"
-                      : ""
-                  }
-                `}
+    <div className="my-16 bg-white">
+      <motion.section
+        className="container mx-auto px-4"
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+          <motion.div
+            variants={cardVariants}
+            className="w-full md:w-2/3 text-center md:text-left"
+          >
+            <h2 className="text-3xl xl:text-4xl font-extrabold text-gray-900">
+              {headerSection.title}
+            </h2>
+            {headerSection.subtitle && (
+              <p className="text-gray-600 mt-4 text-lg">
+                {headerSection.subtitle}
+              </p>
+            )}
+          </motion.div>
+          <motion.div
+            variants={cardVariants}
+            className="w-full md:w-auto mt-4 md:mt-0"
+          >
+            <Link
+              to="/faculty"
+              className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1"
+            >
+              <span className="mr-2 xl:text-sm text-[12px]">View All</span>
+              <FaArrowRight className="text-red-800" />
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* Faculty Cards */}
+        <motion.div
+          variants={sectionVariants}
+          className="overflow-hidden"
+        >
+          <div className="flex snap-x snap-mandatory overflow-x-auto py-6 px-4 scroll-smooth gap-4 md:gap-8">
+            {facultyMembers.map((faculty) => (
+              <motion.div
+                key={faculty.id}
+                variants={cardVariants}
+                className="min-w-[300px] sm:min-w-[250px] flex-shrink-0 snap-center mx-2 bg-white rounded-lg shadow-lg p-4 flex flex-col items-center justify-center hover:shadow-xl transition duration-300"
+                whileHover={{ scale: 1.05 }}
               >
-                <div className="flex flex-col lg:flex-row gap-4 items-center">
-                  {/* Image Container */}
-                  <div className="relative w-full h-72 mb-4 group">
-                    <img
-                      src={deputy.image}
-                      alt={deputy.name}
-                      className="w-full h-full rounded-2xl object-cover group-hover:brightness-90 transition-all duration-300"
-                    />
-
-                    {/* Social Media Overlay */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 1 }}
-                      className="absolute inset-0 bg-black/20 rounded-2xl flex items-center justify-center"
-                    >
-                      {/* Social Images Container */}
-                      <div className="absolute top-4 right-4 group-hover:bg-black/10 p-2 transition-all duration-300 rounded-2xl">
+                <Link
+                  to={`/faculty/${faculty.id}`}
+                  className="relative w-48 h-48 md:w-64 md:h-64 mb-4 group"
+                >
+                  <img
+                    src={faculty.image}
+                    alt={faculty.name}
+                    className="w-full h-full rounded-2xl object-cover group-hover:brightness-90 transition-all duration-300"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/placeholder-faculty.jpg";
+                    }}
+                  />
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileHover={{ opacity: 1 }}
+                    className="absolute inset-0 bg-black/20 rounded-2xl flex items-center justify-center"
+                  >
+                    <div className="absolute top-4 right-4 group-hover:bg-black/10 p-2 transition-all duration-300 rounded-2xl">
+                      <motion.div
+                        initial={{ y: 20 }}
+                        animate={{ y: 0 }}
+                        className="space-y-2"
+                      >
                         <motion.div
-                          initial={{ y: 20 }}
-                          animate={{ y: 0 }}
-                          className="space-y-2"
+                          whileHover={{ scale: 1.1 }}
+                          className="bg-white p-3 rounded-full shadow-lg"
                         >
-                          {/* Facebook Image */}
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            className="bg-white p-3 rounded-full shadow-lg"
+                          <Link
+                            to="#"
+                            className="text-gray-700 hover:text-red-600"
                           >
-                            <a
-                              href={deputy.facebook}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-gray-700 hover:text-red-600"
-                            >
-                              <img
-                                src={deputy.facebook_image}
-                                alt="Facebook"
-                                className="w-6 h-6 object-contain"
-                              />
-                            </a>
-                          </motion.div>
-
-                          {/* Telegram Image */}
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            className="bg-white p-3 rounded-full shadow-lg"
-                          >
-                            <a
-                              href={deputy.telegram}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-gray-700 hover:text-red-400"
-                            >
-                              <img
-                                src={deputy.telegram_image}
-                                alt="Telegram"
-                                className="w-6 h-6 object-contain"
-                              />
-                            </a>
-                          </motion.div>
+                            <SlSocialFacebook className="text-xl" />
+                          </Link>
                         </motion.div>
-                      </div>
-                    </motion.div>
-                  </div>
-                  <div className="space-y-6 max-w-md relative">
-                    <div className="flex justify-between items-center">
-                      <h1 className="text-2xl font-semibold">{deputy.name}</h1>
-                      <div className="text-right">
-                        <RiDoubleQuotesR className="text-7xl text-red-900" />
-                      </div>
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          className="bg-white p-3 rounded-full shadow-lg"
+                        >
+                          <Link
+                            to="#"
+                            className="text-gray-700 hover:text-red-400"
+                          >
+                            <PiTelegramLogoDuotone className="text-xl" />
+                          </Link>
+                        </motion.div>
+                      </motion.div>
                     </div>
-
-                    <p className="text-left">{deputy.bio}</p>
-                    <Link to={`/deputy/${deputy.id}`}>
-                      <button className="bg-red-900 px-6 py-2 text-gray-50 rounded-2xl">
-                        {language === "km" ? "មើល" : "View"}
-                      </button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
+                  </motion.div>
+                </Link>
+                <h3 className="text-xl font-semibold text-gray-800">
+                  {faculty.name}
+                </h3>
+                <p className="text-sm text-gray-600 font-normal mb-4">
+                  {faculty.position}
+                </p>
+              </motion.div>
             ))}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.section>
     </div>
   );
 };
 
-export default DeputyHeadofDepartment;
+export default FacultyCarousel;
