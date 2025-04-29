@@ -33,6 +33,7 @@ const FacultyCarousel = () => {
   const [facultyMembers, setFacultyMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentLang, setCurrentLang] = useState(1); // Default language ID (1)
 
   const fetchFacultyData = useCallback(async () => {
     try {
@@ -60,8 +61,20 @@ const FacultyCarousel = () => {
         throw new Error("No faculty members found");
       }
 
+      // Filter faculty members by language and active status
+      const filteredFaculty = facultyData.filter(
+        (faculty) => faculty.lang === currentLang && faculty.active === 1 && faculty.display === 1
+      );
+
+      if (!filteredFaculty.length) {
+        throw new Error(`No faculty members found for language ID: ${currentLang}`);
+      }
+
+      // Sort by order field
+      const sortedFaculty = filteredFaculty.sort((a, b) => a.f_order - b.f_order);
+
       setFacultyMembers(
-        facultyData.map((faculty) => ({
+        sortedFaculty.map((faculty) => ({
           id: faculty.f_id,
           name: faculty.f_name || "Unknown Faculty",
           position: faculty.f_position || "No position",
@@ -76,9 +89,15 @@ const FacultyCarousel = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [currentLang]);
 
+  // Effect to detect language changes from application context
   useEffect(() => {
+    // You might want to get language from context or a language service
+    // For now, we'll use a local state, but you could replace this with:
+    // const { language } = useLanguageContext();
+    // setCurrentLang(language);
+    
     fetchFacultyData();
   }, [fetchFacultyData]);
 
