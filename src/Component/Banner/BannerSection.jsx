@@ -44,7 +44,7 @@ const BannerSection = ({ section }) => {
     axios
       .get(`${API_ENDPOINTS.getBanner}?section_id=${section.sec_id}`)
       .then((res) => {
-        console.log("BannerSection API Response:", res.data);
+        // console.log("BannerSection API Response:", res.data);
         const banners = res.data?.data || [];
 
         // Find the banner that matches the current section

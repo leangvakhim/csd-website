@@ -30,22 +30,22 @@ const PartnershipSection = ({ section }) => {
             .get(`${API_ENDPOINTS.getPartnership}?section_id=${section.sec_id}`)
             .then((res) => {
                 let data = res.data?.data ?? [];
-    
+
                 // Ensure data is an array
                 if (data && !Array.isArray(data)) {
                     data = [data];
                 }
-    
+
                 const formatted = data
                     .filter((partner) => partner.active === 1) // Filter active partners
                     .map((partner) => ({
                         src: partner.ps_img
-                            ? `${API}/storage/uploads/${partner.ps_id}` 
+                            ? `${API}/storage/uploads/${partner.ps_id}`
                             : null, // Fallback to null if no image ID
                         alt: partner.ps_title || 'Partner Logo', // Use title or fallback
                     }));
-                    console.log('Formatted partners:', formatted);
-    
+                    // console.log('Formatted partners:', formatted);
+
                 setPartners(formatted);
             })
             .catch((error) => {

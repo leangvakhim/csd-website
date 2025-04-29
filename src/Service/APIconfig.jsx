@@ -81,7 +81,7 @@ const API_ENDPOINTS = {
 
     // ras(specialization)
     getSpecialization: `${API_BASEURL}/ras`,
-    
+
      // faculty
      getFaculty: `${API_BASEURL}/faculty`,
 
@@ -172,6 +172,36 @@ const API_ENDPOINTS = {
 
     // partnership
     getPartnership: `${API_BASEURL}/partnership`,
+
+    // developer
+    getDevelopers: `${API_BASEURL}/developer`,
+
+    // developersocial
+    getSocialDeveloper: `${API_BASEURL}/developersocial`,
+
+    // setting
+    getSetting: `${API_BASEURL}/setting2`,
+
+    // settingsocial
+    getSocialSetting: `${API_BASEURL}/settingsocial`,
+
+    // contact
+    getContact: `${API_BASEURL}/contact`,
+
+    // subcontact
+    getSubContact: `${API_BASEURL}/subcontact`,
+
+    // rsd-desc (Research Description)
+    getRsdDescription: `${API_BASEURL}/rsd-desc`,
+
+    // rsd-project (Research Project)
+    getRsdProject: `${API_BASEURL}/rsd-project`,
+
+    // rsd-meet (Research Project)
+    getRsdMeeting: `${API_BASEURL}/rsd-meet`,
+
+    // import announcement
+    getAnnouncementStudent: `${API_BASEURL}/announcement/student`,
 };
 
 export { API_BASEURL, API_ENDPOINTS, API };

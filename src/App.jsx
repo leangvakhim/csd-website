@@ -7,6 +7,8 @@ import PageRenderer from './Component/PageRenderer';
 
 function App() {
   const [pages, setPages] = useState([]);
+  const [settings, setSettings] = useState(null);
+  const [currentLang, setCurrentLang] = useState(1);
 
   useEffect(() => {
     axios.get(API_ENDPOINTS.getPage)
@@ -17,6 +19,24 @@ function App() {
       .catch(err => console.error('Error fetching pages:', err));
   }, []);
 
+  useEffect(() => {
+    axios.get(API_ENDPOINTS.getSetting)
+      .then(res => {
+        const settingData = res.data?.data || [];
+        const langSetting = settingData.find(item => item.lang === currentLang);
+        if (langSetting) {
+          setSettings({
+            facultyTitle: langSetting.set_facultytitle || "",
+            departmentTitle: langSetting.set_facultydep || "",
+            logoUrl: langSetting.logo?.img
+              ? `${API}/storage/uploads/${langSetting.logo.img}`
+              : "/placeholder-icon.png"
+          });
+        }
+      })
+      .catch(err => console.error("Error fetching settings:", err));
+  }, [currentLang]);
+
   return (
     <Router>
       <Routes>
@@ -25,7 +45,8 @@ function App() {
           <Route
             key={page.p_id}
             path={page.p_alias}
-            element={<PageRenderer page={page} />}
+            settings={settings}
+            element={<PageRenderer page={page} currentLang={currentLang} setCurrentLang={setCurrentLang} settings={settings} setSettings={setSettings}/>}
           />
         ))}
       </Routes>

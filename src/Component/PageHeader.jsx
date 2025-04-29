@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation,useNavigate } from "react-router-dom";
 import { IoMdSearch } from "react-icons/io";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { FiChevronDown } from "react-icons/fi";
@@ -9,122 +9,58 @@ import PageNavbar from "./PageNavbar";
 import axios from "axios";
 import Flag from "react-world-flags";
 
-const PageHeader = () => {
+const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [menus, setMenus] = useState([]);
-  const [settings, setSettings] = useState({
-    facultyTitle: "",
-    departmentTitle: "",
-    logoUrl: "/placeholder-icon.png", // Store resolved URL
-  });
   const [activeMenu, setActiveMenu] = useState(null);
   const [mobileDropdowns, setMobileDropdowns] = useState({});
-  const [currentLang, setCurrentLang] = useState(1); // Default to English (1)
-  const [pages, setPages] = useState([]);
   const [menusWithAlias, setMenusWithAlias] = useState([]);
   const searchContainerRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Function to get the logo URL based on the image ID
-  const getLogoUrl = async (imageId) => {
-    if (!imageId) {
-      console.warn("No imageId provided for logo");
-      return "/placeholder-icon.png";
-    }
-    try {
-      console.log(`Fetching logo for imageId: ${imageId}`);
-      const res = await axios.get(`${API_ENDPOINTS.getImage}?id=${imageId}`);
-      console.log("Image API response:", res.data);
-      // Handle various response formats
-      const filename =
-        res.data?.img ||
-        res.data?.image_url ||
-        res.data?.image?.img ||
-        res.data?.filename ||
-        res.data?.image?.filename;
-      if (!filename) {
-        console.warn("No valid filename or URL in image API response:", res.data);
-        return "/placeholder-icon.png";
-      }
-      const url = filename.startsWith("http")
-        ? filename
-        : `${API}/storage/uploads/${filename}`;
-      console.log(`Resolved logo URL: ${url}`);
-      return url;
-    } catch (err) {
-      console.error(`Error fetching logo URL for imageId ${imageId}:`, err);
-      return "/placeholder-icon.png";
-    }
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch menus, settings, and pages at the same time
+        const [menuRes, pageRes] = await Promise.all([
+          axios.get(API_ENDPOINTS.getMenu),
+          // axios.get(API_ENDPOINTS.getSetting),
+          axios.get(API_ENDPOINTS.getPage),
+        ]);
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // Fetch menus, settings, and pages at the same time
-      const [menuRes, settingRes, pageRes] = await Promise.all([
-        axios.get(API_ENDPOINTS.getMenu),
-        axios.get(API_ENDPOINTS.getSetting),
-        axios.get(API_ENDPOINTS.getPage),
-      ]);
+        // Handle menus
+        const menuData = menuRes.data?.data || [];
+        const filteredMenus = menuData
+          .filter((menu) => menu.lang === currentLang)
+          .filter((menu) => menu.display === 1)
+          .sort((a, b) => b.menu_order - a.menu_order);
+        setMenus(filteredMenus);
 
-      // Handle menus
-      const menuData = menuRes.data?.data || [];
-      const filteredMenus = menuData
-        .filter((menu) => menu.lang === currentLang)
-        .filter((menu) => menu.display === 1)
-        .sort((a, b) => b.menu_order - a.menu_order);
-      setMenus(filteredMenus);
+        // Handle pages and combine alias with menu
+        const pageData = pageRes.data?.data || [];
+        const combinedMenus = filteredMenus.map(menu => {
+          const matchedPage = pageData.find(page => page.p_menu === menu.menu_id);
+          return {
+            ...menu,
+            p_alias: matchedPage ? matchedPage.p_alias : null,
+          };
+        });
+        setMenusWithAlias(combinedMenus);
 
-      // Handle settings and resolve logo
-      const settingData = settingRes.data?.data;
-      if (settingData && Array.isArray(settingData)) {
-        const langSettings = settingData.find((item) => item.lang === currentLang) || settingData[0];
-        if (langSettings) {
-          const logoUrl = await getLogoUrl(langSettings.set_logo);
-          setSettings({
-            facultyTitle: langSettings.set_facultytitle || "",
-            departmentTitle: langSettings.set_facultydep || "",
-            logoUrl: logoUrl || "/placeholder-icon.png",
-          });
-        } else {
-          console.warn("No settings found for current language or default");
-          setSettings((prev) => ({
-            ...prev,
-            logoUrl: "/placeholder-icon.png",
-          }));
-        }
-      } else {
-        console.warn("Settings data is not an array:", settingData);
+      } catch (err) {
+        console.error("Error fetching menus, settings, or pages:", err);
         setSettings((prev) => ({
           ...prev,
           logoUrl: "/placeholder-icon.png",
         }));
       }
+    };
 
-      // Handle pages and combine alias with menu
-      const pageData = pageRes.data?.data || [];
-      const combinedMenus = filteredMenus.map(menu => {
-        const matchedPage = pageData.find(page => page.p_menu === menu.menu_id);
-        return {
-          ...menu,
-          p_alias: matchedPage ? matchedPage.p_alias : null,
-        };
-      });
-      setMenusWithAlias(combinedMenus);
-
-    } catch (err) {
-      console.error("Error fetching menus, settings, or pages:", err);
-      setSettings((prev) => ({
-        ...prev,
-        logoUrl: "/placeholder-icon.png",
-      }));
-    }
-  };
-
-  fetchData();
-}, [currentLang]);
+    fetchData();
+  }, [currentLang]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -144,7 +80,20 @@ useEffect(() => {
   };
 
   const toggleLanguage = () => {
-    setCurrentLang((prevLang) => (prevLang === 1 ? 2 : 1));
+    const newLang = currentLang === 1 ? 2 : 1;
+    let currentPath = location.pathname;
+
+    if (currentPath.startsWith("/km")) {
+      currentPath = currentPath.replace(/^\/km/, "") || "/";
+    }
+
+    if (newLang === 2) {
+      navigate(`/km${currentPath === "/" ? "" : currentPath}`);
+    } else {
+      navigate(currentPath || "/");
+    }
+
+    setCurrentLang(newLang);
   };
 
   useEffect(() => {
@@ -246,7 +195,9 @@ useEffect(() => {
                 className="w-14 h-14 object-contain"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = "/placeholder-icon.png";
+                  if (!e.target.src.includes('placeholder-icon.png')) {
+                    e.target.src = "/placeholder-icon.png";
+                  }
                 }}
               />
               <h2 className="text-sm font-normal uppercase">

@@ -44,8 +44,7 @@ const PageNavbar = ({ menus }) => {
               >
                 {/* Parent Menu Item as Link */}
                 <Link
-                  // to={`/${menu.title.toLowerCase()}`}
-                  to={menu.p_alias}
+                  to={menu.p_alias || `/${menu.title.toLowerCase()}`}
                   className={`flex items-center uppercase hover:text-red-900 ${
                     isActive ? "text-red-900 font-bold" : ""
                   }`}
@@ -68,7 +67,7 @@ const PageNavbar = ({ menus }) => {
                       .map((child) => (
                         <Link
                           key={child.menu_id}
-                          to={`/${child.title.toLowerCase()}`}
+                          to={menu.p_alias || `/${menu.title.toLowerCase()}`}
                           className={`block px-4 py-2 hover:text-red-900 ${
                             location.pathname ===
                             `/${child.title.toLowerCase()}`

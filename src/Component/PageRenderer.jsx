@@ -30,21 +30,21 @@ import ContactSection from './Contact/ContactSection';
 import Faculty from './Faculty/Faculty';
 import PartnerControllSection from './Partnership/PartnerControllSection';
 
-const PageRenderer = ({ page }) => {
+const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
     const [sections, setSections] = useState([]);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         if (page?.p_id) {
-            console.log("PageRenderer: Fetching sections for page_id:", page.p_id);
+            // console.log("PageRenderer: Fetching sections for page_id:", page.p_id);
             axios
                 .get(`${API_ENDPOINTS.getSection}?page_id=${page.p_id}`)
                 .then((res) => {
-                    console.log("PageRenderer: Sections API response:", res.data);
+                    // console.log("PageRenderer: Sections API response:", res.data);
                     const pageSections = res.data.data
                         .filter((section) => section.sec_page === page.p_id && section.display === 1)
                         .sort((a, b) => a.sec_order - b.sec_order);
-                    console.log("PageRenderer: Filtered and sorted sections:", pageSections);
+                    // console.log("PageRenderer: Filtered and sorted sections:", pageSections);
                     setSections(pageSections);
                     setError(null);
                 })
@@ -63,20 +63,20 @@ const PageRenderer = ({ page }) => {
     }
 
     if (sections.length === 0) {
-        console.log("PageRenderer: No sections to render");
+        // console.log("PageRenderer: No sections to render");
         return (
             <>
-                <PageHeader />
+                <PageHeader currentLang={currentLang} setCurrentLang={setCurrentLang} settings={settings} setSettings={setSettings}/>
                 <div className="text-center py-8 text-gray-600">No sections available for this page.</div>
             </>
         );
     }
 
-    console.log("PageRenderer: Rendering sections:", sections);
+    // console.log("PageRenderer: Rendering sections:", sections);
     return (
         <>
             <div className="sticky top-0 z-50">
-                <PageHeader />
+                <PageHeader currentLang={currentLang} setCurrentLang={setCurrentLang} settings={settings} setSettings={setSettings}/>
             </div>
             {sections.map((section) => {
                 switch (section.sec_type) {
