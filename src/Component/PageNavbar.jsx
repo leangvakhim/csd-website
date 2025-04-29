@@ -67,7 +67,7 @@ const PageNavbar = ({ menus }) => {
                       .map((child) => (
                         <Link
                           key={child.menu_id}
-                          to={menu.p_alias || `/${menu.title.toLowerCase()}`}
+                          to={child.p_alias || `/${child.title.toLowerCase()}`}
                           className={`block px-4 py-2 hover:text-red-900 ${
                             location.pathname ===
                             `/${child.title.toLowerCase()}`
