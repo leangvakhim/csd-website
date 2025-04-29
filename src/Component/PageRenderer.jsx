@@ -29,6 +29,7 @@ import QuestionSection from './Question/QuestionSection';
 import ContactSection from './Contact/ContactSection';
 import Faculty from './Faculty/Faculty';
 import PartnerControllSection from './Partnership/PartnerControllSection';
+import SectionInjector from './SectionInjector';
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
     const [sections, setSections] = useState([]);
@@ -36,7 +37,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
 
     useEffect(() => {
         if (page?.p_id) {
-            // console.log("PageRenderer: Fetching sections for page_id:", page.p_id);
+            console.log("PageRenderer: Fetching sections for page_id:", page);
             axios
                 .get(`${API_ENDPOINTS.getSection}?page_id=${page.p_id}`)
                 .then((res) => {
@@ -140,6 +141,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                         );
                 }
             })}
+
+            <SectionInjector alias={page?.p_alias} />
 
             <div>
                 <Footer />

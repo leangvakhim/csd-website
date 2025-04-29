@@ -1,11 +1,14 @@
 import React from 'react'
-import DeputyHeadofDepartment from './DeputyHeadofDepartment'
+import HeadofDepartment from './HeadofDepartment';
+import DeputyHeadofDepartment from './DeputyHeadofDepartment';
+import FacultyMemeber from './FacultyMemeber';
 
 const Faculty = () => {
   return (
     <div>
-       <DeputyHeadofDepartment language="en" /> {/* English deputies */}
-       <DeputyHeadofDepartment language="km" /> {/* Khmer deputies */}
+      <HeadofDepartment/>
+      <DeputyHeadofDepartment/>
+      <FacultyMemeber/>
     </div>
   )
 }
