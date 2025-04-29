@@ -6,9 +6,11 @@ import FacultyMemeber from './FacultyMemeber';
 const Faculty = () => {
   return (
     <div>
+
       <HeadofDepartment/>
       <DeputyHeadofDepartment/>
       <FacultyMemeber/>
+
     </div>
   )
 }
