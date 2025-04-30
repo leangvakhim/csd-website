@@ -47,7 +47,13 @@ function App() {
             <Route
               key={page.p_id}
               // path={page.p_alias}
-              path={page.p_alias === '/faculty' ? '/faculty/*' : page.p_alias}
+              path={
+                page.p_alias === '/faculty'
+                  ? '/faculty/*'
+                  : page.p_alias === '/research'
+                  ? '/research/*'
+                  : page.p_alias
+              }
               element={
                 <PageRenderer
                   page={page}
@@ -58,6 +64,7 @@ function App() {
                 />
               }
             />
+            
           ))}
         </Routes>
       ) : (

@@ -1,29 +1,28 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { SlSocialFacebook } from "react-icons/sl";
-import { PiTelegramLogoDuotone } from "react-icons/pi";
-import { RiDoubleQuotesR } from "react-icons/ri";
+import { RiDoubleQuotesR } from 'react-icons/ri';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
 const HeadofDepartment = () => {
     const [head, setHead] = useState(null);
+    const [socials, setSocials] = useState([]);
 
     const currentLang = 1; // Assuming 1 is the current language ID
     useEffect(() => {
         const fetchHead = async () => {
             try {
+                // Fetch faculty data
                 const res = await axios.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = res.data?.data || [];
 
                 const filteredHead = allFaculty.filter(item =>
                     item.f_order === 1 &&
                     item.display === 1 &&
-                    item.active === 1
+                    item.active === 1 &&
+                    item.lang === currentLang
                 );
-
-               
 
                 if (filteredHead.length > 0) {
                     const headData = filteredHead[0];
@@ -34,14 +33,21 @@ const HeadofDepartment = () => {
                         image: headData.img?.img
                             ? `${API}/storage/uploads/${headData.img.img}`
                             : "/placeholder-icon.png",
-                        socialLinks: {
-                            facebook: '#',
-                            telegram: '#',
-                        },
                     });
+
+                    // Fetch social media data
+                    const socialRes = await axios.get(API_ENDPOINTS.getSocial);
+                    const allSocials = socialRes.data?.data || [];
+                    const filteredSocials = allSocials.filter(
+                        social =>
+                            social.social_faculty === headData.f_id &&
+                            social.display === 1 &&
+                            social.active === 1
+                    );
+                    setSocials(filteredSocials);
                 }
             } catch (error) {
-                console.error("Error fetching head of department:", error);
+                console.error("Error fetching head of department or socials:", error);
             }
         };
 
@@ -53,18 +59,20 @@ const HeadofDepartment = () => {
             <div className='container mx-auto px-4'>
                 <div className='space-y-10'>
                     <div id="head-department-header">
-                        <h1 className={`text-2xl font-normal mb-4 `}
-                            >Head of Department</h1>
+                        <h1 className="text-2xl font-normal mb-4">Head of Department</h1>
                     </div>
                     {head && (
                         <div key={head.id} className='max-w-5xl mx-auto shadow-lg rounded-2xl items-center p-4' id="head-department-profile">
-                            <div className="flex flex-col lg:flex-row gap-6 items-center ">
+                            <div className="flex flex-col lg:flex-row gap-6 items-center">
                                 {/* Image Container */}
                                 <div className="relative w-96 h-96 mb-4 group" id="profile-image-container">
                                     <img
                                         src={head.image}
                                         alt={head.name}
                                         className="w-full h-full rounded-2xl object-cover group-hover:brightness-90 transition-all duration-300"
+                                        onError={(e) => {
+                                            e.target.src = "/placeholder-icon.png";
+                                        }}
                                         id="profile-image"
                                     />
                                     {/* Social Media Overlay */}
@@ -81,31 +89,60 @@ const HeadofDepartment = () => {
                                                 className="space-y-2"
                                                 id="social-icons"
                                             >
-                                                <motion.div
-                                                    whileHover={{ scale: 1.1 }}
-                                                    className="bg-white p-3 rounded-full shadow-lg"
-                                                    id="facebook-icon"
-                                                >
-                                                    <Link to={head.socialLinks.facebook} className="text-gray-700 hover:text-red-600">
-                                                        <SlSocialFacebook className="text-xl" />
-                                                    </Link>
-                                                </motion.div>
-                                                <motion.div
-                                                    whileHover={{ scale: 1.1 }}
-                                                    className="bg-white p-3 rounded-full shadow-lg"
-                                                    id="telegram-icon"
-                                                >
-                                                    <Link to={head.socialLinks.telegram} className="text-gray-700 hover:text-red-400">
-                                                        <PiTelegramLogoDuotone className="text-xl" />
-                                                    </Link>
-                                                </motion.div>
+                                                {socials.length > 0 ? (
+                                                    socials.map(social => (
+                                                        <motion.div
+                                                            key={social.social_id}
+                                                            whileHover={{ scale: 1.1 }}
+                                                            className="bg-white p-3 rounded-full shadow-lg"
+                                                            id={`social-icon-${social.social_id}`}
+                                                        >
+                                                            <Link
+                                                                to={social.social_link || "#"}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-gray-700 hover:text-red-600"
+                                                            >
+                                                                <img
+                                                                    src={
+                                                                        social.img?.img
+                                                                            ? `${API}/storage/uploads/${social.img.img}`
+                                                                            : "/placeholder-icon.png"
+                                                                    }
+                                                                    alt={social.social_name || "Social Icon"}
+                                                                    className="w-6 h-6 rounded-full object-cover"
+                                                                    onError={(e) => {
+                                                                        e.target.src = "/placeholder-icon.png";
+                                                                    }}
+                                                                />
+                                                            </Link>
+                                                        </motion.div>
+                                                    ))
+                                                ) : (
+                                                    <motion.div
+                                                        whileHover={{ scale: 1.1 }}
+                                                        className="bg-white p-3 rounded-full shadow-lg"
+                                                        id="default-social-icon"
+                                                    >
+                                                        <Link
+                                                            to="#"
+                                                            className="text-gray-700 hover:text-red-600"
+                                                        >
+                                                            <img
+                                                                src="/placeholder-icon.png"
+                                                                alt="Default Social Icon"
+                                                                className="w-6 h-6 rounded-full object-cover"
+                                                            />
+                                                        </Link>
+                                                    </motion.div>
+                                                )}
                                             </motion.div>
                                         </div>
                                     </motion.div>
                                 </div>
                                 <div className='space-y-6 max-w-xl relative' id="profile-info">
                                     <div className='flex justify-between items-center'>
-                                        <h1 className='text-2xl font-semibold ' id="professor-name">{head.name}</h1>
+                                        <h1 className='text-2xl font-semibold' id="professor-name">{head.name}</h1>
                                         <div className='text-right'>
                                             <RiDoubleQuotesR className='text-7xl text-red-900' />
                                         </div>
@@ -126,4 +163,4 @@ const HeadofDepartment = () => {
     );
 }
 
-export default HeadofDepartment
+export default HeadofDepartment;

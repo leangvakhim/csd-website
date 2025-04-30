@@ -1,0 +1,148 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { FaArrowRight, FaCalendarAlt, FaSpinner } from 'react-icons/fa';
+import axios from 'axios';
+import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+
+const CareerSection = () => {
+    const navigate = useNavigate();
+    const [careers, setCareers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [headerData, setHeaderData] = useState({
+        hsec_title: 'default title',
+        hsec_subtitle: 'default subtitle',
+    });
+
+    const BASE_IMAGE_URL = `${API}/storage/uploads`;
+    const DEFAULT_IMAGE = '/placeholder-image.jpg';
+
+    useEffect(() => {
+        const fetchCareerData = async () => {
+            try {
+                const headerRes = await axios.get(API_ENDPOINTS.getHeaderSection);
+                if (headerRes.data?.hsec_title) {
+                    setHeaderData({
+                        hsec_title: headerRes.data.hsec_title,
+                        hsec_subtitle: headerRes.data.hsec_subtitle,
+                    });
+                }
+
+                const careerRes = await axios.get(API_ENDPOINTS.getCareer);
+                const formatted = careerRes.data.data.map(item => ({
+                    id: item.cr_id,
+                    title: item.cr_title,
+                    description: item.cr_shortdesc,
+                    date: new Date(item.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                    }),
+                    imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
+                }));
+
+                setCareers(formatted);
+            } catch (err) {
+                console.error('Error fetching careers:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCareerData();
+    }, []);
+
+    const containerVariants = {
+        hidden: { opacity: 0, y: 50 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, scale: 0.9 },
+        visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <FaSpinner className="animate-spin text-4xl text-red-800" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="my-16 py-4">
+            <motion.div
+                className="container mx-auto px-4"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.5 }}
+            >
+                <div className="flex flex-col sm:flex-row gap-8">
+                    {/* Header and description */}
+                    <motion.div
+                        className="w-full sm:w-1/2 text-center sm:text-left"
+                        variants={itemVariants}
+                    >
+                        <div className="flex flex-col sm:flex-row items-start mb-8">
+                            <div className="mr-6">
+                                <h2 className="text-3xl font-semibold mb-2">{headerData.hsec_title}</h2>
+                                <p className="mt-4 text-gray-800">{headerData.hsec_subtitle}</p>
+                            </div>
+                            <button
+                                onClick={() => navigate('/career')}
+                                className="bg-red-700 text-white p-3 rounded-lg flex items-center justify-center mt-4 sm:mt-0 hover:bg-red-800 transition duration-300"
+                            >
+                                <FaArrowRight className="h-6 w-6" />
+                            </button>
+                        </div>
+                    </motion.div>
+
+                    {/* Career cards scrollable */}
+                    <motion.div
+                        className="flex space-x-4 w-full sm:w-1/2 overflow-x-auto snap-x snap-mandatory"
+                        variants={containerVariants}
+                    >
+                        {careers.length > 0 ? (
+                            careers.map((career, index) => (
+                                <motion.div
+                                    key={career.id}
+                                    onClick={() => navigate(`/career/${career.id}`)}
+                                    className="snap-start cursor-pointer relative sm:w-80 w-70 flex-shrink-0 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+                                    variants={itemVariants}
+                                    whileHover={{ scale: 1.05 }}
+                                >
+                                    <img
+                                        src={career.imageUrl}
+                                        alt={career.title}
+                                        className="w-full h-52 object-cover"
+                                        onError={(e) => (e.target.src = DEFAULT_IMAGE)}
+                                    />
+                                    <div
+                                        className="absolute bottom-0 left-0 w-full text-white p-4 space-y-2"
+                                        style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+                                    >
+                                        <h3 className="text-lg font-semibold">{career.title}</h3>
+                                        <p className="text-gray-200 line-clamp-2">{career.description}</p>
+                                        <div className="flex items-center text-sm">
+                                            <FaCalendarAlt className="mr-2" />
+                                            <p className="text-gray-200">{career.date}</p>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))
+                        ) : (
+                            <div className="text-gray-600 text-center w-full py-8">
+                                No careers available at the moment.
+                            </div>
+                        )}
+                    </motion.div>
+
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
+export default CareerSection;

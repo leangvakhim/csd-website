@@ -4,8 +4,6 @@ import { FaArrowRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
-import { SlSocialFacebook } from "react-icons/sl";
-import { PiTelegramLogoDuotone } from "react-icons/pi";
 
 // Animation variants
 const sectionVariants = {
@@ -31,9 +29,11 @@ const FacultyCarouselSection = () => {
     subtitle: "",
   });
   const [facultyMembers, setFacultyMembers] = useState([]);
+  const [socials, setSocials] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const currentLang = 1;
+
   const fetchFacultyData = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -60,8 +60,8 @@ const FacultyCarouselSection = () => {
         throw new Error("No faculty members found");
       }
 
-      setFacultyMembers(
-        facultyData.filter((faculty) => faculty.lang === currentLang)
+      const filteredFaculty = facultyData
+        .filter((faculty) => faculty.lang === currentLang)
         .map((faculty) => ({
           id: faculty.f_id,
           name: faculty.f_name || "Unknown Faculty",
@@ -69,8 +69,25 @@ const FacultyCarouselSection = () => {
           image: faculty.img?.img
             ? `${API}/storage/uploads/${faculty.img.img}`
             : "/placeholder-faculty.jpg",
-        }))
-      );
+        }));
+
+      setFacultyMembers(filteredFaculty);
+
+      // Fetch social media for each faculty
+      const socialRes = await axios.get(API_ENDPOINTS.getSocial);
+      const allSocials = socialRes.data?.data || [];
+      const socialsByFaculty = {};
+
+      filteredFaculty.forEach((faculty) => {
+        socialsByFaculty[faculty.id] = allSocials.filter(
+          (social) =>
+            social.social_faculty === faculty.id &&
+            social.display === 1 &&
+            social.active === 1
+        );
+      });
+
+      setSocials(socialsByFaculty);
     } catch (err) {
       console.error("API error:", err);
       setError(err.response?.data?.message || "Failed to load faculty data");
@@ -147,10 +164,7 @@ const FacultyCarouselSection = () => {
         </div>
 
         {/* Faculty Cards */}
-        <motion.div
-          variants={sectionVariants}
-          className="overflow-hidden"
-        >
+        <motion.div variants={sectionVariants} className="overflow-hidden">
           <div className="flex snap-x snap-mandatory overflow-x-auto py-6 px-4 scroll-smooth gap-4 md:gap-8">
             {facultyMembers.map((faculty) => (
               <motion.div
@@ -183,28 +197,30 @@ const FacultyCarouselSection = () => {
                         animate={{ y: 0 }}
                         className="space-y-2"
                       >
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          className="bg-white p-3 rounded-full shadow-lg"
-                        >
-                          <Link
-                            to="#"
-                            className="text-gray-700 hover:text-red-600"
+                        {socials[faculty.id]?.map((social) => (
+                          <motion.div
+                            key={social.social_id}
+                            whileHover={{ scale: 1.1 }}
+                            className="bg-white p-3 rounded-full shadow-lg"
                           >
-                            <SlSocialFacebook className="text-xl" />
-                          </Link>
-                        </motion.div>
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          className="bg-white p-3 rounded-full shadow-lg"
-                        >
-                          <Link
-                            to="#"
-                            className="text-gray-700 hover:text-red-400"
-                          >
-                            <PiTelegramLogoDuotone className="text-xl" />
-                          </Link>
-                        </motion.div>
+                            <Link
+                              to={social.social_link || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gray-700 hover:text-red-600"
+                            >
+                              <img
+                                src={
+                                  social.img?.img
+                                    ? `${API}/storage/uploads/${social.img.img}`
+                                    : "/placeholder-icon.png"
+                                }
+                                alt="Social Icon"
+                                className="w-6 h-6"
+                              />
+                            </Link>
+                          </motion.div>
+                        ))}
                       </motion.div>
                     </div>
                   </motion.div>
