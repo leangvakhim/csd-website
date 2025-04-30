@@ -116,4 +116,4 @@ const FacultyMemeber = () => {
     );
 }
 
-export default FacultyMembers;
+export default FacultyMemeber;
