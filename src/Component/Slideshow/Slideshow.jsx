@@ -9,35 +9,39 @@ import axios from 'axios';
 // import { useTranslation } from "react-i18next";
 
 
-const Slideshow = ({key, section}) => {
+const Slideshow = ({key, section, menuLang}) => {
     // const { t } = useTranslation();
 
     const [slides, setSlides] = useState([]);
 
     useEffect(() => {
         if (section?.sec_id) {
-            axios.get(`${API_ENDPOINTS.getSlideshow}?section_id=${section.sec_id}`)
+            axios.get(`${API_ENDPOINTS.getSlideshow}`)
                 .then(res => {
                     const data = res.data?.data || [];
                     const formatted = data
-                    .filter(slide => slide.display === 1)
-                    .map(slide => ({
-                        image: `${API}/storage/uploads/${slide.img?.img}`,
-                        title: slide.slider_title,
-                        description: slide.slider_text,
-                        buttonText1: slide.btn1?.bss_title || '',
-                        buttonLink1: slide.btn1?.bss_routepage || '#',
-                        buttonText2: slide.btn2?.bss_title || '',
-                        buttonLink2: slide.btn2?.bss_routepage || '#',
-                        buttonColor: 'bg-red-900',
-                        linkIcon: <BsFillInfoCircleFill className="ml-2 text-white" />,
-                        logo: `${API}/storage/uploads/${slide.logo?.img}`
-                    }));
+                        .filter(slide =>
+                            slide.display === 1 &&
+                            slide.active === 1 &&
+                            slide.slider_sec?.sec_id === section.sec_id
+                        )
+                        .map(slide => ({
+                            image: `${API}/storage/uploads/${slide.img?.img}`,
+                            title: slide.slider_title,
+                            description: slide.slider_text,
+                            buttonText1: slide.btn1?.bss_title || '',
+                            buttonLink1: slide.btn1?.bss_routepage || '#',
+                            buttonText2: slide.btn2?.bss_title || '',
+                            buttonLink2: slide.btn2?.bss_routepage || '#',
+                            buttonColor: 'bg-red-900',
+                            linkIcon: <BsFillInfoCircleFill className="ml-2 text-white" />,
+                            logo: `${API}/storage/uploads/${slide.logo?.img}`
+                        }));
                     setSlides(formatted);
                 })
                 .catch(err => console.error("Failed to fetch slideshow:", err));
         }
-    }, [section]);
+    }, [section, menuLang]);
 
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isPaused, setIsPaused] = useState(false);

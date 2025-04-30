@@ -31,16 +31,21 @@ import Faculty from './Faculty/Faculty';
 import PartnerControllSection from './Partnership/PartnerControllSection';
 import SectionInjector from './SectionInjector';
 import FacultyCarouselSection from './Carousel/FacultyCarouselSection';
+import { useLocation } from 'react-router-dom';
 import SpecializationSection from './Spacialization/SpecializationSection';
 import FeedbackSection from './Feedback/FeedbackSection';
 import ResearchSection from './Research/ResearchSection';
 import ScholarshipSection from './Scholarship/ScholarshipSection';
 import CareerSection from './Career/CareerSection';
 
+
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
     const [sections, setSections] = useState([]);
     const [error, setError] = useState(null);
     const [onlyContentMode, setOnlyContentMode] = useState(false);
+    const location = useLocation();
+    const isKhmer = location.pathname.startsWith("/km");
+    const menuLang = isKhmer ? 2 : 1;
 
     useEffect(() => {
         if (page?.p_id) {
@@ -93,65 +98,62 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                     {sections.map((section) => {
                         switch (section.sec_type) {
                             case 'Slideshow':
-                                return <Slideshow key={section.sec_id} section={section} />;
+                                return <Slideshow key={section.sec_id} section={section} menuLang={menuLang}/>;
                             case 'Service':
-                                return <ServiceSection key={section.sec_id} section={section} />;
+                                return <ServiceSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Programs':
-                                return <ProgramSection key={section.sec_id} section={section} />;
+                                return <ProgramSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Academic':
-                                return <AcademicSection key={section.sec_id} section={section} />;
-                            case 'Partner':
-                                return <PartnerControllSection key={section.sec_id} section={section} />;
+                                return <AcademicSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            // case 'Partner':
+                            //     return <PartnerControllSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Banner':
-                                return <BannerSection key={section.sec_id} section={section} />;
+                                return <BannerSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Requirement':
-                                return <BasicRequirements key={section.sec_id} section={section} />;
+                                return <BasicRequirements key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Apply':
-                                return <ApplySection key={section.sec_id} section={section} />;
+                                return <ApplySection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Important':
-                                return <ImportantSection key={section.sec_id} section={section} />;
+                                return <ImportantSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Gallery':
-                                return <GallerySection key={section.sec_id} section={section} />;
+                                return <GallerySection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Information':
-                                return <Overview key={section.sec_id} section={section} />;
+                                return <Overview key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Facilities':
-                                return <FacilitiesSection key={section.sec_id} section={section} />;
+                                return <FacilitiesSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Study':
-                                return <StudySection key={section.sec_id} section={section} />;
+                                return <StudySection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Introduction':
-                                return <Introduction key={section.sec_id} section={section} />;
+                                return <Introduction key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Innovation':
-                                return <InnovationSection key={section.sec_id} section={section} />;
-                            case 'Specialization':
-                                return <SpecializationSection key={section.sec_id} section={section} />;
-                            case 'Feedback':
-                                return <FeedbackSection key={section.sec_id} section={section} />;
+                                return <InnovationSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Fee':
-                                return <FeeSection key={section.sec_id} section={section} />;
+                                return <FeeSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Future':
-                                return <FutureSection key={section.sec_id} section={section} />;
+                                return <FutureSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Testimonial':
-                                return <TestimonialSection key={section.sec_id} section={section} />;
+                                return <TestimonialSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Type':
-                                return <TypeSection key={section.sec_id} section={section} />;
+                                return <TypeSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Criteria':
-                                return <BasicRequirements key={section.sec_id} section={section} />;
+                                return <BasicRequirements key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Question':
-                                return <QuestionSection key={section.sec_id} section={section} />;
+                                return <QuestionSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'About':
-                                return <AboutSection key={section.sec_id} section={section} />;
+                                return <AboutSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Contact':
-                                return <ContactSection key={section.sec_id} section={section} />;
+                                return <ContactSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'FAQ':
-                                return <FAQSection key={section.sec_id} section={section} />;
+                                return <FAQSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Faculty':
-                                return <FacultyCarouselSection key={section.sec_id} section={section} />;
+                                return <FacultyCarouselSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Research':
                                 return <ResearchSection key={section.sec_id} section={section} />;
                             case 'Scholarship':
                                 return <ScholarshipSection key={section.sec_id} section={section} />;
                             case 'Career':
                                 return <CareerSection key={section.sec_id} section={section} />;
+
 
                             default:
                                 console.log("PageRenderer: Unknown section type:", section.sec_type);
