@@ -105,8 +105,6 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <ProgramSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Academic':
                                 return <AcademicSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                            // case 'Partner':
-                            //     return <PartnerControllSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Banner':
                                 return <BannerSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Requirement':
@@ -152,8 +150,18 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Scholarship':
                                 return <ScholarshipSection key={section.sec_id} section={section} />;
                             case 'Career':
+<<<<<<< Updated upstream
                                 return <CareerSection key={section.sec_id} section={section} />;
 
+=======
+                                return <CareerSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Specialization':
+                                return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Feedback':
+                                return <FeedbackSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Partner':
+                                return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
+>>>>>>> Stashed changes
 
                             default:
                                 console.log("PageRenderer: Unknown section type:", section.sec_type);
