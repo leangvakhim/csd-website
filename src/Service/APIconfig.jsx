@@ -177,12 +177,8 @@ const API_ENDPOINTS = {
     // developersocial
     getSocialDeveloper: `${API_BASEURL}/developersocial`,
 
-<<<<<<< Updated upstream
-   
-=======
     // researchtitle
     getResearchTitle: `${API_BASEURL}/rsd-title`,
->>>>>>> Stashed changes
 
     // subcontact
     getSubContact: `${API_BASEURL}/subcontact`,
