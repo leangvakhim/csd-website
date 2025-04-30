@@ -34,14 +34,15 @@ const DeveloperSection = () => {
         const seenImages = new Set();
         const seenNames = new Set();
 
-        filteredDevelopers.forEach(dev => {
+        filteredDevelopers.filter(dev => dev.display === 1 && dev.active === 1)
+        .sort((a, b) => b.d_order - a.d_order)
+        .forEach(dev => {
           const normalizedName = dev.d_name.toLowerCase().replace(/\s+/g, '');
           const imageId = dev.d_img;
-
+      
           if (
             !seenImages.has(imageId) &&
             !seenNames.has(normalizedName) &&
-            // Prefer entries with "Mr." or "Ms." for consistency
             (dev.d_name.includes('Mr.') || dev.d_name.includes('Ms.'))
           ) {
             uniqueDevelopers.push({

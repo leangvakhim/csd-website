@@ -48,7 +48,7 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
             p_alias: matchedPage ? matchedPage.p_alias : null,
           };
         });
-        setMenusWithAlias(combinedMenus);
+        setMenusWithAlias(combinedMenus)
 
       } catch (err) {
         console.error("Error fetching menus, settings, or pages:", err);

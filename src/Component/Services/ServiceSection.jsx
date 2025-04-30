@@ -34,7 +34,8 @@ const ServiceSection = ({ section }) => {
         .then((res) => {
           const data = res.data?.data || [];
           const formatted = data
-            .filter((service) => service.display === 1)
+            .filter((service) => service.display === 1 &&
+              service.lang === section.sec_lang)
             .map((service) => ({
               title: service.s_title,
               description: service.s_subtitle,

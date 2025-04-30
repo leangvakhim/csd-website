@@ -3,6 +3,8 @@ import FacultyDepartment from './Faculty/FacultyDepartment';
 import FacultyDetail from './Faculty/FacultyDetail';
 import DeveloperSection from './developer/DeveloperSection';
 import { useParams } from 'react-router-dom';
+import ResearchDetails from './Research/ResearchDetails';
+import ResearchSection from './Research/ResearchSection';
 
 const SectionInjector = ({ alias, setOnlyContentMode }) => {
   const { id } = useParams();
@@ -22,8 +24,15 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
         setOnlyContentMode(true);
         return <DeveloperDetail developerId={lastSegment} />;
       }
-      setOnlyContentMode(false);
       return <DeveloperSection />;
+    case '/research':
+      if (lastSegment && lastSegment !== 'research') {
+        setOnlyContentMode(true);
+        return <ResearchDetails />;
+      }
+      setOnlyContentMode(false);  
+      return '';
+
     default:
       setOnlyContentMode(false);
       return null;

@@ -39,12 +39,12 @@ const PartnershipSection = ({ section }) => {
                 const formatted = data
                     .filter((partner) => partner.active === 1) // Filter active partners
                     .map((partner) => ({
-                        src: partner.ps_img
-                            ? `${API}/storage/uploads/${partner.ps_id}`
-                            : null, // Fallback to null if no image ID
+                        src: partner.partner?.ps_img
+                            ? `${API}/storage/uploads/${partner.partner?.partner?.ps_id}`
+                            : null,
                         alt: partner.ps_title || 'Partner Logo', // Use title or fallback
                     }));
-                    // console.log('Formatted partners:', formatted);
+                // console.log('Formatted partners:', formatted);
 
                 setPartners(formatted);
             })

@@ -31,6 +31,9 @@ import Faculty from './Faculty/Faculty';
 import PartnerControllSection from './Partnership/PartnerControllSection';
 import SectionInjector from './SectionInjector';
 import FacultyCarouselSection from './Carousel/FacultyCarouselSection';
+import SpecializationSection from './Spacialization/SpecializationSection';
+import FeedbackSection from './Feedback/FeedbackSection';
+import ResearchSection from './Research/ResearchSection';
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
     const [sections, setSections] = useState([]);
@@ -117,6 +120,10 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <Introduction key={section.sec_id} section={section} />;
                             case 'Innovation':
                                 return <InnovationSection key={section.sec_id} section={section} />;
+                            case 'Specialization':
+                                return <SpecializationSection key={section.sec_id} section={section} />;
+                            case 'Feedback':
+                                return <FeedbackSection key={section.sec_id} section={section} />;
                             case 'Fee':
                                 return <FeeSection key={section.sec_id} section={section} />;
                             case 'Future':
@@ -137,6 +144,9 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <FAQSection key={section.sec_id} section={section} />;
                             case 'Faculty':
                                 return <FacultyCarouselSection key={section.sec_id} section={section} />;
+                            case 'Research':
+                                return <ResearchSection key={section.sec_id} section={section} />;
+
 
 
                             default:
@@ -155,6 +165,9 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                 <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
             )}
             {page?.p_alias === '/developer' && (
+                <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
+            )}
+            {page?.p_alias === '/research' && (
                 <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
             )}
             <div>
