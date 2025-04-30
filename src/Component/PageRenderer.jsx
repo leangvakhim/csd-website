@@ -150,10 +150,6 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Scholarship':
                                 return <ScholarshipSection key={section.sec_id} section={section} />;
                             case 'Career':
-<<<<<<< Updated upstream
-                                return <CareerSection key={section.sec_id} section={section} />;
-
-=======
                                 return <CareerSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Specialization':
                                 return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
@@ -161,7 +157,6 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <FeedbackSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Partner':
                                 return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
->>>>>>> Stashed changes
 
                             default:
                                 console.log("PageRenderer: Unknown section type:", section.sec_type);
