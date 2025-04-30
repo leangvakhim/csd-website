@@ -28,9 +28,9 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
     case '/research':
       if (lastSegment && lastSegment !== 'research') {
         setOnlyContentMode(true);
-        return <ResearchDetails />;
+        return <ResearchDetails researchId={lastSegment}/>;
       }
-      setOnlyContentMode(false);  
+      setOnlyContentMode(false);
       return '';
 
     default:
