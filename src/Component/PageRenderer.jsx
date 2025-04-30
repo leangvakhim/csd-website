@@ -34,6 +34,8 @@ import FacultyCarouselSection from './Carousel/FacultyCarouselSection';
 import SpecializationSection from './Spacialization/SpecializationSection';
 import FeedbackSection from './Feedback/FeedbackSection';
 import ResearchSection from './Research/ResearchSection';
+import ScholarshipSection from './Scholarship/ScholarshipSection';
+import CareerSection from './Career/CareerSection';
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
     const [sections, setSections] = useState([]);
@@ -146,8 +148,10 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <FacultyCarouselSection key={section.sec_id} section={section} />;
                             case 'Research':
                                 return <ResearchSection key={section.sec_id} section={section} />;
-
-
+                            case 'Scholarship':
+                                return <ScholarshipSection key={section.sec_id} section={section} />;
+                            case 'Career':
+                                return <CareerSection key={section.sec_id} section={section} />;
 
                             default:
                                 console.log("PageRenderer: Unknown section type:", section.sec_type);
