@@ -22,7 +22,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const ServiceSection = ({ section }) => {
+const ServiceSection = ({ section, menuLang }) => {
   const [services, setServices] = useState([]);
 
 
@@ -30,12 +30,14 @@ const ServiceSection = ({ section }) => {
   useEffect(() => {
     if (section?.sec_id) {
       axios
-        .get(`${API_ENDPOINTS.getService}?section_id=${section.sec_id}`)
+        .get(`${API_ENDPOINTS.getService}`)
         .then((res) => {
           const data = res.data?.data || [];
           const formatted = data
             .filter((service) => service.display === 1 &&
-              service.lang === section.sec_lang)
+              service.active === 1 &&
+              service.section?.sec_id === section.sec_id
+            )
             .map((service) => ({
               title: service.s_title,
               description: service.s_subtitle,
@@ -47,7 +49,7 @@ const ServiceSection = ({ section }) => {
     } else {
       console.log("ServiceSection: No section.sec_id provided, skipping API call");
     }
-  }, [section]);
+  }, [section, menuLang]);
 
 
   if (services.length === 0) {

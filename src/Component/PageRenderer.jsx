@@ -148,13 +148,18 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Faculty':
                                 return <FacultyCarouselSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Research':
-                                return <ResearchSection key={section.sec_id} section={section} />;
+                                return <ResearchSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Scholarship':
-                                return <ScholarshipSection key={section.sec_id} section={section} />;
+                                return <ScholarshipSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Career':
-                                return <CareerSection key={section.sec_id} section={section} />;
-
-
+                                return <CareerSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Specialization':
+                                return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Feedback':
+                                return <FeedbackSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Partner':
+                                return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                           
                             default:
                                 console.log("PageRenderer: Unknown section type:", section.sec_type);
                                 return (
