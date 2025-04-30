@@ -49,10 +49,10 @@ const ResearchDetails = () => {
                 const allOverviews = overviewRes.data?.data || [];
                 
                 const selectedOverview = allOverviews.find(
-                    info => info.rsinfo_rsd === id && 
+                    info => info.rsdd_rsd === id && 
                     info.display === 1 && 
                     info.active === 1 &&
-                    info.rsinfo_order === 1
+                    info.rsdd_order === 1
                 );
 
                 if (selectedOverview) {
@@ -69,8 +69,8 @@ const ResearchDetails = () => {
                 const allProjects = projectRes.data?.data || [];
                 
                 const filteredProjects = allProjects.filter(
-                    project => project.rsinfo_rsd === id &&
-                    Number(project.rsinfo_order) >= 2 &&
+                    project => project.rsdp_rsd === id &&
+                    Number(project.rsdp_order) >= 2 &&
                     project.display === 1 &&
                     project.active === 1
                 );
@@ -84,15 +84,15 @@ const ResearchDetails = () => {
         const fetchRequirements = async () => {
             try {
                 const reqRes = await axios.get(API_ENDPOINTS.getRsdMeeting);
-                const allRequirements = reqRes.data?.data || [];
+                const allMeeting = reqRes.data?.data || [];
                 
-                const filteredRequirements = allRequirements.filter(
-                    req => req.rsreq_rsd === id &&
+                const filterMeeting = allMeeting.filter(
+                    req => req.rsdm_rsd === id &&
                     req.display === 1 &&
                     req.active === 1
                 );
                 
-                setRequirements(filteredRequirements);
+                setRequirements(filterMeeting);
             } catch (error) {
                 console.error("Error fetching research requirements:", error);
             }
@@ -169,11 +169,11 @@ const ResearchDetails = () => {
                             {researchOverview && (
                                 <section className="space-y-4">
                                     <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                                        {researchOverview.rsinfo_title || "Research Overview"}
+                                        {researchOverview.rsdd_title || "Research Overview"}
                                     </h2>
                                     <div
                                         className="space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base"
-                                        dangerouslySetInnerHTML={{ __html: researchOverview.rsinfo_detail }}
+                                        dangerouslySetInnerHTML={{ __html: researchOverview.rsdd_details }}
                                     ></div>
                                 </section>
                             )}
@@ -189,10 +189,10 @@ const ResearchDetails = () => {
                                     <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
                                         {requirements.map(requirement => (
                                             <p
-                                                key={requirement.rsreq_id}
+                                                key={requirement.rsdp_id}
                                                 className="text-red-700 hover:text-red-600 px-4 py-2 bg-pink-100 rounded-full transition-colors text-sm sm:text-base"
                                             >
-                                                <span className="font-normal">{requirement.rsreq_name}</span>
+                                                <span className="font-normal">{requirement.rsdp_detail}</span>
                                             </p>
                                         ))}
                                     </div>
@@ -207,14 +207,14 @@ const ResearchDetails = () => {
                             <div className="max-w-3xl mx-auto p-4 sm:p-6">
                                 {researchProjects.length > 0 ? (
                                     researchProjects.map((project) => (
-                                        <div key={project.rsinfo_id || `${project.rsinfo_rsd}-${project.rsinfo_order}`} className="py-4">
+                                        <div key={project.rsdm_id || `${project.rsdm_rsd}-${project.rsdm_order}`} className="py-4">
                                             <section className="space-y-4">
                                                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                                                    {project.rsinfo_title}
+                                                    {project.rsdm_title}
                                                 </h2>
                                                 <div
                                                     className="space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base"
-                                                    dangerouslySetInnerHTML={{ __html: project.rsinfo_detail }}
+                                                    dangerouslySetInnerHTML={{ __html: project.rsdm_detail }}
                                                 ></div>
                                             </section>
                                             {project !== researchProjects[researchProjects.length - 1] && (
