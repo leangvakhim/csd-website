@@ -112,8 +112,6 @@ const FacultyDetail = ({ facultyId }) => {
         fetchFacultyResearchProjects();
     }, [facultyId]);
 
-    console.log("researchProjects is: ", researchProjects);
-
     return (
         <>
             {/* Faculty Profile */}

@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom';
 const FacultyMemeber = () => {
     const [facultyMembers, setFacultyMembers] = useState([]);
     const [socials, setSocials] = useState({});
-
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     useEffect(() => {
         const fetchFacultyMembers = async () => {

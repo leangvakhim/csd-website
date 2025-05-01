@@ -23,7 +23,6 @@ const HeadofDepartment = () => {
 
                 if (filteredHead.length) {
                     const headData = filteredHead[0];
-                    console.log("headData is: ",headData);
                     setHead({
                         id: headData.f_id,
                         name: headData.f_name,
