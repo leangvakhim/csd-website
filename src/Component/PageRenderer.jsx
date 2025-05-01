@@ -37,6 +37,9 @@ import FeedbackSection from './Feedback/FeedbackSection';
 import ResearchSection from './Research/ResearchSection';
 import ScholarshipSection from './Scholarship/ScholarshipSection';
 import CareerSection from './Career/CareerSection';
+import PotentialSection from './Potential/PotentialSection';
+import AnnouncementSection from './Announcement/AnnouncementSection';
+import EventSection from './Event/EventSection';
 
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
@@ -157,6 +160,15 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <FeedbackSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Partner':
                                 return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
+
+                            case 'Potential':
+                                return <PotentialSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Announcement':
+                                return <AnnouncementSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Event':
+                                return <EventSection key={section.sec_id} section={section} menuLang={menuLang} />;
+
+                           
 
                             default:
                                 console.log("PageRenderer: Unknown section type:", section.sec_type);
