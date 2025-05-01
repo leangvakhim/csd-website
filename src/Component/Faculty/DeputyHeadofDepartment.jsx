@@ -103,7 +103,7 @@ const DeputyHeadofDepartment = () => {
                                                             <motion.div
                                                                 key={social.social_id}
                                                                 whileHover={{ scale: 1.1 }}
-                                                                className="bg-white p-3 rounded-full shadow-lg"
+                                                                className="bg-white p-2.5 rounded-full shadow-lg"
                                                             >
                                                                 <Link
                                                                     to={social.social_link || "#"}
@@ -118,7 +118,7 @@ const DeputyHeadofDepartment = () => {
                                                                                 : "/placeholder-icon.png"
                                                                         }
                                                                         alt={social.social_name || "Social Icon"}
-                                                                        className="w-6 h-6 rounded-full object-cover"
+                                                                        className="w-5 h-5 object-contain items-center"
                                                                         onError={(e) => {
                                                                             e.target.src = "/placeholder-icon.png";
                                                                         }}

@@ -169,12 +169,12 @@ const FacultyDetail = ({ facultyId }) => {
                                                     href={social.social_link || '#'}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex items-center justify-center bg-white rounded-full shadow-md p-2 border border-gray-200 hover:bg-gray-100 transition-colors"
+                                                    className="flex items-center justify-center bg-white rounded-full shadow-md p-2.5 border border-gray-200 hover:bg-gray-100 transition-colors"
                                                 >
                                                     <img
                                                         src={social.img?.img ? `${API}/storage/uploads/${social.img.img}` : "/placeholder-icon.png"}
                                                         alt="Social Icon"
-                                                        className="w-6 h-6 rounded-full object-cover"
+                                                        className="w-6 h-6 object-contain items-center "
                                                     />
                                                 </a>
                                             ))}
