@@ -1,167 +1,319 @@
 import React, { useState, useEffect } from "react";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import axios from "axios";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import {
+  FaPhoneAlt,
+  FaEnvelope,
+  FaArrowRight,
+  FaCalendarAlt,
+} from "react-icons/fa";
 
-const FeedbackSection = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [feedbackData, setFeedbackData] = useState([]);
+const sectionVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      when: "beforeChildren",
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const ApplySection = ({ section, menuLang }) => {
+  const [sectionData, setSectionData] = useState({});
+  const [contactInfo, setContactInfo] = useState({
+    contactDetails: {
+      phone: "",
+      email: "",
+    },
+  });
+  const [socialData, setSocialData] = useState({
+    contactDetails: {
+      socialLinks: [],
+    },
+  });
+  const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchFeedback = async () => {
-      try {
-        const response = await axios.get(API_ENDPOINTS.getFeedback);
-        const data = response.data?.data || [];
+  const fallbackContactInfo = {
+    contactDetails: {
+      phone: "885 234 876 987",
+      email: "rupp@email.edu.kh",
+      socialLinks: [
+        {
+          title: "telegram",
+          link: "https://t.me/university_channel",
+          image: "telegram-university.png",
+        },
+      ],
+    },
+  };
 
-        // Map API data to component structure
-        const formattedData = data
-          .filter((item) => item.display === 1 && item.active === 1)
+  const fallbackSectionData = {
+    ha_title: "Step By Step: How to Apply to Computer Science Department",
+    ha_tagtitle: "",
+    ha_subtitletag: "",
+    ha_date: "",
+    image: null,
+    ha_id: null,
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch main section data
+        const sectionResponse = await axios.get(
+          `${API_ENDPOINTS.getApply}?section_id=${section.sec_id}`
+        );
+        const sectionDataRaw = sectionResponse.data?.data || [];
+
+        // Filter by language and format section data
+        const filteredSectionData = sectionDataRaw
+          .filter((item) => item.lang === menuLang)
           .map((item) => ({
-            name: item.fb_writer || "Anonymous",
-            text: [item.fb_subtitle || "No feedback provided"],
+            ha_title: item.ha_title || "Default Title",
+            ha_tagtitle: item.ha_tagtitle || "",
+            ha_subtitletag: item.ha_subtitletag || "",
+            ha_date: item.ha_date || "",
             image: item.image?.img
               ? `${API}/storage/uploads/${item.image.img}`
-              : "/placeholder-image.jpg",
+              : null,
+            ha_id: item.ha_id || null,
           }));
 
-        setFeedbackData(formattedData);
+        if (filteredSectionData.length > 0) {
+          setSectionData(filteredSectionData[0]);
+
+          // Fetch social settings
+          const socialResponse = await axios.get(
+            `${API_ENDPOINTS.getSocialSetting}?section_id=${section.sec_id}`
+          );
+          const socialDataRaw = socialResponse.data?.data || [];
+          const filteredSocialData = socialDataRaw
+            .filter((item) => item.lang === menuLang)
+            .map((item) => ({
+              title: item.setsoc_title || "",
+              link: item.setsoc_link || "",
+              image: item.img?.img
+                ? `${API}/storage/uploads/${item.img.img}`
+                : "",
+            }));
+          setSocialData({
+            contactDetails: { socialLinks: filteredSocialData },
+          });
+
+          // Fetch contact info
+          const contactResponse = await axios.get(
+            `${API_ENDPOINTS.getContact}?section_id=${section.sec_id}`
+          );
+          const contactDataRaw = contactResponse.data?.data || [];
+          const filteredContactData = contactDataRaw.filter(
+            (item) => item.lang === menuLang
+          );
+          const contactDetails = filteredContactData.length > 0
+            ? {
+                phone: filteredContactData[0].contact_phone || "",
+                email: filteredContactData[0].contact_email || "",
+              }
+            : fallbackContactInfo.contactDetails;
+          setContactInfo({ contactDetails });
+
+          // Fetch steps
+          const stepsResponse = await axios.get(
+            `${API_ENDPOINTS.getSubApply}?ha_id=${filteredSectionData[0].ha_id}`
+          );
+          const stepsDataRaw = stepsResponse.data?.data || [];
+          const filteredSteps = stepsDataRaw
+            .filter((step) => step.display === 1 && step.lang === menuLang)
+            .map((step) => step.sha_title);
+          setSteps(filteredSteps);
+        } else {
+          setSectionData(fallbackSectionData);
+          setContactInfo(fallbackContactInfo);
+          setSocialData(fallbackContactInfo);
+          setSteps([]);
+        }
+
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching feedback:", err);
-        setError("Failed to load feedback. Please try again later.");
+        console.error("Error fetching apply section data:", err);
+        setError("Failed to load application data. Please try again later.");
+        setSectionData(fallbackSectionData);
+        setContactInfo(fallbackContactInfo);
+        setSocialData(fallbackContactInfo);
+        setSteps([]);
         setLoading(false);
       }
     };
 
-    fetchFeedback();
-  }, []);
-
-  const nextFeedback = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === feedbackData.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const prevFeedback = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? feedbackData.length - 1 : prevIndex - 1
-    );
-  };
-
-  const goToSlide = (index) => {
-    setCurrentIndex(index);
-  };
+    if (section?.sec_id && menuLang) {
+      fetchData();
+    } else {
+      console.log(
+        "ApplySection: No section.sec_id or menuLang provided, using fallback data"
+      );
+      setSectionData(fallbackSectionData);
+      setContactInfo(fallbackContactInfo);
+      setSocialData(fallbackContactInfo);
+      setSteps([]);
+      setLoading(false);
+    }
+  }, [section?.sec_id, menuLang]);
 
   if (loading) {
     return (
-      <div className="my-8 sm:my-12 lg:my-16 text-center text-gray-600">
-        Loading feedback...
+      <div className="my-16 text-center text-gray-600">
+        Loading application data...
       </div>
     );
   }
 
-  if (error || feedbackData.length === 0) {
+  if (error) {
     return (
-      <div className="my-8 sm:my-12 lg:my-16 text-center text-gray-600">
-        {error || "No feedback available at this time."}
+      <div className="my-16 text-center text-gray-600">
+        {error}
       </div>
     );
   }
-
-  const { name, text, image } = feedbackData[currentIndex];
 
   return (
-    <div className="my-8 sm:my-12 lg:my-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 bg-red-900 text-gray-50 rounded-3xl">
-        <div className="py-8 sm:py-12 lg:py-16 relative">
-          <div
-            className="flex flex-col lg:flex-row items-center w-full h-full overflow-hidden"
-            role="region"
-            aria-label="Student feedback carousel"
+    <div className="my-16">
+      <motion.section
+        className="container mx-auto px-4"
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <div className="flex flex-col xl:flex-row gap-8 items-center justify Built by xAI-between">
+          {/* Left Side: Steps */}
+          <motion.div
+            className="lg:w-1/2 mb-8 xl:mb-0"
+            variants={cardVariants}
+            transition={{ duration: 0.6 }}
           >
-            {/* Navigation Buttons */}
-            <button
-              onClick={prevFeedback}
-              className="absolute left-4 sm:left-6 top-1/2 transform -translate-y-1/2 rounded-full p-2 sm:p-3 bg-white text-gray-700 hover:bg-gray-200 shadow-md z-10"
-              aria-label="Previous slide"
+            <motion.h2
+              className="text-3xl font-semibold mb-6"
+              variants={cardVariants}
+              transition={{ duration: 0.6 }}
             >
-              <FaChevronLeft className="text-sm sm:text-base" />
-            </button>
-            <button
-              onClick={nextFeedback}
-              className="absolute right-4 sm:right-6 top-1/2 transform -translate-y-1/2 rounded-full p-2 sm:p-3 bg-white text-gray-700 hover:bg-gray-200 shadow-md z-10"
-              aria-label="Next slide"
-            >
-              <FaChevronRight className="text-sm sm:text-base" />
-            </button>
-
-            {/* Content */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentIndex}
-                className="flex flex-col lg:flex-row items-center w-full"
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.5 }}
-              >
-                {/* Left - Text Content */}
-                <div className="w-full lg:w-1/2 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 flex flex-col justify-center order-2 lg:order-1">
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-4 sm:mb-6">
-                    Student Feedback on Research Experience
-                  </h2>
-                  {text.map((paragraph, index) => (
-                    <p
-                      key={index}
-                      className="mb-3 sm:mb-4 text-xs sm:text-sm lg:text-base text-gray-200 leading-relaxed line-clamp-6 sm:line-clamp-none"
-                    >
-                      {`"${paragraph}"`}
-                    </p>
-                  ))}
-                  <h2 className="text-sm sm:text-base lg:text-lg font-semibold mt-4">
-                    {name}
-                  </h2>
-                </div>
-
-                {/* Right - Image */}
-                <div className="w-full lg:w-1/2 flex justify-center lg:justify-end order-1 lg:order-2 relative px-4 sm:px-6">
-                  <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[450px] aspect-[4/3] rounded-3xl overflow-hidden">
-                    <div className="absolute inset-0 bg-pink-100 transform -translate-x-3 -translate-y-3 rounded-3xl z-0"></div>
-                    <img
-                      src={image}
-                      alt={name}
-                      className="relative w-full h-full object-cover rounded-lg shadow-md z-10"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = "/placeholder-image.jpg";
-                      }}
-                    />
-                    {/* Slide Indicators */}
-                    <div className="absolute bottom-4 left-0 right-0 flex justify-center z-20">
-                      {feedbackData.map((_, index) => (
-                        <button
-                          key={index}
-                          className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full mx-1 sm:mx-2 ${
-                            currentIndex === index ? "bg-white" : "bg-gray-400"
-                          } shadow-md`}
-                          onClick={() => goToSlide(index)}
-                          aria-label={`Go to slide ${index + 1}`}
-                          aria-current={currentIndex === index ? "true" : "false"}
-                        ></button>
-                      ))}
+              {sectionData.ha_title}
+            </motion.h2>
+            <div className="space-y-4">
+              {steps.length > 0 ? (
+                steps.map((step, index) => (
+                  <motion.div
+                    key={index}
+                    className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                    variants={cardVariants}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="lg:text-xl text-md">{step}</span>
+                      <FaArrowRight className="ml-2" />
                     </div>
+                  </motion.div>
+                ))
+              ) : (
+                <p className="text-gray-600">No steps available.</p>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Right Side: Semester and Contact Info */}
+          <motion.div
+            className="xl:w-1/2 flex flex-col xl:flex-row justify-center items-center gap-6"
+            variants={cardVariants}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div
+              className="bg-white p-6 rounded-lg shadow-lg xl:w-1/2 order-1 xl:order-2"
+              variants={cardVariants}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-semibold mb-4">
+                    {sectionData.ha_tagtitle || "Admission Details"}
+                  </h3>
+                  <p className="mb-4">
+                    {sectionData.ha_subtitletag || "No additional details provided."}
+                  </p>
+                  <p className="text-center text-lg xl:text-xl">
+                    <FaCalendarAlt className="inline-block mr-2" />
+                    {sectionData.ha_date || "Date not specified"}
+                  </p>
+                </div>
+                <div className="py-6 px-4 bg-red-900 text-white shadow-lg rounded-lg">
+                  <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
+                  <p className="flex items-center mb-2">
+                    <FaPhoneAlt className="mr-2" />
+                    {contactInfo.contactDetails.phone || "No phone number provided"}
+                  </p>
+                  <p className="flex items-center mb-4">
+                    <FaEnvelope className="mr-2" />
+                    {contactInfo.contactDetails.email || "No email provided"}
+                  </p>
+                  <div className="flex space-x-4">
+                    {socialData.contactDetails.socialLinks.length > 0 ? (
+                      socialData.contactDetails.socialLinks.map((link, index) => (
+                        <a
+                          key={index}
+                          href={link.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-gray-50 p-2 rounded-lg"
+                        >
+                          {link.image && (
+                            <img
+                              src={link.image}
+                              alt={link.title}
+                              className="w-6 h-6 object-contain"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "/placeholder-image.jpg";
+                              }}
+                            />
+                          )}
+                        </a>
+                      ))
+                    ) : (
+                      <p className="text-gray-200">No social links available.</p>
+                    )}
                   </div>
                 </div>
+              </div>
+            </motion.div>
+            {sectionData.image && (
+              <motion.div
+                className="lg:w-1/2 order-2 lg:order-1 shadow-sm bg-white"
+                variants={cardVariants}
+                transition={{ duration: 0.6 }}
+              >
+                <img
+                  src={sectionData.image}
+                  alt="Admission Image"
+                  className="rounded-lg w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/placeholder-image.jpg";
+                  }}
+                />
               </motion.div>
-            </AnimatePresence>
-          </div>
+            )}
+          </motion.div>
         </div>
-      </div>
+      </motion.section>
     </div>
   );
 };
 
-export default FeedbackSection;
+export default ApplySection;

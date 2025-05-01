@@ -26,7 +26,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const ApplySection = ({ section }) => {
+const ApplySection = ({ section, menuLang }) => {
   const [sectionData, setSectionData] = useState({});
   const [contactInfo, setContactInfo] = useState({
     contactDetails: {
@@ -56,9 +56,10 @@ const ApplySection = ({ section }) => {
   };
 
   useEffect(() => {
-    if (section?.sec_id) {
+    if (section?.sec_id && menuLang) {
+      // Fetch main section data with language filter
       axios
-        .get(`${API_ENDPOINTS.getApply}?section_id=${section.sec_id}`)
+        .get(`${API_ENDPOINTS.getApply}?section_id=${section.sec_id}&lang=${menuLang}`)
         .then((res) => {
           const data = res.data?.data || [];
           if (data.length > 0) {
@@ -75,15 +76,15 @@ const ApplySection = ({ section }) => {
             };
             setSectionData(formattedSection);
 
-            // Fetch social settings
+            // Fetch social settings with language filter
             axios
-              .get(`${API_ENDPOINTS.getSocialSetting}?section_id=${section.sec_id}`)
+              .get(`${API_ENDPOINTS.getSocialSetting}?section_id=${section.sec_id}&lang=${menuLang}`)
               .then((socialRes) => {
                 const socialData = socialRes.data?.data || [];
                 const contactDetails = {
                   socialLinks: socialData.map((item) => ({
                     title: item.setsoc_title || "",
-                    link: item.setsoc_link || "", // setsoc_link is null, so fallback to empty string
+                    link: item.setsoc_link || "",
                     image: item.img?.img ? `${API}/storage/uploads/${item.img.img}` : "",
                   })),
                 };
@@ -94,10 +95,9 @@ const ApplySection = ({ section }) => {
                 setSocialData(fallbackContactInfo);
               });
 
-
-            // Fetch contact info
+            // Fetch contact info with language filter
             axios
-              .get(`${API_ENDPOINTS.getContact}?section_id=${section.sec_id}`)
+              .get(`${API_ENDPOINTS.getContact}?section_id=${section.sec_id}&lang=${menuLang}`)
               .then((contactRes) => {
                 const contactData = contactRes.data?.data || [];
                 const contactDetails = {
@@ -114,13 +114,13 @@ const ApplySection = ({ section }) => {
                 setContactInfo(fallbackContactInfo);
               });
 
-            // Fetch steps
+            // Fetch steps with language filter
             axios
-              .get(`${API_ENDPOINTS.getSubApply}?ha_id=${sectionData.ha_id}`)
+              .get(`${API_ENDPOINTS.getSubApply}?ha_id=${sectionData.ha_id}&lang=${menuLang}`)
               .then((stepRes) => {
                 const stepsData = stepRes.data?.data || [];
                 const formattedSteps = stepsData
-                  .filter((step) => step.display === 1)
+                  .filter((step) => step.display === 1 && step.ha.ha_sec === sectionData.ha_id)
                   .map((step) => step.sha_title);
                 setSteps(formattedSteps);
               })
@@ -153,7 +153,7 @@ const ApplySection = ({ section }) => {
           setContactInfo(fallbackContactInfo);
         });
     } else {
-      console.log("ApplySection: No section.sec_id provided, skipping API call");
+      console.log("ApplySection: No section.sec_id or menuLang provided, skipping API call");
       setSectionData({
         ha_title: "Step By Step: How to Apply to Computer Science Department",
         ha_tagtitle: "",
@@ -164,7 +164,7 @@ const ApplySection = ({ section }) => {
       });
       setContactInfo(fallbackContactInfo);
     }
-  }, [section?.sec_id]);
+  }, [section?.sec_id, menuLang]);
 
   return (
     <div className="my-16">
@@ -260,7 +260,7 @@ const ApplySection = ({ section }) => {
             </motion.div>
             {sectionData.image && (
               <motion.div
-                className="lg:w-1/2 order-2 lg:order-1 shadow-2xs bg-white"
+                className="lg:w-1/2 order-2 lg:order-1 shadow-2some-2xs bg-white"
                 variants={cardVariants}
                 transition={{ duration: 0.6 }}
               >
