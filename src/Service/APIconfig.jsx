@@ -178,7 +178,8 @@ const API_ENDPOINTS = {
     // developersocial
     getSocialDeveloper: `${API_BASEURL}/developersocial`,
 
-
+    // researchtitle
+    getResearchTitle: `${API_BASEURL}/rsd-title`,
 
     // subcontact
     getSubContact: `${API_BASEURL}/subcontact`,
