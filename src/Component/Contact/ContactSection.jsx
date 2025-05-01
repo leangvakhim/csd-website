@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
 
-const ContactSection = ({ section }) => {
+const ContactSection = ({ section, menuLang }) => {
   const [contactData, setContactData] = useState(null); // No static fallback
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -11,27 +11,53 @@ const ContactSection = ({ section }) => {
   useEffect(() => {
     if (!section?.sec_id) {
       console.log("GetInTouchSection: No section.sec_id provided, skipping API call");
-      setContactData(null); // No data to render
+      setContactData(null);
       return;
     }
 
     setIsLoading(true);
     axios
-      .get(`${API_ENDPOINTS.getContact}?section_id=${section.sec_id}`)
+      .get(`${API_ENDPOINTS.getContactByLang}/${menuLang}`)
       .then((res) => {
-        const data = res.data?.data || {};
+        const data = res.data?.data;
+        if (!data) {
+          setContactData(null);
+          setIsLoading(false);
+          return;
+        }
+
         const formattedContactData = {
-          heading: data.heading || "", // Default if missing
-          description:
-            data.description ||
-            "",
-          contactDetails: (data.contactDetails || []).map((contact) => ({
-            id: contact.id || Date.now() + Math.random(), // Ensure unique ID
-            title: contact.title || "Unknown",
-            content: contact.content || "",
-            image: contact.image ? `${API}/storage/uploads/${contact.image}` : "",
-          })),
+          heading: data.con_title || "",
+          description: data.con_subtitle || "",
+          image: data.image?.img ? `${API}/storage/uploads/${data.image.img}` : "",
+          contactDetails: [
+            {
+              id: data.subcontact1?.scon_id || 1,
+              title: data.subcontact1?.scon_title || "",
+              content: data.subcontact1?.scon_detail || "",
+              image: data.subcontact1?.image?.img
+                ? `${API}/storage/uploads/${data.subcontact1.image.img}`
+                : "",
+            },
+            {
+              id: data.subcontact2?.scon_id || 2,
+              title: data.subcontact2?.scon_title || "",
+              content: data.subcontact2?.scon_detail || "",
+              image: data.subcontact2?.image?.img
+                ? `${API}/storage/uploads/${data.subcontact2.image.img}`
+                : "",
+            },
+            {
+              id: data.subcontact3?.scon_id || 3,
+              title: data.subcontact3?.scon_title || "",
+              content: data.subcontact3?.scon_detail || "",
+              image: data.subcontact3?.image?.img
+                ? `${API}/storage/uploads/${data.subcontact3.image.img}`
+                : "",
+            },
+          ],
         };
+
         setContactData(formattedContactData);
         setIsLoading(false);
       })
@@ -41,7 +67,7 @@ const ContactSection = ({ section }) => {
         setContactData(null);
         setIsLoading(false);
       });
-  }, [section?.sec_id]);
+  }, [section?.sec_id, menuLang]);
 
   if (isLoading) {
     return (
@@ -122,7 +148,7 @@ const ContactSection = ({ section }) => {
                         <img
                           src={contact.image}
                           alt={contact.title}
-                          className={`w-8 h-8 object-contain `}
+                          className={`w-18 h-18 object-contain `}
                         />
                       )}
                     </div>

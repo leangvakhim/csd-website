@@ -117,6 +117,7 @@ const API_ENDPOINTS = {
 
     // contact
     getContact: `${API_BASEURL}/contact`,
+    getContactByLang: `${API_BASEURL}/contact/lang`,
 
     // subservice
     getSubserviceAF: `${API_BASEURL}/subservice`,
