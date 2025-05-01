@@ -10,28 +10,38 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
   const { id } = useParams();
   const path = window.location.pathname;
   const lastSegment = path.split('/').pop();
+  const normalizedAlias = alias.replace(/^\/km/, '');
 
-  switch (alias) {
+  // switch (alias) {
+  switch (normalizedAlias) {
     case '/faculty':
-      if (lastSegment && lastSegment !== 'faculty') {
-        setOnlyContentMode(true);
-        return <FacultyDetail facultyId={lastSegment} />;
+      if (alias.endsWith('/faculty')) {
+        if (lastSegment && lastSegment !== 'faculty') {
+          setOnlyContentMode(true);
+          return <FacultyDetail facultyId={lastSegment} />;
+        }
+        setOnlyContentMode(false);
+        return <FacultyDepartment />;
       }
-      setOnlyContentMode(false);
-      return <FacultyDepartment />;
+
     case '/developer':
-      if (lastSegment && lastSegment !== 'developer') {
-        setOnlyContentMode(true);
-        return <DeveloperDetail developerId={lastSegment} />;
+      if (alias.endsWith('/developer')) {
+        if (lastSegment && lastSegment !== 'developer') {
+          setOnlyContentMode(true);
+          return <DeveloperDetail developerId={lastSegment} />;
+        }
+        return <DeveloperSection />;
       }
-      return <DeveloperSection />;
+
     case '/research':
-      if (lastSegment && lastSegment !== 'research') {
-        setOnlyContentMode(true);
-        return <ResearchDetails researchId={lastSegment}/>;
+      if (alias.endsWith('/research')) {
+        if (lastSegment && lastSegment !== 'research') {
+          setOnlyContentMode(true);
+          return <ResearchDetails researchId={lastSegment}/>;
+        }
+        setOnlyContentMode(false);
+        return '';
       }
-      setOnlyContentMode(false);
-      return '';
 
     default:
       setOnlyContentMode(false);

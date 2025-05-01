@@ -8,6 +8,7 @@ const FacultyMemeber = () => {
     const [facultyMembers, setFacultyMembers] = useState([]);
     const [socials, setSocials] = useState({});
 
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     useEffect(() => {
         const fetchFacultyMembers = async () => {
             try {
@@ -15,12 +16,9 @@ const FacultyMemeber = () => {
                 const res = await axios.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = res.data?.data || [];
 
-                const filteredMembers = allFaculty.filter(item =>
-                    item.f_order >= 4 &&
-                    item.display === 1 &&
-                    item.active === 1 &&
-                    item.lang === 1
-                );
+                const filteredMembers = allFaculty
+                    .filter(item => item.display === 1 && item.active === 1 && item.lang === currentLang)
+                    .slice(3);
 
                 const formattedMembers = filteredMembers.map(member => ({
                     id: member.f_id,
@@ -55,13 +53,13 @@ const FacultyMemeber = () => {
         };
 
         fetchFacultyMembers();
-    }, []);
+    }, [currentLang]);
 
     return (
         <div className='my-16'>
             <div className='container mx-auto px-4'>
                 <div className='space-y-10'>
-                    <h1 className="text-2xl font-normal mb-4">Faculty Members</h1>
+                    <h1 className="text-2xl font-normal mb-4">{currentLang === 1 ? "Faculty Members" : "បុគ្គលិកដេប៉ាតឺម៉ង់"}</h1>
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
                         {facultyMembers.map((member) => (
                             <div key={member.id} className='shadow-lg rounded-2xl p-4'>
@@ -95,7 +93,7 @@ const FacultyMemeber = () => {
                                                             <motion.div
                                                                 key={social.social_id}
                                                                 whileHover={{ scale: 1.1 }}
-                                                                className="bg-white p-3 rounded-full shadow-lg"
+                                                                className="bg-white p-2.5 rounded-full shadow-lg"
                                                             >
                                                                 <Link
                                                                     to={social.social_link || "#"}
@@ -110,7 +108,7 @@ const FacultyMemeber = () => {
                                                                                 : "/placeholder-icon.png"
                                                                         }
                                                                         alt={social.social_name || "Social Icon"}
-                                                                        className="w-6 h-6 rounded-full object-cover"
+                                                                        className="w-5 h-5 object-contain items-center"
                                                                         onError={(e) => {
                                                                             e.target.src = "/placeholder-icon.png";
                                                                         }}
@@ -148,7 +146,7 @@ const FacultyMemeber = () => {
                                             to={`/faculty/${member.id}`}
                                             className='bg-red-900 px-6 py-2 text-gray-50 rounded-2xl inline-block'
                                         >
-                                            View
+                                            {currentLang === 1 ? "View" : "មើលបន្ថែម"}
                                         </Link>
                                     </div>
                                 </div>
