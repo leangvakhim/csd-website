@@ -9,18 +9,21 @@ const DeputyHeadofDepartment = () => {
     const [deputyData, setDeputyData] = useState([]);
     const [socials, setSocials] = useState({});
 
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     useEffect(() => {
         const fetchDeputies = async () => {
             try {
                 // Fetch faculty data
                 const facultyRes = await axios.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = facultyRes.data?.data || [];
-                const deputies = allFaculty.filter(item =>
-                    [2, 3].includes(item.f_order) &&
-                    item.display === 1 &&
-                    item.active === 1 &&
-                    item.lang === 1 // Assuming 1 is the current language ID
-                );
+                const deputies = allFaculty
+                    .filter(item =>
+                        item.display === 1 &&
+                        item.active === 1 &&
+                        item.lang === currentLang
+                    )
+                    .sort((a, b) => a.f_order - b.f_order)
+                    .slice(1, 3);
                 const formattedDeputies = deputies.map(deputy => ({
                     id: deputy.f_id,
                     name: deputy.f_name,
@@ -60,7 +63,7 @@ const DeputyHeadofDepartment = () => {
             <div className='container mx-auto px-4'>
                 <div className='space-y-10'>
                     <div>
-                        <h1 className="text-2xl font-normal mb-4">Deputy Head of Department:</h1>
+                        <h1 className="text-2xl font-normal mb-4">{currentLang === 1 ? "Deputy Head of Department:" : "អនុប្រធានដេប៉ាតឺម៉ង់"}</h1>
                     </div>
                     <div className='flex flex-col xl:flex-row xl:flex-wrap gap-8 justify-center'>
                         {deputyData.map((deputy, index) => (
@@ -157,7 +160,7 @@ const DeputyHeadofDepartment = () => {
                                         <p className='text-left'>{deputy.bio}</p>
                                         <Link to={`/faculty/${deputy.id}`}>
                                             <button className='bg-red-900 px-6 py-2 text-gray-50 rounded-2xl'>
-                                                View
+                                                {currentLang === 1 ? "View" : "មើលបន្ថែម"}
                                             </button>
                                         </Link>
                                     </div>

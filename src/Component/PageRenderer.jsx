@@ -168,7 +168,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Event':
                                 return <EventSection key={section.sec_id} section={section} menuLang={menuLang} />;
 
-                           
+
 
                             default:
                                 console.log("PageRenderer: Unknown section type:", section.sec_type);
@@ -182,9 +182,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                 </>
             )}
 
-            {page?.p_alias === '/faculty' && (
-                <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
-            )}
+            <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
             {page?.p_alias === '/developer' && (
                 <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
             )}

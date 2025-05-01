@@ -9,7 +9,7 @@ const HeadofDepartment = () => {
     const [head, setHead] = useState(null);
     const [socials, setSocials] = useState([]);
 
-    const currentLang = 1; // Assuming 1 is the current language ID
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     useEffect(() => {
         const fetchHead = async () => {
             try {
@@ -17,15 +17,13 @@ const HeadofDepartment = () => {
                 const res = await axios.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = res.data?.data || [];
 
-                const filteredHead = allFaculty.filter(item =>
-                    item.f_order === 1 &&
-                    item.display === 1 &&
-                    item.active === 1 &&
-                    item.lang === currentLang
-                );
+                const filteredHead = allFaculty
+                    .filter(item => item.display === 1 && item.active === 1 && item.lang === currentLang)
+                    .sort((a, b) => a.f_order - b.f_order);
 
-                if (filteredHead.length > 0) {
+                if (filteredHead.length) {
                     const headData = filteredHead[0];
+                    console.log("headData is: ",headData);
                     setHead({
                         id: headData.f_id,
                         name: headData.f_name,
@@ -45,6 +43,8 @@ const HeadofDepartment = () => {
                             social.active === 1
                     );
                     setSocials(filteredSocials);
+                } else {
+                    console.warn("No matching Khmer records found for currentLang =", currentLang);
                 }
             } catch (error) {
                 console.error("Error fetching head of department or socials:", error);
@@ -59,7 +59,7 @@ const HeadofDepartment = () => {
             <div className='container mx-auto px-4'>
                 <div className='space-y-10'>
                     <div id="head-department-header">
-                        <h1 className="text-2xl font-normal mb-4">Head of Department</h1>
+                        <h1 className="text-2xl font-normal mb-4">{currentLang === 1 ? "Head of Department:" : "ប្រធានដេប៉ាតឺម៉ង់"}</h1>
                     </div>
                     {head && (
                         <div key={head.id} className='max-w-5xl mx-auto shadow-lg rounded-2xl items-center p-4' id="head-department-profile">
@@ -150,7 +150,7 @@ const HeadofDepartment = () => {
                                     <p>{head.bio}</p>
                                     <Link to={`/faculty/${head.id}`}>
                                         <button className='bg-red-900 px-6 py-2 text-gray-50 rounded-2xl' id="view-button">
-                                            View
+                                            {currentLang === 1 ? "View" : "មើលបន្ថែម"}
                                         </button>
                                     </Link>
                                 </div>
