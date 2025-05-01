@@ -156,11 +156,20 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <CareerSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Specialization':
                                 return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            // case 'CSD':
+                            //     return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            // case 'Unlock':
+                            //     return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            // case 'Available':
+                            //     return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Feedback':
                                 return <FeedbackSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Partner':
                                 return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
-
+                            // case 'New':
+                            //     return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            // case 'Lab':
+                            //     return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Potential':
                                 return <PotentialSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Announcement':
