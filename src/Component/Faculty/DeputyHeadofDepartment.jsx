@@ -56,7 +56,7 @@ const DeputyHeadofDepartment = () => {
         };
 
         fetchDeputies();
-    }, []);
+    }, [currentLang]);
 
     return (
         <div className='my-16'>

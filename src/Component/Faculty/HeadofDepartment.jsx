@@ -52,7 +52,7 @@ const HeadofDepartment = () => {
         };
 
         fetchHead();
-    }, []);
+    }, [currentLang]);
 
     return (
         <div className='my-16'>

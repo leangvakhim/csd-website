@@ -53,7 +53,7 @@ const FacultyMemeber = () => {
         };
 
         fetchFacultyMembers();
-    }, []);
+    }, [currentLang]);
 
     return (
         <div className='my-16'>
