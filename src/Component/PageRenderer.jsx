@@ -7,8 +7,6 @@ import Slideshow from './Slideshow/Slideshow';
 import ServiceSection from './Services/ServiceSection';
 import ProgramSection from './Program/ProgramSection';
 import AcademicSection from './Academic/AcademicSection';
-import PartnershipSection from './Partnership/PartnershipSection';
-import AdmissionBanner from './Banner/BannerSection';
 import BasicRequirements from './Requirement/BasicRequirements';
 import ApplySection from './ApplySection/ApplySection';
 import ImportantSection from './Important/ImportantSection';
@@ -194,6 +192,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
             )}
 
             <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
+            
            
             <div>
                 <Footer />

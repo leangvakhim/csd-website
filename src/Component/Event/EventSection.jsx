@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaSearch, FaFilter, FaTimes, FaSpinner, FaArrowRight } from 'react-icons/fa';
 import { PiCalendarDots } from 'react-icons/pi';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
@@ -18,7 +18,7 @@ const useDebounce = (value, delay) => {
 const EventSection = ({ section, menuLang }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const isHomePage = location.pathname === "/home";
+    const isHomePage = location.pathname === '/home';
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [headerLoading, setHeaderLoading] = useState(true);
@@ -27,42 +27,37 @@ const EventSection = ({ section, menuLang }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTag, setSelectedTag] = useState('');
     const [headerData, setHeaderData] = useState({
-        hsec_title: "Events & News",
-        hsec_amount: 4
+        hsec_title: 'Events & News',
+        hsec_amount: 4,
+        hsec_subtitle: '',
     });
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
-    const DEFAULT_IMAGE = '/placeholder-image.jpg'; // Ensure this path is valid
+    const DEFAULT_IMAGE = '/placeholder-image.jpg';
 
     useEffect(() => {
-        const fetchHeaderData = async () => {
+        const fetchData = async () => {
             try {
                 setHeaderLoading(true);
                 const response = await axios.get(API_ENDPOINTS.getHeaderSection);
                 if (response.data) {
                     if (isHomePage && response.data.splits) {
-                        // On homepage, find the "Events" section in splits
                         const eventSplit = response.data.splits.find(
-                            split => split.section_type === "events" || split.hsec_title.toLowerCase().includes("events")
+                            split => split.section_type === 'events' || split.hsec_title.toLowerCase().includes('events')
                         );
                         if (eventSplit) {
                             setHeaderData({
-                                hsec_title: eventSplit.hsec_title || "Events & News",
-                                hsec_amount: eventSplit.hsec_amount || 4
-                            });
-                        } else {
-                            // Fallback to default if no events section in splits
-                            setHeaderData({
-                                hsec_title: "Events & News",
-                                hsec_amount: 4
+                                hsec_title: eventSplit.hsec_title || 'Events & News',
+                                hsec_amount: eventSplit.hsec_amount || 4,
+                                hsec_subtitle: eventSplit.hsec_subtitle || '',
                             });
                         }
                     } else if (response.data.hsec_title) {
-                        // Non-homepage: use section-specific header data
                         setHeaderData({
                             hsec_title: response.data.hsec_title,
-                            hsec_amount: response.data.hsec_amount || 4
+                            hsec_amount: response.data.hsec_amount || 4,
+                            hsec_subtitle: response.data.hsec_subtitle || '',
                         });
                     }
                 }
@@ -72,29 +67,34 @@ const EventSection = ({ section, menuLang }) => {
             } finally {
                 setHeaderLoading(false);
             }
-        };
 
-        const fetchEvents = async () => {
             try {
                 setLoading(true);
                 const response = await axios.get(API_ENDPOINTS.getEvent);
-                const transformed = response.data.data
-                    .filter(event => event.section?.sec_id === section.sec_id)
+                console.log('Events response:', response.data);
+
+                const data = Array.isArray(response.data.data)
+                    ? response.data.data
+                    : [response.data.data];
+
+                const transformed = data
+                    .filter(() => true)
                     .map(item => ({
-                        id: item.event_id,
-                        tag: item.event_category || 'Events',
-                        title: item.event_title,
-                        description: item.event_shortdesc,
-                        date: item.event_date
-                            ? new Date(item.event_date).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                            })
+                        id: item.e_id,
+                        tag: item.e_tags || 'Events',
+                        category: item.e_tags || 'Events',
+                        title: item.e_title || 'Untitled Event',
+                        description: item.e_shorttitle || 'No description available',
+                        date: item.e_date
+                            ? new Date(item.e_date).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                              })
                             : 'TBD',
-                        imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE
+                        imageUrl: item.e_img ? `${BASE_IMAGE_URL}/${item.e_img}` : DEFAULT_IMAGE,
                     }))
-                    .slice(0, headerData.hsec_amount);
+                    .slice(0, headerData.hsec_amount || 4);
 
                 setEvents(transformed);
             } catch (error) {
@@ -105,8 +105,8 @@ const EventSection = ({ section, menuLang }) => {
             }
         };
 
-        fetchHeaderData().then(fetchEvents);
-    }, [headerData.hsec_amount, section, menuLang, isHomePage]);
+        fetchData();
+    }, [section.sec_id, menuLang, isHomePage]);
 
     const tags = [...new Set(events.map(item => item.tag))];
 
@@ -121,7 +121,6 @@ const EventSection = ({ section, menuLang }) => {
     const handleClearSearch = () => setSearchTerm('');
     const handleClearFilter = () => setSelectedTag('');
 
-    // Split title for homepage
     const displayTitle = isHomePage
         ? headerData.hsec_title.split('&')[0].trim() || 'Events'
         : headerData.hsec_title;
@@ -164,21 +163,21 @@ const EventSection = ({ section, menuLang }) => {
                         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-3 sm:mb-4">
                             {displayTitle}
                         </h1>
-                        <p className="text-xs sm:text-sm text-gray-500">
-                            {setHeaderData.hsec_subtitle}
-                        </p>
+                        {headerData.hsec_subtitle && (
+                            <p className="text-xs sm:text-sm text-gray-500">
+                                {headerData.hsec_subtitle}
+                            </p>
+                        )}
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 items-center mt-4 lg:mt-0">
-                        {/* Search and Filter Container (Non-Homepage Only) */}
                         {!isHomePage && (
                             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                                {/* Search Field */}
                                 <div className="relative w-full">
                                     <input
                                         type="text"
                                         placeholder="Search events"
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onChange={e => setSearchTerm(e.target.value)}
                                         className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-blue-300 w-full"
                                         aria-label="Search events"
                                     />
@@ -195,19 +194,19 @@ const EventSection = ({ section, menuLang }) => {
                                         </button>
                                     )}
                                 </div>
-
-                                {/* Tag Filter Dropdown */}
                                 <div className="relative w-full">
                                     <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-50" />
                                     <select
                                         value={selectedTag}
-                                        onChange={(e) => setSelectedTag(e.target.value)}
+                                        onChange={e => setSelectedTag(e.target.value)}
                                         className="border rounded-full py-2 pl-10 bg-red-800 text-gray-50 focus:outline-none focus:ring focus:border-blue-300 appearance-none w-full"
                                         aria-label="Filter by category"
                                     >
                                         <option value="">All</option>
                                         {tags.map((tag, i) => (
-                                            <option key={i} value={tag}>{tag}</option>
+                                            <option key={i} value={tag}>
+                                                {tag}
+                                            </option>
                                         ))}
                                     </select>
                                     {selectedTag && (
@@ -222,8 +221,6 @@ const EventSection = ({ section, menuLang }) => {
                                 </div>
                             </div>
                         )}
-
-                        {/* View All Button */}
                         {isHomePage && (
                             <motion.div
                                 initial={{ opacity: 0, y: -50 }}
@@ -246,9 +243,9 @@ const EventSection = ({ section, menuLang }) => {
 
                 {/* Events List */}
                 <div className="py-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
-                        {filteredEvents.length > 0 ? (
-                            filteredEvents.map((event, index) => (
+                    {filteredEvents.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
+                            {filteredEvents.map((event, index) => (
                                 <motion.div
                                     key={event.id}
                                     initial={{ opacity: 0, y: 50 }}
@@ -256,60 +253,46 @@ const EventSection = ({ section, menuLang }) => {
                                     transition={{ duration: 0.6, delay: index * 0.2 }}
                                     viewport={{ once: true, amount: 0.3 }}
                                 >
-                                    <div
-                                        className="bg-white rounded-2xl p-4 sm:p-5 shadow-md flex flex-col lg:flex-row items-center hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                        onClick={() => navigate(`/events/${event.id}`)}
+                                    <Link
+                                        to={`/news&events/${event.id}`}
+                                        className="block group"
+                                        aria-label={event.title}
                                     >
-                                        <div className="w-full lg:w-1/2 flex justify-center items-center mb-4 lg:mb-0">
-                                            <img
-                                                src={event.imageUrl}
-                                                alt={event.title}
-                                                className="w-full h-[180px] sm:h-[200px] lg:h-[220px] object-cover rounded-2xl hover:scale-105 transition-transform duration-300"
-                                                loading="lazy"
-                                                onError={(e) => {
-                                                    e.target.onerror = null;
-                                                    e.target.src = DEFAULT_IMAGE;
-                                                }}
-                                            />
-                                        </div>
-
-                                        <div className="w-full lg:w-1/2 p-4 sm:p-5">
-                                            {event.tag && (
-                                                <span className="text-xs font-semibold text-red-600 uppercase bg-red-100 px-2 py-1 rounded-full">
-                                                    {event.tag}
+                                        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-md flex flex-col lg:flex-row items-center hover:shadow-lg transition-shadow duration-300">
+                                            <div className="w-full lg:w-1/2 flex justify-center items-center mb-4 lg:mb-0">
+                                                <img
+                                                    src={event.imageUrl}
+                                                    alt={event.title}
+                                                    className="w-full h-[180px] sm:h-[200px] lg:h-[220px] object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
+                                                    loading="lazy"
+                                                    onError={e => (e.target.src = DEFAULT_IMAGE)}
+                                                />
+                                            </div>
+                                            <div className="w-full lg:w-1/2 p-4 sm:p-5">
+                                                {event.category && (
+                                                    <span className="text-xs font-semibold text-red-600 uppercase bg-red-100 px-2 py-1 rounded-full">
+                                                        {event.category}
+                                                    </span>
+                                                )}
+                                                <h5 className="text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4">
+                                                    {event.title}
+                                                </h5>
+                                                <p className="text-xs sm:text-sm text-gray-700 line-clamp-3">
+                                                    {event.description}
+                                                </p>
+                                                <span className="text-xs sm:text-sm text-gray-700 flex items-center gap-2 mt-3 sm:mt-4">
+                                                    <PiCalendarDots className="text-red-600" />
+                                                    {event.date}
                                                 </span>
-                                            )}
-                                            <h5 className="text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4">
-                                                {event.title}
-                                            </h5>
-                                            <p className="text-xs sm:text-sm text-gray-700 line-clamp-3">
-                                                {event.description}
-                                            </p>
-                                            <span className="text-xs sm:text-sm text-gray-700 flex items-center gap-2 mt-3 sm:mt-4">
-                                                <PiCalendarDots className="text-red-600" />
-                                                {event.date}
-                                            </span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </Link>
                                 </motion.div>
-                            ))
-                        ) : (
-                            <div className="text-center text-gray-600 col-span-full py-12">
-                                <p>No events found matching your criteria.</p>
-                                {!isHomePage && (searchTerm || selectedTag) && (
-                                    <button
-                                        onClick={() => {
-                                            setSearchTerm('');
-                                            setSelectedTag('');
-                                        }}
-                                        className="mt-4 text-red-800 hover:underline"
-                                    >
-                                        Clear all filters
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-center text-gray-500">No events found.</p>
+                    )}
                 </div>
             </div>
         </div>

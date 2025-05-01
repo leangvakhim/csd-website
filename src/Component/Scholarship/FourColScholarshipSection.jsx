@@ -202,7 +202,7 @@ const FourColScholarshipSection = () => {
                   </p>
                   <button
                     className="bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl cursor-pointer"
-                    onClick={() => navigate(`/scholars/${scholarship.id}`)}
+                    onClick={() => navigate(`/scholarship/${scholarship.id}`)}
                     aria-label={`View details for ${scholarship.title}`}
                   >
                     View Detail

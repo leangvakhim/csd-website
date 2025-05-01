@@ -6,6 +6,8 @@ import { useParams } from 'react-router-dom';
 import ResearchDetails from './Research/ResearchDetails';
 import ResearchSection from './Research/ResearchSection';
 import ResearchLabDetails from './ResearchDetails/ResearchLabDetails';
+import ScholarshipDetails from './Scholarship/ScholarshipDetails';
+import EventsDetails from './Event/EventsDetails';
 
 const SectionInjector = ({ alias, setOnlyContentMode }) => {
   const { id } = useParams();
@@ -45,24 +47,31 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
       }
 
     case 'researchlab':
-      if (alias.endsWith('/researchlab')) {
-        if (lastSegment && lastSegment !== 'researchlab') {
-          setOnlyContentMode(true);
-          return <ResearchLabDetails researchId={lastSegment} />;
-        }
-        setOnlyContentMode(false);
-        return <ResearchSection />;
+      if (lastSegment && lastSegment !== 'researchlab') {
+        setOnlyContentMode(true);
+        return <ResearchLabDetails researchlabId={lastSegment} />;
       }
+      setOnlyContentMode(false);
+      return ''; 
 
-    case 'scholarship':
-      if (alias.endsWith('/scholarship')) {
-        if (lastSegment && lastSegment !== 'scholarship') {
-          setOnlyContentMode(true);
-          return <ScholarshipDetails scholarshipId={lastSegment} />;
-        }
-        setOnlyContentMode(false);
-        return <ScholarshipSection />;
+
+    case '/scholarship': // Match the route with leading '/'
+      if (lastSegment && lastSegment !== 'scholarship') {
+        setOnlyContentMode(true);
+        return <ScholarshipDetails scholarshipId={lastSegment} />;
       }
+      setOnlyContentMode(false);
+      return ''; 
+
+      case '/news&events': // Match the route with leading '/'
+      if (lastSegment && lastSegment !== 'news&events') {
+        setOnlyContentMode(true);
+        return <EventsDetails eventId={lastSegment} />;
+      }
+      setOnlyContentMode(false);
+      return ''; // Add a component for the scholarship list
+
+
     default:
       setOnlyContentMode(false);
       return null;

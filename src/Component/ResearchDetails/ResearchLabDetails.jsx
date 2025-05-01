@@ -17,10 +17,10 @@ const ResearchLabDetails = ({ researchlabId }) => {
     useEffect(() => {
         const fetchSections = async () => {
             try {
-                const response = await axios.get(API_ENDPOINTS.getResearchTitle);
+                const response = await axios.get(API_ENDPOINTS.getResearchlab);
                 const sorted = response.data.data
-                    .filter(item => item.display === 1 && item.active === 1 && item.rsdt_text === parseInt(researchlabId))
-                    .sort((a, b) => a.rsdt_order - b.rsdt_order);
+                    .filter(item => item.display === 1 && item.active === 1 && item.rsdl_id === parseInt(researchlabId))
+                    .sort((a, b) => a.rsdl_order - b.rsdl_order);
                 setSections(sorted);
             } catch (error) {
                 console.error('Failed to fetch research sections:', error);
@@ -33,11 +33,11 @@ const ResearchLabDetails = ({ researchlabId }) => {
 
         switch (section.rsdt_type) {
             case 'Description':
-                return <ResearchDescription rsdtId={section.rsdtl_id} />;
+                return <ResearchDescription rsdtId={section.rsdl_id} />;
             case 'Project':
-                return <ResearchProject rsdtId={section.rsdtl_id} />;
+                return <ResearchProject rsdtId={section.rsdl_id} />;
             case 'Meeting':
-                return <ResearchMeeting rsdtId={section.rsdtl_id} />;
+                return <ResearchMeeting rsdtId={section.rsdl_id} />;
            
             default:
                 return null;
@@ -48,7 +48,7 @@ const ResearchLabDetails = ({ researchlabId }) => {
         <div>
             <ResearchBanner researchId={researchlabId} />
             {sections.map(section => (
-                <div key={section.rsdt_id}>
+                <div key={section.rsdl_id}>
                     {renderSection(section)}
                 </div>
             ))}

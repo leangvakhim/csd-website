@@ -2,11 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
-import ScholarshipBanner from './ScholarshipBanner';
-import ScholarshipApplication from './ScholarshipApplication';
-import ScholarshipOverview from './ScholarshipOverview';
+import EventBanner from './EventBanner';
 
-const ScholarshipDetails = ({ scholarshipId }) => {
+
+const EventsDetails = ({ eventId }) => {
     const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,26 +13,26 @@ const ScholarshipDetails = ({ scholarshipId }) => {
     useEffect(() => {
         const fetchSections = async () => {
             try {
-                const response = await axios.get(API_ENDPOINTS.getScholarship);
+                const response = await axios.get(API_ENDPOINTS.getEvent);
                 const sorted = response.data.data
                     .filter(
                         (item) =>
                             item.display === 1 &&
                             item.active === 1 &&
-                            item.sc_id === parseInt(scholarshipId)
+                            item.e_id === parseInt(eventId)
                     )
 
-                    .sort((a, b) => a.sc_orders - b.sc_orders);
+                    .sort((a, b) => a.e_orders - b.e_orders);
                 setSections(sorted);
                 setLoading(false);
             } catch (error) {
-                setError('Failed to fetch scholarship details.');
-                console.error('Failed to fetch scholarship sections:', error);
+                setError('Failed to fetch event details.');
+                console.error('Failed to fetch event sections:', error);
                 setLoading(false);
             }
         };
         fetchSections();
-    }, [scholarshipId]);
+    }, [eventId]);
 
 
     if (loading) {
@@ -54,14 +53,12 @@ const ScholarshipDetails = ({ scholarshipId }) => {
 
     return (
         <div className="bg-white">
-            <ScholarshipBanner scholarshipId={scholarshipId} />
+           <EventBanner eventId={eventId}/>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <ScholarshipOverview scholarshipId={scholarshipId} />
-                <ScholarshipApplication scholarshipId={scholarshipId} />
-
+               dfghjhgfdyhgt
             </div>
         </div>
     );
 };
 
-export default ScholarshipDetails;
+export default EventsDetails;
