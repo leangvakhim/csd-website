@@ -167,17 +167,18 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Feedback':
                                 return <FeedbackSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Partner':
-                                return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <PartnerControllSection key={section.sec_id} section={section} menuLang={menuLang} />;
+
                             // case 'New':
-                            //     return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            //     return <NewsSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             // case 'Lab':
                             //     return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Potential':
                                 return <PotentialSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                            case 'Announcement':
-                                return <AnnouncementSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                            case 'Event':
-                                return <EventSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            // case 'Announcement':
+                            //     return <AnnouncementSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            // case 'Event':
+                            //     return <EventSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             default:
                                 console.log("PageRenderer: Unknown section type:", section.sec_type);
                                 return (
