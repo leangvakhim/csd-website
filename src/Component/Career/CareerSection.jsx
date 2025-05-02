@@ -5,10 +5,11 @@ import { FaArrowRight, FaCalendarAlt, FaSpinner } from 'react-icons/fa';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
-const CareerSection = () => {
+const CareerSection = ({section, menuLang}) => {
     const navigate = useNavigate();
     const [careers, setCareers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentLang, setCurrentLang] = useState(1);
     const [headerData, setHeaderData] = useState({
         hsec_title: 'default title',
         hsec_subtitle: 'default subtitle',
@@ -29,10 +30,12 @@ const CareerSection = () => {
                 }
 
                 const careerRes = await axios.get(API_ENDPOINTS.getCareer);
-                const formatted = careerRes.data.data.map(item => ({
-                    id: item.cr_id,
-                    title: item.cr_title,
-                    description: item.cr_shortdesc,
+                const formatted = careerRes.data.data
+                .filter((item) => item.lang === setCurrentLang)
+                .map(item => ({
+                    id: item.c_id,
+                    title: item.c_title,
+                    description: item.c_shortdesc,
                     date: new Date(item.created_at).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',

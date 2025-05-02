@@ -6,7 +6,7 @@ import SocialSection from '../Social/SocialSection';
 import EventData from './EventData';
 import RelatedEvent from './RelatedEvent';
 
-const EventsDetails = ({ eventId }) => {
+const NewDetails = ({ newsId }) => {
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,7 +15,7 @@ const EventsDetails = ({ eventId }) => {
     const fetchSections = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(API_ENDPOINTS.getEvent);
+        const response = await axios.get(API_ENDPOINTS.getNews);
 
         // Log the response for debugging
         console.log('API Response:', response.data);
@@ -23,15 +23,15 @@ const EventsDetails = ({ eventId }) => {
         // Access the nested 'data' property
         const eventData = response.data.data;
 
-        // Check if eventData is an object and matches the eventId
+        // Check if eventData is an object and matches the newsId
         if (!eventData || typeof eventData !== 'object') {
           console.error('Expected an event object but got:', eventData);
           throw new Error('Invalid data format: Expected an event object.');
         }
 
         // Verify the event ID matches
-        if (eventData.e_id !== parseInt(eventId)) {
-          console.warn(`Event ID mismatch: expected ${eventId}, got ${eventData.e_id}`);
+        if (eventData.e_id !== parseInt(newsId)) {
+          console.warn(`Event ID mismatch: expected ${newsId}, got ${eventData.e_id}`);
           throw new Error('Event not found.');
         }
 
@@ -47,14 +47,14 @@ const EventsDetails = ({ eventId }) => {
       }
     };
 
-    if (eventId && !isNaN(parseInt(eventId))) {
+    if (newsId && !isNaN(parseInt(newsId))) {
       fetchSections();
     } else {
-      console.warn('Invalid eventId:', eventId);
+      console.warn('Invalid newsId:', newsId);
       setError('Invalid event ID.');
       setLoading(false);
     }
-  }, [eventId]);
+  }, [newsId]);
 
   if (loading) {
     return (
@@ -82,7 +82,7 @@ const EventsDetails = ({ eventId }) => {
 
   return (
     <div className="bg-white">
-      <EventBanner eventId={eventId} />
+      <EventBanner newsId={newsId} />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {sections.map((section) => (
           <div key={section.e_id} className="py-4">
@@ -96,4 +96,4 @@ const EventsDetails = ({ eventId }) => {
   );
 };
 
-export default EventsDetails;
+export default NewDetails;

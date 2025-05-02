@@ -54,9 +54,9 @@ function App() {
                     ? '/research/*'
                     : page.p_alias === '/scholarship'
                       ? '/scholarship/*'
-                      : page.p_alias === 'researchlab'
+                      : page.p_alias === '/researchlab'
                         ? '/researchlab/*'
-                        : page.p_alias === 'news&events'
+                        : page.p_alias === '/news&events'
                           ? '/news&events/*'
                           : page.p_alias
 

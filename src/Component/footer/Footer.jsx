@@ -34,7 +34,7 @@ const Footer = () => {
                     <motion.div>
                         <h3 className="text-lg font-normal mb-4 pb-4 border-b border-gray-500/50">Our Pages</h3>
                         <ul className="xl:text-lg text-sm font-light text-gray-300">
-                            {["/", "/research", "/programs"].map((path, index) => (
+                            {["/", "/research", "/program"].map((path, index) => (
                                 <motion.li
                                     key={index}
                                     whileHover={{ x: 10 }}
@@ -48,7 +48,7 @@ const Footer = () => {
                                             ? "Home"
                                             : path === "/research"
                                             ? "Research"
-                                            : path === "/programs"
+                                            : path === "/program"
                                             ? "Programs"
                                             : path.replace("/", "").charAt(0).toUpperCase() + path.slice(2)}
                                     </Link>
