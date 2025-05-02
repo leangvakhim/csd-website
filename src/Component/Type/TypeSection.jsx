@@ -18,7 +18,6 @@ const TypeSection = ({ section }) => {
           const allScholarships = data?.data || [];
           const filtered = allScholarships.filter(item => item?.tse?.tse_sec === section.sec_id);
           setScholarships(filtered);
-          console.log("filtered is; ",filtered);
         })
         .catch((error) => console.error("Error fetching scholarships from getSubType:", error));
 
