@@ -224,17 +224,17 @@ const EventSection = ({ section, menuLang }) => {
                                         className="block group"
                                         aria-label={event.title}
                                     >
-                                        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-md flex flex-col lg:flex-row items-center hover:shadow-lg transition-shadow duration-300">
-                                            <div className="w-full lg:w-1/2 flex justify-center items-center mb-4 lg:mb-0">
+                                        <div className="bg-white h-[300px] rounded-2xl p-4 sm:p-5 shadow-md flex flex-col lg:flex-row items-center hover:shadow-lg transition-shadow duration-300">
+                                            <div className="w-full lg:w-1/2 h-full flex justify-center items-center mb-4 lg:mb-0">
                                                 <img
                                                     src={event.imageUrl}
                                                     alt={event.title}
-                                                    className="w-full h-[180px] sm:h-[200px] lg:h-[220px] object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
+                                                    className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
                                                     loading="lazy"
                                                     onError={e => (e.target.src = DEFAULT_IMAGE)}
                                                 />
                                             </div>
-                                            <div className="w-full lg:w-1/2 p-4 sm:p-5">
+                                            <div className="w-full lg:w-1/2  p-4 sm:p-5">
                                                 {event.category && (
                                                     <span className="text-xs font-semibold text-red-600 uppercase bg-red-100 px-2 py-1 rounded-full">
                                                         {event.tags}

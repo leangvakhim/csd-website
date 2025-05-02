@@ -1,398 +1,216 @@
-import React, { useState, useEffect } from "react";
-import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import axios from "axios";
-import Papa from "papaparse";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { API_ENDPOINTS } from '../../service/APIConfig';
+import { motion } from 'framer-motion';
 
 const AnnouncementDetails = ({ announcementId }) => {
-  const [data, setData] = useState([]);
+  const [announcement, setAnnouncement] = useState(null);
+  const [students, setStudents] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [fileError, setFileError] = useState(null);
-  const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Fetch data from API for specific announcementId
+  // Calculate pagination
+  const totalPages = Math.ceil(students.length / rowsPerPage);
+  const indexOfLastStudent = currentPage * rowsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - rowsPerPage;
+  const currentStudents = students.slice(indexOfFirstStudent, indexOfLastStudent);
+
+  // Fetch announcement and student results
   useEffect(() => {
     if (!announcementId) {
-      setError("No announcement ID provided.");
+      setError('No announcement ID provided.');
       setLoading(false);
       return;
     }
 
-    setLoading(true);
-    axios
-      .get(`${API_ENDPOINTS.getAnnouncementStudent}?announcement_id=${announcementId}`)
-      .then((res) => {
-        const apiData = res.data?.data || [];
-        console.log("AnnouncementDetails: API response:", apiData);
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch announcement details
+        const announcementResponse = await axios.get(API_ENDPOINTS.getAnnouncement);
+        const announcements = announcementResponse.data?.data || [];
+        const targetAnnouncement = announcements.find(
+          (ann) => ann.am_id === parseInt(announcementId)
+        );
+        if (targetAnnouncement) {
+          setAnnouncement({
+            title: targetAnnouncement.am_title || 'Untitled Announcement',
+            description: targetAnnouncement.am_shortdesc || 'No description available.',
+            date: targetAnnouncement.am_postdate
+              ? new Date(targetAnnouncement.am_postdate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
+              : 'TBD',
+          });
+        } else {
+          setError('Announcement not found.');
+        }
 
-        // Map API data to required structure
-        const formattedData = apiData.map((item) => {
-          const subjectFields = Object.keys(item).filter(
-            (key) =>
-              ![
-                "student_id",
-                "student_identity",
-                "result",
-                "NO",
-                "STUDENT_IDENTITY",
-                "announcement_id",
-              ].includes(key)
-          );
-          const subjectsObj = subjectFields.reduce((acc, key) => {
-            acc[key] = item[key];
-            return acc;
-          }, {});
-          return {
-            id: item.NO,
-            studentId: item.student_identity,
-            subjects: subjectsObj,
-            result: item.result,
-          };
-        });
+        // Fetch student results
+        const studentResponse = await axios.get(
+          `${API_ENDPOINTS.getAnnouncementStudent}?announcement_id=${announcementId}`
+        );
+        const studentData = studentResponse.data?.data || [];
+        setStudents(studentData);
 
-        // Extract subjects from the first item
-        if (apiData.length > 0) {
-          const subjectKeys = Object.keys(apiData[0]).filter(
+        // Extract dynamic subject keys
+        if (studentData.length > 0) {
+          const subjectKeys = Object.keys(studentData[0]).filter(
             (key) =>
-              ![
-                "student_id",
-                "student_identity",
-                "result",
-                "NO",
-                "STUDENT_IDENTITY",
-                "announcement_id",
-              ].includes(key)
+              !['student_id', 'student_identity', 'result', 'NO', 'announcement_id'].includes(key)
           );
           setSubjects(subjectKeys);
         }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load announcement or student data.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        setData(formattedData);
-        setError(null);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("AnnouncementDetails: Failed to fetch data:", err);
-        setError("Failed to load results for this announcement. Please try again later.");
-        setLoading(false);
-      });
+    fetchData();
   }, [announcementId]);
 
-  // Handle file upload
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    setFileError(null);
-
-    // Handle CSV files
-    if (file.type === "text/csv" || file.name.endsWith(".csv")) {
-      Papa.parse(file, {
-        complete: (result) => {
-          const fileData = result.data;
-          console.log("AnnouncementDetails: Parsed CSV data:", fileData);
-
-          try {
-            // Filter data by announcementId if present
-            const filteredData = fileData.filter(
-              (row) => !row.announcement_id || row.announcement_id == announcementId
-            );
-
-            if (filteredData.length === 0) {
-              setFileError("No data in the file matches the current announcement ID.");
-              return;
-            }
-
-            // Map CSV data to required structure
-            const formattedData = filteredData
-              .filter((row) => row.NO && row.student_identity)
-              .map((row) => {
-                const subjectFields = Object.keys(row).filter(
-                  (key) =>
-                    ![
-                      "student_id",
-                      "student_identity",
-                      "result",
-                      "NO",
-                      "STUDENT_IDENTITY",
-                      "announcement_id",
-                    ].includes(key)
-                );
-                const subjectsObj = subjectFields.reduce((acc, key) => {
-                  acc[key] = parseFloat(row[key]) || row[key] || "-";
-                  return acc;
-                }, {});
-                return {
-                  id: parseInt(row.NO),
-                  studentId: row.student_identity,
-                  subjects: subjectsObj,
-                  result: row.result || "pass",
-                };
-              });
-
-            // Update subjects
-            if (filteredData.length > 0) {
-              const subjectKeys = Object.keys(filteredData[0]).filter(
-                (key) =>
-                  ![
-                    "student_id",
-                    "student_identity",
-                    "result",
-                    "NO",
-                    "STUDENT_IDENTITY",
-                    "announcement_id",
-                  ].includes(key)
-              );
-              setSubjects(subjectKeys);
-            }
-
-            setData(formattedData);
-            setCurrentPage(1);
-          } catch (err) {
-            console.error("AnnouncementDetails: Error parsing CSV:", err);
-            setFileError("Failed to parse CSV file. Please ensure it has the correct format.");
-          }
-        },
-        header: true,
-        skipEmptyLines: true,
-      });
-    }
-    // Handle JSON files
-    else if (file.type === "application/json" || file.name.endsWith(".json")) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const jsonData = JSON.parse(e.target.result);
-          console.log("AnnouncementDetails: Parsed JSON data:", jsonData);
-
-          // Filter data by announcementId if present
-          const filteredData = jsonData.filter(
-            (item) => !item.announcement_id || item.announcement_id == announcementId
-          );
-
-          if (filteredData.length === 0) {
-            setFileError("No data in the file matches the current announcement ID.");
-            return;
-          }
-
-          // Map JSON data to required structure
-          const formattedData = filteredData
-            .filter((item) => item.NO && item.student_identity)
-            .map((item) => {
-              const subjectFields = Object.keys(item).filter(
-                (key) =>
-                  ![
-                    "student_id",
-                    "student_identity",
-                    "result",
-                    "NO",
-                    "STUDENT_IDENTITY",
-                    "announcement_id",
-                  ].includes(key)
-              );
-              const subjectsObj = subjectFields.reduce((acc, key) => {
-                acc[key] = item[key] || "-";
-                return acc;
-              }, {});
-              return {
-                id: item.NO,
-                studentId: item.student_identity,
-                subjects: subjectsObj,
-                result: item.result || "pass",
-              };
-            });
-
-          // Update subjects
-          if (filteredData.length > 0) {
-            const subjectKeys = Object.keys(filteredData[0]).filter(
-              (key) =>
-                ![
-                  "student_id",
-                  "student_identity",
-                  "result",
-                  "NO",
-                  "STUDENT_IDENTITY",
-                  "announcement_id",
-                ].includes(key)
-            );
-            setSubjects(subjectKeys);
-          }
-
-          setData(formattedData);
-          setCurrentPage(1);
-        } catch (err) {
-          console.error("AnnouncementDetails: Error parsing JSON:", err);
-          setFileError("Failed to parse JSON file. Please ensure it has the correct format.");
-        }
-      };
-      reader.readAsText(file);
-    } else {
-      setFileError("Unsupported file type. Please upload a CSV or JSON file.");
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
-  // Pagination logic
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const displayedData = data.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
   };
-
-  const paginationRange = () => {
-    if (totalPages <= 3) return Array.from({ length: totalPages }, (_, i) => i + 1);
-    if (currentPage <= 2) return [1, 2, 3];
-    if (currentPage >= totalPages - 1) return [totalPages - 2, totalPages - 1, totalPages];
-    return [currentPage - 1, currentPage, currentPage + 1];
-  };
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="my-10 text-center">
-        <div className="container mx-auto px-4">
-          <p className="text-gray-600">Loading results...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="my-10 text-center">
-        <div className="container mx-auto px-4">
-          <p className="text-red-600">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Empty state
-  if (data.length === 0) {
-    return (
-      <div className="my-10 text-center">
-        <div className="container mx-auto px-4">
-          <p className="text-gray-600">No results available for this announcement.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="my-10">
-      <div className="container mx-auto px-4">
-        <h1 className="text-2xl font-bold mb-4">Announcement Results</h1>
-        <p className="text-gray-600 mb-4">
-          View student results for this announcement. Upload a CSV or JSON file to update results.
-        </p>
-
-        {/* File Upload Input */}
-        <div className="mb-6">
-          <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">
-            Upload Student Results (CSV or JSON)
-          </label>
-          <input
-            id="file-upload"
-            type="file"
-            accept=".csv,.json"
-            onChange={handleFileUpload}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-800 file:text-white hover:file:bg-red-900"
-          />
-          {fileError && (
-            <p className="mt-2 text-sm text-red-600">{fileError}</p>
-          )}
-        </div>
-
-        <div className="overflow-x-auto bg-white rounded-lg shadow-md">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-red-800 text-white text-left">
-                <th className="p-3 text-sm md:text-base">NO.</th>
-                <th className="p-3 text-sm md:text-base">Student ID</th>
-                {subjects.map((subject) => (
-                  <th key={subject} className="p-3 text-sm md:text-base">
-                    {subject}
-                  </th>
-                ))}
-                <th className="p-3 text-sm md:text-base">Result</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayedData.map((item, index) => (
-                <tr key={index} className="odd:bg-white even:bg-red-50 text-gray-700">
-                  <td className="p-3 text-sm">{item.id}</td>
-                  <td className="p-3 text-sm">{item.studentId}</td>
-                  {subjects.map((subject) => (
-                    <td key={subject} className="p-3 text-sm">
-                      {item.subjects[subject] || "-"}
-                    </td>
-                  ))}
-                  <td className="p-3 text-sm">
-                    <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-semibold">
-                      {item.result}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-center mt-6 space-x-2">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            className={`sm:px-3 py-1 border rounded-md text-gray-700 hover:bg-gray-200 ${
-              currentPage === 1 && "opacity-50 cursor-not-allowed"
-            }`}
-          >
-            <HiChevronLeft size={18} />
-          </button>
-
-          {paginationRange().map((page, index) => (
+    <motion.div
+      className="my-10"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="container mx-auto px-4 flex flex-col items-center">
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <p className="text-lg text-gray-500">Loading announcement details...</p>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-64 flex-col">
+            <p className="text-lg text-red-500">{error}</p>
             <button
-              key={index}
-              onClick={() => handlePageChange(page)}
-              className={`px-3 py-1 border rounded-md ${
-                currentPage === page ? "bg-red-800 text-white" : "text-gray-700 hover:bg-gray-200"
-              }`}
+              onClick={() => {
+                setError(null);
+                setLoading(true);
+                
+              }}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
-              {page}
+              Retry
             </button>
-          ))}
-
-          {totalPages > 3 && currentPage < totalPages - 1 && (
-            <span className="px-3 py-1 text-gray-700">...</span>
-          )}
-
-          {totalPages > 3 && currentPage < totalPages - 1 && (
-            <button
-              onClick={() => handlePageChange(totalPages)}
-              className={`px-3 py-1 border rounded-md ${
-                currentPage === totalPages ? "bg-red-800 text-white" : "text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              {totalPages}
-            </button>
-          )}
-
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            className={`sm:px-3 py-1 border rounded-md text-gray-700 hover:bg-gray-200 ${
-              currentPage === totalPages && "opacity-50 cursor-not-allowed"
-            }`}
-          >
-            <HiChevronRight size={18} />
-          </button>
-        </div>
+          </div>
+        ) : announcement || students.length > 0 ? (
+          <div className="w-full max-w-6xl">
+            {announcement && (
+              <>
+                <h1 className="text-2xl font-bold mb-4 text-center">{announcement.title}</h1>
+                <p className="text-gray-600 mb-6 text-center">{announcement.description}</p>
+              </>
+            )}
+            {students.length === 0 ? (
+              <div className="flex items-center justify-center h-64">
+                <p className="text-lg text-gray-500">No student results available.</p>
+              </div>
+            ) : (
+              <div className="relative overflow-x-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <label htmlFor="rowsPerPage" className="mr-2">
+                      Rows per page:
+                    </label>
+                    <select
+                      id="rowsPerPage"
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        setRowsPerPage(parseInt(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="border rounded px-2 py-1 border-gray-300"
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </div>
+                </div>
+                <table className="w-full text-sm text-left text-gray-500 border">
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                    <tr>
+                      <th className="px-6 py-3">NO.</th>
+                      <th className="px-6 py-3">Student ID</th>
+                      {subjects.map((subject, idx) => (
+                        <th key={idx} className="px-6 py-3">
+                          {subject}
+                        </th>
+                      ))}
+                      <th className="px-6 py-3">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentStudents.map((student, index) => (
+                      <tr key={index} className="bg-white border-b border-gray-200">
+                        <td className="px-6 py-4">{student.NO}</td>
+                        <td className="px-6 py-4">{student.student_identity}</td>
+                        {subjects.map((subject, idx) => (
+                          <td key={idx} className="px-6 py-4">
+                            {student[subject] ?? '-'}
+                          </td>
+                        ))}
+                        <td className="px-6 py-4">
+                          <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-semibold">
+                            {student.result}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="flex justify-between items-center mt-4">
+                  <button
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
+                    className="py-2 px-4 border rounded disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className="py-2 px-4 border rounded disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-64">
+            <p className="text-lg text-gray-500">No announcement or student data available.</p>
+          </div>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

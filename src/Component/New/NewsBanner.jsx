@@ -4,39 +4,45 @@ import { FaCalendarAlt } from 'react-icons/fa';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
-const NewsBanner = ({ newId }) => {
+const NewsBanner = () => {
   const [bannerSection, setBannerSection] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (newId) {
-        const fetchBanner = async () => {
-            try {
-                const response = await axios.get(`${API_ENDPOINTS.getEvent}/${newId}`);
-                const data = response.data?.data;
-                setBannerSection({
-                    title: data.e_title || 'Untitled Event',
-                    postDate: data.e_date
-                        ? new Date(data.e_date).toLocaleDateString('en-GB', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric',
-                          })
-                        : 'TBD', // Format: "22 Aug 2025"
-                    image: data.img?.img
-                        ? `${API}/storage/uploads/${data.img?.img}`
-                        : '/placeholder-image.jpg',
-                });
-                setLoading(false);
-            } catch (err) {
-                setError('Failed to load event banner.');
-                console.error('Error fetching event details:', err);
-                setLoading(false);
-            }
-        };
+   
+    const fetchBanner = async () => {
+      try {
+          const response = await axios.get(`${API_ENDPOINTS.getNews}`);
+          const data = response.data?.data || [];
+          // Select the first item with display: 1 and lang: 1 (or user’s preferred language)
+          const selectedItem = data.find(item => item.display === 1 && item.lang === 1) || data[0];
+          if (selectedItem) {
+              setBannerSection({
+                  title: selectedItem.n_title,
+                  postDate: selectedItem.n_date
+                      ? new Date(selectedItem.n_date).toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                        })
+                      : 'TBD',
+                  image: selectedItem.img?.img
+                      ? `${API}/storage/uploads/${selectedItem.img.img}`
+                      : '/placeholder-image.jpg',
+              });
+          } else {
+              setError('No relevant news found.');
+          }
+          setLoading(false);
+      } catch (err) {
+          setError(err.response?.status === 404 ? 'News not found.' : 'Failed to load news banner.');
+          console.error('Error fetching news details:', err);
+          setLoading(false);
+      }
+  };
         fetchBanner();
-    }
+  
 }, []);
 
   if (loading) {

@@ -33,6 +33,8 @@ const ResearchSection = () => {
 
   // Debounce the search term
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,7 +43,8 @@ const ResearchSection = () => {
         const researchData = researchResponse.data?.data || [];
 
         const formattedResearchData = researchData
-          .filter((item) => item.display === 1 && item.active === 1)
+          .filter((item) => item.display === 1 && item.active === 1 
+            && item.lang === currentLang)
           .map((item) => ({
             id: item.rsd_id,
             title: item.rsd_title || 'Untitled Research',

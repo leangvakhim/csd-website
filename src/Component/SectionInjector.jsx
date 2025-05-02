@@ -68,7 +68,7 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
     case '/events':
       if (lastSegment && lastSegment !== 'events') {
         setOnlyContentMode(true);
-        return <EventsNewsDetails eventId={lastSegment} />;
+        return <EventsNewsDetails  />;
       }
       setOnlyContentMode(false);
       return <div></div>; // Main page content
@@ -90,10 +90,10 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
         return ''; // Replace <div></div> with your actual banner or list component
       }
 
-    case 'announcement':
+    case '/announcement':
       if (lastSegment && lastSegment !== 'announcement') {
         setOnlyContentMode(true);
-        return <AnnouncementDetails />;
+        return <AnnouncementDetails announcementId={lastSegment}/>;
       }
       setOnlyContentMode(false);
       return <div></div>; // Main page content

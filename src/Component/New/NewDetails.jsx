@@ -1,98 +1,115 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_ENDPOINTS } from '../../Service/APIconfig';
-import SocialSection from '../Social/SocialSection';
+import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { motion } from 'framer-motion';
+import DOMPurify from 'dompurify';
 import NewsBanner from './NewsBanner';
-import NewsData from './NewsData';
+import SocialSection from '../Social/SocialSection';
+import RelatedNews from './RelatedNews';
 
-const NewDetails = ({ newsId }) => {
-  const [sections, setSections] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const NewDetails = ({ sectionId, menuLang }) => {
+    const [news, setNews] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchSections = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(API_ENDPOINTS.getNews);
+    useEffect(() => {
+        const fetchNews = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get(
+                    `${API_ENDPOINTS.getNews}?section_id=${sectionId}&lang=${menuLang}`
+                );
+                const data = response.data?.data || [];
 
-        // Log the response for debugging
-        console.log('API Response:', response.data);
+                if (!data.length) {
+                    setError('No news data available for this section and language.');
+                    setLoading(false);
+                    return;
+                }
 
-        // Access the nested 'data' property
-        const eventData = response.data.data;
+                // Select the first item with display: 1 and matching lang, or first display: 1, or first item
+                const selectedItem = data.find(item => item.display === 1 && item.lang === menuLang) ||
+                                    data.find(item => item.display === 1) ||
+                                    data[0];
 
-        // Check if eventData is an object and matches the newsId
-        if (!eventData || typeof eventData !== 'object') {
-          console.error('Expected an event object but got:', eventData);
-          throw new Error('Invalid data format: Expected an event object.');
-        }
+                if (selectedItem) {
+                    setNews({
+                        n_id: selectedItem.n_id,
+                        date: selectedItem.n_date && !isNaN(new Date(selectedItem.n_date).getTime())
+                            ? new Date(selectedItem.n_date).toLocaleDateString('en-GB', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric',
+                              })
+                            : 'TBD',
+                        title: selectedItem.n_title || 'Untitled Event',
+                        shortTitle: selectedItem.n_shorttitle || '',
+                        detail: selectedItem.n_detail || 'No details available.',
+                        image: selectedItem.img?.img
+                            ? `${API}/storage/uploads/${selectedItem.img?.img}`
+                            : '/placeholder-image.jpg',
+                    });
+                } else {
+                    setError('No relevant news found.');
+                }
+                setLoading(false);
+            } catch (err) {
+                const errorMessage = err.response?.status === 404
+                    ? 'News not found.'
+                    : `Failed to load news data: ${err.message}`;
+                console.error('Failed to fetch news data:', err);
+                setError(errorMessage);
+                setLoading(false);
+            }
+        };
+        fetchNews();
+    }, [sectionId, menuLang]);
 
-        // Verify the event ID matches
-        if (eventData.e_id !== parseInt(newsId)) {
-          console.warn(`Event ID mismatch: expected ${newsId}, got ${eventData.e_id}`);
-          throw new Error('Event not found.');
-        }
-
-        // Wrap the single event object in an array for consistency
-        const sorted = [eventData].sort((a, b) => a.e_orders - b.e_orders); // Sorting optional for single item
-
-        setSections(sorted);
-        setLoading(false);
-      } catch (error) {
-        console.error('Failed to fetch event sections:', error);
-        setError(error.message || 'Failed to fetch event details. Please try again later.');
-        setLoading(false);
-      }
-    };
-
-    if (newsId && !isNaN(parseInt(newsId))) {
-      fetchSections();
-    } else {
-      console.warn('Invalid newsId:', newsId);
-      setError('Invalid event ID.');
-      setLoading(false);
-    }
-  }, [newsId]);
-
-  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen px-4 text-center">
-        <p className="text-sm sm:text-base lg:text-lg text-gray-500 animate-pulse">Loading...</p>
-      </div>
-    );
-  }
+        <div className="min-h-screen">
+            {loading ? (
+                <p className="text-gray-600 text-center py-8">Loading news data...</p>
+            ) : error ? (
+                <p className="text-red-500 text-center py-8">{error}</p>
+            ) : news ? (
+                <div>
+                    <NewsBanner
+                        title={news.title}
+                        postDate={news.date}
+                        image={news.image}
+                    />
+                    <div className='px-2'>
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen px-4 text-center">
-        <p className="text-sm sm:text-base lg:text-lg text-red-500">{error}</p>
-      </div>
+                    
+                   
+                    <div className="container mx-auto px-4 py-8">
+                    <SocialSection />
+                        <motion.h2
+                            className="text-2xl font-bold mb-4"
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            {news.title}
+                        </motion.h2>
+                        <motion.div
+                            className="text-gray-700 mb-4"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(news.detail),
+                            }}
+                        />
+                        <RelatedNews />
+                         </div>
+                    </div>
+                </div>
+            ) : (
+                <p className="text-grayClassical Greek and Latin literature-600 text-center py-8">No news data available.</p>
+            )}
+        </div>
     );
-  }
-
-  if (!sections.length) {
-    return (
-      <div className="flex items-center justify-center min-h-screen px-4 text-center">
-        <p className="text-sm sm:text-base lg:text-lg text-gray-500">No event details found.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-white">
-      <NewsBanner newsId={newsId} />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {sections.map((section) => (
-          <div key={section.e_id} className="py-4">
-            <SocialSection />
-            <NewsData />
-            {/* <RelatedEvent /> */}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 };
 
 export default NewDetails;

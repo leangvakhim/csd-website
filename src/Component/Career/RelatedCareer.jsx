@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
-const RelatedEvent = ({ sectionId, menuLang }) => {
+const RelatedCareer = ({ sectionId, menuLang }) => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,20 +14,20 @@ const RelatedEvent = ({ sectionId, menuLang }) => {
         const fetchEvents = async () => {
             try {
                 const response = await axios.get(
-                    `${API_ENDPOINTS.getEvent}?section_id=${sectionId}&lang=${menuLang}`
+                    `${API_ENDPOINTS.getCareer}?section_id=${sectionId}&lang=${menuLang}`
                 );
                 const data = response.data?.data || [];
                 const eventData = Array.isArray(data) ? data : [data].filter(Boolean);
                 const formattedEvents = eventData
                     .map((item, index) => ({
-                        id: item.e_id || index + 1,
-                        title: item.e_title || 'Untitled Event',
+                        id: item.c_id || index + 1,
+                        title: item.c_title || 'Untitled Event',
                         image: item.img?.img
                             ? `${API}/storage/uploads/${item.img.img}`
                             : '/placeholder-image.jpg',
-                        description: item.e_shorttitle || 'No description available.',
-                        date: item.e_date || 'TBD',
-                        category: item.e_tags,
+                        description: item.c_shorttitle || 'No description available.',
+                        date: item.c_date || 'TBD',
+                        category: item.c_tags,
                     }))
                     .slice(0, 4); // 🔥 Limit to 4 items
 
@@ -130,4 +130,4 @@ const RelatedEvent = ({ sectionId, menuLang }) => {
     );
 };
 
-export default RelatedEvent;
+export default RelatedCareer;

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
-import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
+
 
 
 
