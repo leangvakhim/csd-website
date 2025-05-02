@@ -121,7 +121,6 @@ const CSDSection = ({key, section, menuLang}) => {
               >
                   <h2 className="text-3xl font-bold mb-4">{programTitle}</h2>
                   <p className="text-base sm:text-lg mb-6">{description}</p>
-
                   <div className="space-y-6">
                       {objectives.map((objective, index) => (
                           <div key={index} className="flex items-start gap-3">
