@@ -39,13 +39,9 @@ const PartnershipSection = ({ section }) => {
                 const formatted = data
                     .filter((partner) => partner.active === 1) // Filter active partners
                     .map((partner) => ({
-<<<<<<< HEAD
+
                         src: partner.ps_img
                             ? `${API}/storage/uploads/${partner.img?.img}`
-=======
-                        src: partner.img?.img
-                            ? `${API}/storage/uploads/${partner.img.img}` // Use img.img for image file name
->>>>>>> f88820c (update)
                             : null,
                         alt: partner.ps_title || 'Partner Logo', // Use title or fallback
                     }));
