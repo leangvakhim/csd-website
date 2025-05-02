@@ -90,10 +90,10 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
         return ''; // Replace <div></div> with your actual banner or list component
       }
 
-    case 'announcement':
+    case '/announcement':
       if (lastSegment && lastSegment !== 'announcement') {
         setOnlyContentMode(true);
-        return <AnnouncementDetails />;
+        return <AnnouncementDetails announcementID={lastSegment}/>;
       }
       setOnlyContentMode(false);
       return <div></div>; // Main page content
