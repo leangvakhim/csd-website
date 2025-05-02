@@ -10,6 +10,7 @@ import AcademicSection from './Academic/AcademicSection';
 import BasicRequirements from './Requirement/BasicRequirements';
 import ApplySection from './ApplySection/ApplySection';
 import ImportantSection from './Important/ImportantSection';
+import AvailableSection from './Available/AvailableSection';
 import BannerSection from './Banner/BannerSection';
 import GallerySection from './Gallery/GallerySection';
 import Overview from './Overview/overviewContent';
@@ -169,8 +170,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <CSDSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             // case 'Unlock':
                             //     return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                            // case 'Available':
-                            //     return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Avaialable':
+                                return <AvailableSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Feedback':
                                 return <FeedbackSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Partner':

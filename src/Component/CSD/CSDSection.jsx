@@ -82,15 +82,16 @@ const CSDSection = ({ section }) => {
 
             // Parse description for paragraphs
             const parser = new DOMParser();
-            const doc = parser.parseFromString(item.text.desc, "text/html");
+            const rawDesc = item?.text?.desc || '';
+            const doc = parser.parseFromString(rawDesc, "text/html");
             const paragraphs = Array.from(doc.querySelectorAll("p"))
-              .map((p) => p.textContent.trim())
+              .map((p) => p.textContent?.trim?.())
               .filter((p) => p);
 
             // Set program data
             setProgramData({
-              programTitle: item.text.title,
-              description: item.text.desc,
+              programTitle: item.text?.title || 'Untitled Program',
+              description: item.text?.desc || '',
               paragraphs,
               keyMetrics,
               images: [
@@ -98,13 +99,13 @@ const CSDSection = ({ section }) => {
                   src: item.image1?.img
                     ? `${API}/storage/uploads/${item.image1.img}`
                     : null,
-                  alt: `${item.text.title} Image 1`,
+                  alt: `${item.text?.title || 'Untitled Program'} Image 1`,
                 },
                 {
                   src: item.image2?.img
                     ? `${API}/storage/uploads/${item.image2.img}`
                     : null,
-                  alt: `${item.text.title} Image 2`,
+                  alt: `${item.text?.title || 'Untitled Program'} Image 2`,
                 },
               ],
               objectives: subserviceData.map((s) => ({
