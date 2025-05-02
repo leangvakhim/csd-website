@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { API_ENDPOINTS } from "../../Service/APIconfig";
+import { RiDoubleQuotesR } from "react-icons/ri";
 
 const TypeScholar = ({ section }) => {
   const [scholarships, setScholarships] = useState([]);
@@ -11,27 +12,26 @@ const TypeScholar = ({ section }) => {
   useEffect(() => {
     if (section && section.sec_id) {
       // Fetch data for both API endpoints
-      fetch(`${API_ENDPOINTS.getSubType}?section_id=${section.sec_id}`)
+      fetch(API_ENDPOINTS.getSubType)
         .then((response) => response.json())
         .then((data) => {
-          const scholarshipData = data?.data;
-          if (scholarshipData) {
-            setScholarships(scholarshipData);
-          }
+          const allScholarships = data?.data || [];
+          const filtered = allScholarships.filter(item => item?.tse?.tse_sec === section.sec_id);
+          setScholarships(filtered);
         })
         .catch((error) => console.error("Error fetching scholarships from getSubType:", error));
 
-      fetch(`${API_ENDPOINTS.getType}?section_id=${section.sec_id}`)
+      fetch(API_ENDPOINTS.getType)
         .then((response) => response.json())
         .then((data) => {
-          const scholarshipData = data?.data;
-          if (scholarshipData && scholarshipData.length > 0) {
-            const mainData = scholarshipData[0];
-            setMainTitle(mainData?.text?.title || 'Default Title');
-            setDescription(mainData?.text?.desc || 'No description available.');
+          const tseData = data?.data || [];
+          const filtered = tseData.find(t => t.tse_sec === section.sec_id);
+          if (filtered && filtered.text) {
+            setMainTitle(filtered.text.title || 'Default Title');
+            setDescription(filtered.text.desc || 'No description available.');
           }
         })
-        .catch((error) => console.error("Error fetching scholarships from getType:", error));
+        .catch((error) => console.error("Error fetching data from /api/tse:", error));
     }
   }, [section]);  // Fetch scholarships when `section` is available or changes
 
@@ -47,17 +47,15 @@ const TypeScholar = ({ section }) => {
 
   return (
     <div className="my-16">
-      <motion.div
+      {/* <motion.div
         className="container mx-auto px-4"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
       >
         <div className="mb-8 flex flex-col xl:flex-row xl:justify-between xl:items-start gap-6">
-          {/* Title */}
           <h2 className="text-3xl font-bold">{mainTitle}</h2>
 
-          {/* Description */}
           <p className="text-gray-800 max-w-2xl">{description}</p>
         </div>
 
@@ -72,10 +70,8 @@ const TypeScholar = ({ section }) => {
                 className={`rounded-lg p-6 shadow-lg border ${index % 2 === 1 ? 'bg-red-800 text-white' : 'bg-white text-gray-800'}`}
                 variants={itemVariants}
               >
-                {/* Title */}
                 <h3 className="text-xl font-semibold">{scholarship.stse_title}</h3>
 
-                {/* Content Section */}
                 <div className="space-y-4">
                   <div className="flex items-start gap-2 mb-4">
                     <p className="text-lg" dangerouslySetInnerHTML={{ __html: scholarship.stse_detail }} />
@@ -88,6 +84,190 @@ const TypeScholar = ({ section }) => {
           )}
         </motion.div>
       </motion.div>
+
+      <motion.section
+        className="my-16"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
+        <div className="container mx-auto px-4">
+            <div className='flex flex-col xl:flex-row justify-between'>
+                <motion.h2
+                    className="text-3xl font-bold text-center mb-8"
+                    variants={itemVariants}
+                >
+                    Why Choose Our Program
+                </motion.h2>
+                <motion.div
+                    className="text-center mb-12"
+                    variants={itemVariants}
+                >
+                    <p className="max-w-3xl text-start">
+                        We offer a top-tier Computer Science education with expert faculty,
+                        cutting-edge facilities, and strong industry ties for internships and
+                        jobs. Our globally aligned curriculum, research in AI, cybersecurity,
+                        and data science, plus hackathons and student organizations, foster
+                        innovation and career growth.
+                    </p>
+                </motion.div>
+            </div>
+            <motion.div
+                className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                variants={containerVariants}
+            >
+                <motion.div
+                    className="bg-red-800 text-white shadow-lg rounded-lg p-6 relative"
+                    variants={itemVariants}
+                >
+
+
+                    <div className="absolute top-[-40px] right-4 text-7xl opacity-90 text-red-700">
+                    <RiDoubleQuotesR />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">
+                        Expert Faculty & Cutting-Edge Facilities
+                    </h3>
+                    <p>
+                        Learn from industry professionals and researchers while accessing
+                        modern labs, research centers, and collaborative spaces.
+                    </p>
+                </motion.div>
+
+                <motion.div
+                    className="bg-white shadow-lg rounded-lg p-6 relative"
+                    variants={itemVariants}
+                >
+                    <div className="absolute top-[-40px] right-4 text-7xl opacity-90 text-red-700">
+                    <RiDoubleQuotesR />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2 text-red-800">
+                        Strong Industry Connections
+                    </h3>
+                    <p className="text-gray-700">
+                        Benefit from internships and job opportunities through partnerships
+                        with top tech companies.
+                    </p>
+                </motion.div>
+
+                <motion.div
+                    className="bg-white shadow-lg rounded-lg p-6 relative"
+                    variants={itemVariants}
+                >
+                    <div className="absolute top-[-40px] right-4 text-7xl opacity-90  text-red-700">
+                    <RiDoubleQuotesR />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2 text-red-800">
+                        Globally Aligned Curriculum & Research Opportunities
+                    </h3>
+                    <p className="text-gray-700">
+                        Stay ahead with an internationally recognized curriculum and engage
+                        in research in AI, cybersecurity, and data science.
+                    </p>
+                </motion.div>
+
+                <motion.div
+                    className="bg-white shadow-lg rounded-lg p-6 relative"
+                    variants={itemVariants}
+                >
+                      <div className="absolute top-[-40px] right-4 text-7xl opacity-90  text-red-700">
+                    <RiDoubleQuotesR />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2 text-red-800">
+                        Dynamic Student Community
+                    </h3>
+                    <p className="text-gray-700">
+                        Join hackathons, coding competitions, and tech meetups to enhance
+                        skills, network, and innovate.
+                    </p>
+                </motion.div>
+            </motion.div>
+        </div>
+      </motion.section> */}
+
+      <motion.div
+        className="container mx-auto px-4"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+      >
+        <div className="mb-8 flex flex-col xl:flex-row xl:justify-between xl:items-start gap-6">
+          <h2 className="text-3xl font-bold">{mainTitle}</h2>
+
+          <p className="text-gray-800 max-w-2xl">{description}</p>
+        </div>
+      </motion.div>
+      <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4"
+          variants={containerVariants}
+        >
+      {
+        scholarships.map((scholarship, index) => {
+          if (scholarship.tse?.tse_type === 1) {
+            return (
+              <motion.div
+                key={index}
+                className={`rounded-lg p-6 shadow-lg border !border-gray-300 ${index % 2 === 1 ? 'mr-4 bg-red-800 text-white' : 'ml-4 bg-white text-gray-800'}`}
+                variants={itemVariants}
+              >
+                <h3 className="text-xl font-semibold mb-4">{scholarship.stse_title}</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-2 mb-4">
+                    <p className="text-lg" dangerouslySetInnerHTML={{ __html: scholarship.stse_detail }} />
+                  </div>
+                </div>
+              </motion.div>
+            );
+          } else if (scholarship.tse?.tse_type === 2) {
+            return null;
+          }
+          return null;
+        })
+      }
+      </motion.div>
+      {scholarships.filter(s => s.tse?.tse_type === 2).length > 0 && (
+        <motion.section
+          className="my-16"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <div className="container mx-auto px-4">
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 gap-8"
+              variants={containerVariants}
+            >
+              {scholarships
+                .filter(s => s.tse?.tse_type === 2)
+                .map((s, i) => (
+                  <motion.div
+                    key={i}
+                    className={`shadow-lg rounded-lg p-6 relative ${
+                      i === 0 ? 'bg-red-800 text-white' : 'bg-white text-gray-800'
+                    }`}
+                    variants={itemVariants}
+                  >
+                    <div className="absolute top-[-40px] right-4 text-7xl opacity-90 text-red-700">
+                      <RiDoubleQuotesR />
+                    </div>
+                    <h3
+                      className={`text-xl font-semibold mb-2 ${
+                        i !== 0 ? 'text-red-800' : ''
+                      }`}
+                    >
+                      {s.stse_title}
+                    </h3>
+                    <p className={`${i !== 0 ? 'text-gray-700' : ''}`}>
+                      {s.stse_detail.replace(/<\/?[^>]+(>|$)/g, '')}
+                    </p>
+                  </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </motion.section>
+      )}
     </div>
   );
 };
