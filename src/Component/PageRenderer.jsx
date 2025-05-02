@@ -21,7 +21,7 @@ import InnovationSection from './Innovation/InnovationSection';
 import FeeSection from './Fee/FeeSection';
 import FutureSection from './Future/FutureSection';
 import TestimonialSection from './Testimonial/TestimonialSection';
-import TypeSection from './Type/TypeSection';
+import TypeSection from './Type/TypeScholar';
 import AboutSection from './About/AboutSection';
 import QuestionSection from './Question/QuestionSection';
 import ContactSection from './Contact/ContactSection';
@@ -40,6 +40,8 @@ import AnnouncementSection from './Announcement/AnnouncementSection';
 import EventSection from './Event/EventSection';
 import ResearchController from './Research/ResearchController';
 import NewsSection from './New/NewsSection';
+import TypeController from './Type/TypeController';
+import CSDSection from './CSD/CSDSection';
 
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
@@ -101,7 +103,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                     {sections.map((section) => {
                         switch (section.sec_type) {
                             case 'Slideshow':
-                                return <Slideshow key={section.sec_id} section={section} menuLang={menuLang}/>;
+                                return <Slideshow key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Service':
                                 return <ServiceSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Programs':
@@ -135,7 +137,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Testimonial':
                                 return <TestimonialSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Type':
-                                return <TypeSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <TypeController key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Criteria':
                                 return <BasicRequirements key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Question':
@@ -156,8 +158,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <CareerSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Specialization':
                                 return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                            // case 'CSD':
-                            //     return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'CSD':
+                                return <CSDSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             // case 'Unlock':
                             //     return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             // case 'Available':
@@ -178,8 +180,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <AnnouncementSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Event':
                                 return <EventSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                          
-                               
+
+
                             default:
                                 console.log("PageRenderer: Unknown section type:", section.sec_type);
                                 return (
@@ -193,8 +195,10 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
             )}
 
             <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
-            
-           
+
+            {/* Footer */}
+
+
             <div>
                 <Footer />
             </div>

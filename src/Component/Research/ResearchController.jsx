@@ -4,6 +4,7 @@ import axios from 'axios';
 import { API_ENDPOINTS } from '../../Service/APIconfig';
 import ResearchInnovations from './ResearcInnovation';
 import ResearchSection from './ResearchSection';
+import ColController from '../Col/FourCol';
 
 const sectionVariants = {
   hidden: { opacity: 0 },
@@ -39,7 +40,7 @@ const ResearchController = ({ section }) => {
         const res = await axios.get(`${API_ENDPOINTS.getPage}?section_id=${section.sec_id}`);
         const fetchedSections = res.data?.data?.sections || [];
 
-        const matchedSection = fetchedSections.find(sec => sec.sec_page === section.sec_page);
+        const matchedSection = fetchedSections.find(sec => sec.page?.p_alias === section.page?.p_alias);
         setResearchData(matchedSection || section);
       } catch (err) {
         console.error('ResearchController: Failed to fetch data', err);
@@ -53,7 +54,7 @@ const ResearchController = ({ section }) => {
   }, [section]);
 
   const renderResearchContent = () => {
-    if (!section?.sec_page) {
+    if (!section?.page?.p_alias) {
       return (
         <div className="text-center py-8 text-gray-600">
           Research section not available for this page type.
@@ -61,12 +62,20 @@ const ResearchController = ({ section }) => {
       );
     }
 
-    // Extend this logic if you need more specific page-based rendering
-    if (section.sec_page === '/home') {
+    // Render based on page alias
+    if (section.page.p_alias === '/home') {
       return <ResearchInnovations section={researchData} />;
     }
+    if (section.page.p_alias === '/research') {
+      return <ResearchSection section={researchData} />;
+    }
 
-    return <ResearchSection section={researchData} />;
+    // Fallback for other page types
+    return (
+      <div className="text-center py-8 text-gray-600">
+        No specific research content available for this page.
+      </div>
+    );
   };
 
   if (loading) {

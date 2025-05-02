@@ -78,7 +78,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
 
         const transformed = [{
           id: announcement.am_id,
-          tag: announcement.am_tag || 'General',
           title: announcement.am_title,
           description: announcement.am_shortdesc || '',
           date: announcement.am_postdate
@@ -88,7 +87,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
               day: 'numeric'
             })
             : 'TBD',
-          imageUrl: announcement.am_img ? `${BASE_IMAGE_URL}/${announcement.am_img}` : DEFAULT_IMAGE
+            imageUrl: announcement.img.img ? `${BASE_IMAGE_URL}/${announcement.img.img}` : DEFAULT_IMAGE
         }];
 
         setNewsItems(transformed);
@@ -185,30 +184,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
                   )}
                 </div>
 
-                {/* Tag Filter Dropdown */}
-                <div className="relative w-full">
-                  <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-50" />
-                  <select
-                    value={selectedTag}
-                    onChange={(e) => setSelectedTag(e.target.value)}
-                    className="border rounded-full py-2 pl-10 bg-red-800 text-gray-50 focus:outline-none focus:ring focus:border-blue-300 appearance-none w-full"
-                    aria-label="Filter by tag"
-                  >
-                    <option value="">All</option>
-                    {tags.map((tag, i) => (
-                      <option key={i} value={tag}>{tag}</option>
-                    ))}
-                  </select>
-                  {selectedTag && (
-                    <button
-                      onClick={handleClearFilter}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-50 hover:text-gray-200"
-                      aria-label="Clear filter"
-                    >
-                      <FaTimes className="text-sm" />
-                    </button>
-                  )}
-                </div>
+               
               </div>
             </div>
           )}
@@ -238,10 +214,10 @@ const AnnouncementSection = ({ section, menuLang }) => {
               <div
                 key={item.id}
                 className="bg-white rounded-lg flex flex-col xl:flex-row shadow-md overflow-hidden cursor-pointer"
-                onClick={() => navigate(`/news/${item.id}`)}
+                onClick={() => navigate(`/announcement/${item.id}`)}
               >
                 {/* Image Section */}
-                <div className="p-3 w-full xl:w-[313px] h-auto xl W-[221px]">
+                <div className="p-3 w-full h-auto">
                   <img
                     src={item.imageUrl}
                     alt={item.title}
@@ -255,11 +231,10 @@ const AnnouncementSection = ({ section, menuLang }) => {
 
                 {/* Text Content */}
                 <div className="p-6 flex flex-col justify-center">
-                  <span className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2">
-                    {item.tag}
-                  </span>
+                 
                   <h3 className="text-lg font-semibold mb-4">{item.title}</h3>
                   <p className="text-gray-600">{item.description}</p>
+                  <p className="text-gray-500 text-sm mt-2">{item.date}</p>
                 </div>
               </div>
             ))

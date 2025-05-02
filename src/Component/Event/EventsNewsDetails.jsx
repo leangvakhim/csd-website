@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../../Service/APIconfig';
 import EventBanner from './EventBanner';
@@ -7,7 +6,7 @@ import SocialSection from '../Social/SocialSection';
 import EventData from './EventData';
 import RelatedEvent from './RelatedEvent';
 
-const EventsNewsDetails = ( { eventId, newId }) => {
+const EventsNewsDetails = ({ eventId, newId }) => {
   const [event, setEvent] = useState(null);
   const [news, setNews] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,30 +16,29 @@ const EventsNewsDetails = ( { eventId, newId }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-
         let eventData = null;
         let newsData = null;
 
-        // Fetch event data if eventId is provided
         if (eventId) {
           const eventRes = await axios.get(`${API_ENDPOINTS.getEvent}/${eventId}`);
           eventData = eventRes.data?.data;
           if (!eventData || eventData.e_id !== parseInt(eventId)) {
             throw new Error('Event not found.');
           }
+           setEvent(eventData);
         }
 
-        // Fetch news data if newId is provided
         if (newId) {
           const newsRes = await axios.get(`${API_ENDPOINTS.getNews}/${newId}`);
           newsData = newsRes.data?.data;
           if (!newsData || newsData.n_id !== parseInt(newId)) {
             throw new Error('News not found.');
           }
+          setNews(newsData);
         }
 
-        setEvent(eventData);
-        setNews(newsData);
+       
+       
         setLoading(false);
       } catch (error) {
         setError(error.message || 'Failed to fetch content.');
@@ -48,7 +46,6 @@ const EventsNewsDetails = ( { eventId, newId }) => {
       }
     };
 
-    // Fetch data if at least one ID is provided
     if (eventId || newId) {
       fetchData();
     } else {
@@ -56,6 +53,14 @@ const EventsNewsDetails = ( { eventId, newId }) => {
       setLoading(false);
     }
   }, [eventId, newId]);
+
+  // Debug logs to verify data
+  useEffect(() => {
+    console.log('Event ID:', eventId);
+    console.log('New ID:', newId);
+    console.log('Event Data:', event);
+    console.log('News Data:', news);
+  }, [eventId, newId, event, news]);
 
   if (loading) {
     return (
@@ -73,7 +78,10 @@ const EventsNewsDetails = ( { eventId, newId }) => {
     );
   }
 
-  if (!event && !news) {
+  // Prioritize news if newId and news exist, otherwise use event if eventId and event exist
+  const displayData = newId && news ? news : (eventId && event ? event : null);
+
+  if (!displayData) {
     return (
       <div className="flex items-center justify-center min-h-screen px-4 text-center">
         <p className="text-sm sm:text-base lg:text-lg text-gray-500">No event or news details found.</p>
@@ -83,15 +91,11 @@ const EventsNewsDetails = ( { eventId, newId }) => {
 
   return (
     <div className="bg-white">
-      {/* Conditionally render EventBanner based on eventId and newId */}
       {(eventId || newId) && <EventBanner eventId={eventId} newId={newId} />}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-4">
-          {/* Render SocialSection with available data */}
           <SocialSection event={event} news={news} />
-          {/* Render EventData with available data */}
-          <EventData event={event} news={news} />
-          {/* Conditionally render RelatedEvent if eventId or newId is provided */}
+          <EventData event={event} news={news} eventId={eventId} newId={newId} />
           {(eventId || newId) && <RelatedEvent eventId={eventId} newId={newId} />}
         </div>
       </div>

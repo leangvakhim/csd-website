@@ -5,11 +5,11 @@ import { FaArrowRight, FaCalendarAlt, FaSpinner } from 'react-icons/fa';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
-const CareerSection = ({section, menuLang}) => {
+const CareerSection = ({ section, menuLang }) => {
     const navigate = useNavigate();
     const [careers, setCareers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [currentLang, setCurrentLang] = useState(1);
+    const [currentLang, setCurrentLang] = useState(1); // Assuming a default language of 1
     const [headerData, setHeaderData] = useState({
         hsec_title: 'default title',
         hsec_subtitle: 'default subtitle',
@@ -22,29 +22,35 @@ const CareerSection = ({section, menuLang}) => {
         const fetchCareerData = async () => {
             try {
                 const headerRes = await axios.get(API_ENDPOINTS.getHeaderSection);
-                if (headerRes.data?.hsec_title) {
+                if (headerRes.data) {
                     setHeaderData({
-                        hsec_title: headerRes.data.hsec_title,
-                        hsec_subtitle: headerRes.data.hsec_subtitle,
+                        hsec_title: headerRes.data.hsec_title || 'default title',
+                        hsec_subtitle: headerRes.data.hsec_subtitle || 'default subtitle',
                     });
                 }
 
                 const careerRes = await axios.get(API_ENDPOINTS.getCareer);
-                const formatted = careerRes.data.data
-                .filter((item) => item.lang === setCurrentLang)
-                .map(item => ({
-                    id: item.c_id,
-                    title: item.c_title,
-                    description: item.c_shortdesc,
-                    date: new Date(item.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                    }),
-                    imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
-                }));
+                const formattedCareers = careerRes.data.data
+                    .filter(
+                        (item) =>
+                            item.display === 1 &&
+                            item.active === 1 &&
+                            item.c_order === 1 &&
+                            item.lang === currentLang
+                    )
+                    .map((item) => ({
+                        id: item.c_id,
+                        title: item.c_title,
+                        description: item.c_shortdesc,
+                        date: new Date(item.c_date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                        }),
+                        imageUrl: item.image?.c_img ? `${BASE_IMAGE_URL}/${item.image.c_img}` : DEFAULT_IMAGE,
+                    }));
 
-                setCareers(formatted);
+                setCareers(formattedCareers);
             } catch (err) {
                 console.error('Error fetching careers:', err);
             } finally {
@@ -53,7 +59,13 @@ const CareerSection = ({section, menuLang}) => {
         };
 
         fetchCareerData();
-    }, []);
+    }, [currentLang]); // Re-fetch data if the language changes
+
+    useEffect(() => {
+        if (menuLang) {
+            setCurrentLang(menuLang);
+        }
+    }, [menuLang]);
 
     const containerVariants = {
         hidden: { opacity: 0, y: 50 },
@@ -141,7 +153,6 @@ const CareerSection = ({section, menuLang}) => {
                             </div>
                         )}
                     </motion.div>
-
                 </div>
             </motion.div>
         </div>

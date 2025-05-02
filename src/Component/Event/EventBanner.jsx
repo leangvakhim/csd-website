@@ -24,8 +24,8 @@ const EventBanner = ({ eventId }) => {
                                   year: 'numeric',
                               })
                             : 'TBD', // Format: "22 Aug 2025"
-                        image: data.e_img
-                            ? `${API}/storage/uploads/${data.e_img}`
+                        image: data.img?.img
+                            ? `${API}/storage/uploads/${data.img?.img}`
                             : '/placeholder-image.jpg',
                     });
                     setLoading(false);

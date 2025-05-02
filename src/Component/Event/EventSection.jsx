@@ -26,7 +26,7 @@ const EventSection = ({ section, menuLang }) => {
     const [headerError, setHeaderError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTag, setSelectedTag] = useState('');
-    const [headerData, setHeaderData] = useState([]);
+    const [headerData, setHeaderData] = useState({});
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
@@ -44,7 +44,7 @@ const EventSection = ({ section, menuLang }) => {
                         );
                         if (eventSplit) {
                             setHeaderData({
-                                hsec_title: eventSplit.hsec_title ,
+                                hsec_title: eventSplit.hsec_title,
                                 hsec_amount: eventSplit.hsec_amount || 4,
                                 hsec_subtitle: eventSplit.hsec_subtitle || '',
                             });
@@ -78,7 +78,6 @@ const EventSection = ({ section, menuLang }) => {
                     .map(item => ({
                         id: item.e_id,
                         tag: item.e_tags || 'Events',
-                        category: item.e_tags || 'Events',
                         title: item.e_title || 'Untitled Event',
                         description: item.e_shorttitle || 'No description available',
                         date: item.e_date
@@ -88,7 +87,7 @@ const EventSection = ({ section, menuLang }) => {
                                   day: 'numeric',
                               })
                             : 'TBD',
-                        imageUrl: item.e_img ? `${BASE_IMAGE_URL}/${item.e_img}` : DEFAULT_IMAGE,
+                        imageUrl: item.img.img ? `${BASE_IMAGE_URL}/${item.img.img}` : DEFAULT_IMAGE,
                     }))
                     .slice(0, headerData.hsec_amount || 4);
 
@@ -102,7 +101,7 @@ const EventSection = ({ section, menuLang }) => {
         };
 
         fetchData();
-    }, [section.sec_id, menuLang, isHomePage]);
+    }, [headerData.hsec_amount, isHomePage]); // Add dependencies to prevent infinite loop
 
     const tags = [...new Set(events.map(item => item.tag))];
 
@@ -115,9 +114,7 @@ const EventSection = ({ section, menuLang }) => {
     });
 
     const handleClearSearch = () => setSearchTerm('');
-    const handleClearFilter = () => setSelectedTag('');
 
-  
     if (headerLoading || loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -154,7 +151,7 @@ const EventSection = ({ section, menuLang }) => {
                 >
                     <div>
                         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-3 sm:mb-4">
-                            {headerData.hsec_title }
+                            {headerData.hsec_title || 'Events'}
                         </h1>
                         {headerData.hsec_subtitle && (
                             <p className="text-xs sm:text-sm text-gray-500">
@@ -187,31 +184,7 @@ const EventSection = ({ section, menuLang }) => {
                                         </button>
                                     )}
                                 </div>
-                                <div className="relative w-full">
-                                    <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-50" />
-                                    <select
-                                        value={selectedTag}
-                                        onChange={e => setSelectedTag(e.target.value)}
-                                        className="border rounded-full py-2 pl-10 bg-red-800 text-gray-50 focus:outline-none focus:ring focus:border-blue-300 appearance-none w-full"
-                                        aria-label="Filter by category"
-                                    >
-                                        <option value="">All</option>
-                                        {tags.map((tag, i) => (
-                                            <option key={i} value={tag}>
-                                                {tag}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {selectedTag && (
-                                        <button
-                                            onClick={handleClearFilter}
-                                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-50 hover:text-gray-200"
-                                            aria-label="Clear filter"
-                                        >
-                                            <FaTimes className="text-sm" />
-                                        </button>
-                                    )}
-                                </div>
+                             
                             </div>
                         )}
                         {isHomePage && (
@@ -247,7 +220,7 @@ const EventSection = ({ section, menuLang }) => {
                                     viewport={{ once: true, amount: 0.3 }}
                                 >
                                     <Link
-                                        to={`/news&events/${event.id}`}
+                                        to={`/events/${event.id}`}
                                         className="block group"
                                         aria-label={event.title}
                                     >
@@ -264,7 +237,7 @@ const EventSection = ({ section, menuLang }) => {
                                             <div className="w-full lg:w-1/2 p-4 sm:p-5">
                                                 {event.category && (
                                                     <span className="text-xs font-semibold text-red-600 uppercase bg-red-100 px-2 py-1 rounded-full">
-                                                        {event.category}
+                                                        {event.tags}
                                                     </span>
                                                 )}
                                                 <h5 className="text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4">

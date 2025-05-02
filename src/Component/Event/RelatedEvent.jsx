@@ -3,7 +3,7 @@ import { FaCalendarAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { API_ENDPOINTS } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
 const RelatedEvent = ({ sectionId, menuLang }) => {
     const [events, setEvents] = useState([]);
@@ -21,7 +21,9 @@ const RelatedEvent = ({ sectionId, menuLang }) => {
                 const formattedEvents = eventData.map((item, index) => ({
                     id: item.e_id || index + 1,
                     title: item.e_title || 'Untitled Event',
-                    imageUrl: item.e_img || 'https://via.placeholder.com/300',
+                    image: data.img?.img
+                            ? `${API}/storage/uploads/${data.img?.img}`
+                            : '/placeholder-image.jpg',
                     description: item.e_shorttitle || 'No description available.',
                     date: item.e_date || 'TBD',
                     category: item.e_tags ,
@@ -92,7 +94,7 @@ const RelatedEvent = ({ sectionId, menuLang }) => {
                                 >
                                     <div className="mx-auto w-full lg:w-1/2 flex justify-center items-center">
                                         <img
-                                            src={event.imageUrl}
+                                            src={event.image}
                                             alt={event.title}
                                             className="w-full h-56 object-cover rounded-2xl"
                                         />

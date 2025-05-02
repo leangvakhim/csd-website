@@ -10,6 +10,9 @@ import ResearchLabDetails from './ResearchDetails/ResearchLabDetails';
 import ScholarshipDetails from './Scholarship/ScholarshipDetails';
 import EventsNewsDetails from './Event/EventsNewsDetails';
 import { useParams } from 'react-router-dom';
+import CareerDetails from './Career/CareerDetails';
+import AnnouncementDetails from './Announcement/AnnouncementDetails';
+import NewDetails from './New/NewDetails';
 
 const SectionInjector = ({ alias, setOnlyContentMode }) => {
   const { id, sec_page } = useParams(); // Added sec_page from useParams
@@ -46,7 +49,7 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
       setOnlyContentMode(false);
       return '';
 
-    case '/researchlab': // Added leading '/' for consistency
+    case '/researchlab':
       if (lastSegment && lastSegment !== 'researchlab') {
         setOnlyContentMode(true);
         return <ResearchLabDetails researchlabId={lastSegment} />;
@@ -60,16 +63,40 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
         return <ScholarshipDetails scholarshipId={lastSegment} />;
       }
       setOnlyContentMode(false);
-      return <div></div>; // Placeholder; replace with actual component
+      return <div></div>;
 
-    case '/news&events':
-      if (lastSegment && lastSegment !== 'news&events') {
+    case '/events':
+      if (lastSegment && lastSegment !== 'events') {
         setOnlyContentMode(true);
-        return <EventsNewsDetails eventId={lastSegment} newId={lastSegment} />;
+        return <EventsNewsDetails eventId={lastSegment} />;
       }
       setOnlyContentMode(false);
       return <div></div>; // Main page content
 
+    case '/news':
+      if (lastSegment && lastSegment !== 'news') {
+        setOnlyContentMode(true);
+        return <NewDetails  newId={lastSegment} />;
+      }
+      setOnlyContentMode(false);
+      return <div></div>; // Main page content
+
+    case '/career':
+      if (lastSegment && lastSegment !== 'career') {
+        setOnlyContentMode(true);
+        return <CareerDetails careerId={lastSegment} />;
+      } else {
+        setOnlyContentMode(false);
+        return ''; // Replace <div></div> with your actual banner or list component
+      }
+
+    case 'announcement':
+      if (lastSegment && lastSegment !== 'announcement') {
+        setOnlyContentMode(true);
+        return <AnnouncementDetails />;
+      }
+      setOnlyContentMode(false);
+      return <div></div>; // Main page content
 
     default:
       setOnlyContentMode(false);

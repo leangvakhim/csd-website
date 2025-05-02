@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../../Service/APIconfig';
-import EventBanner from './EventBanner';
 import SocialSection from '../Social/SocialSection';
-import EventData from './EventData';
-import RelatedEvent from './RelatedEvent';
+import NewsBanner from './NewsBanner';
+import NewsData from './NewsData';
 
 const NewDetails = ({ newsId }) => {
   const [sections, setSections] = useState([]);
@@ -82,13 +81,13 @@ const NewDetails = ({ newsId }) => {
 
   return (
     <div className="bg-white">
-      <EventBanner newsId={newsId} />
+      <NewsBanner newsId={newsId} />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {sections.map((section) => (
           <div key={section.e_id} className="py-4">
             <SocialSection />
-            <EventData />
-            <RelatedEvent />
+            <NewsData />
+            {/* <RelatedEvent /> */}
           </div>
         ))}
       </div>

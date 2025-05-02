@@ -26,9 +26,9 @@ const PartnershipSection = ({ section }) => {
     const [partners, setPartners] = useState([]);
 
     useEffect(() => {
-        axios
-            .get(`${API_ENDPOINTS.getPartnership}?section_id=${section.sec_id}`)
-            .then((res) => {
+        const fetchPartners = async () => {
+            try {
+                const res = await axios.get(`${API_ENDPOINTS.getPartnership}?section_id=${section.sec_id}`);
                 let data = res.data?.data ?? [];
 
                 // Ensure data is an array
@@ -39,20 +39,32 @@ const PartnershipSection = ({ section }) => {
                 const formatted = data
                     .filter((partner) => partner.active === 1) // Filter active partners
                     .map((partner) => ({
+<<<<<<< HEAD
                         src: partner.ps_img
                             ? `${API}/storage/uploads/${partner.img?.img}`
+=======
+                        src: partner.img?.img
+                            ? `${API}/storage/uploads/${partner.img.img}` // Use img.img for image file name
+>>>>>>> f88820c (update)
                             : null,
                         alt: partner.ps_title || 'Partner Logo', // Use title or fallback
                     }));
-                // console.log('Formatted partners:', formatted);
 
-                setPartners(formatted);
-            })
-            .catch((error) => {
+                // Only update state if data has changed to prevent unnecessary re-renders
+                setPartners((prevPartners) => {
+                    if (JSON.stringify(prevPartners) !== JSON.stringify(formatted)) {
+                        return formatted;
+                    }
+                    return prevPartners;
+                });
+            } catch (error) {
                 console.error('PartnershipSection: Error fetching partners:', error);
                 setPartners([]); // Reset state on error
-            });
-    }, [section]);
+            }
+        };
+
+        fetchPartners();
+    }, [section.sec_id]); // Use specific property to avoid unnecessary re-runs
 
     if (partners.length === 0) {
         console.log('PartnershipSection: No partners to render (partners array is empty)');
@@ -84,19 +96,26 @@ const PartnershipSection = ({ section }) => {
                     <span className="border-r border-gray-300 h-10 hidden lg:block"></span>
 
                     {/* Partner Logos */}
-                    <div className="flex flex-wrap justify-center xl:justify-start items-center gap-6">
+                    <motion.div
+                        className="flex flex-wrap justify-center xl:justify-start items-center gap-6"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                    >
                         {partners.map((partner, index) => (
                             <motion.div
                                 key={index}
                                 className="flex items-center justify-center"
                                 variants={cardVariants}
-                                transition={{ duration: 0.6 }}
+                                whileHover={{ scale: 1.1 }}
+                                transition={{ duration: 0.3 }}
                             >
                                 {partner.src ? (
                                     <img
                                         src={partner.src}
                                         alt={partner.alt}
-                                        className="max-h-16 w-auto"
+                                        className="h-16 w-auto"
                                         aria-label={partner.alt}
                                         loading="lazy"
                                         onError={(e) => (e.currentTarget.src = '/fallback-logo.png')}
@@ -106,7 +125,7 @@ const PartnershipSection = ({ section }) => {
                                 )}
                             </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </motion.section>
         </div>

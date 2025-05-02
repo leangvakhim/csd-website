@@ -56,11 +56,15 @@ function App() {
                       ? '/scholarship/*'
                       : page.p_alias === '/researchlab'
                         ? '/researchlab/*'
-                        : page.p_alias === '/news&events'
-                          ? '/news&events/*'
-                          : page.p_alias === '/news'
-                            ? '/news/*'
-                              : page.p_alias 
+                        : page.p_alias === '/events'
+                          ? '/events/*'
+                            : page.p_alias === '/news'
+                              ? '/news/*'
+                              : page.p_alias === '/career'
+                                ? '/career/*'
+                                : page.p_alias === '/announcement'
+                                  ? '/announcement/*'
+                                  : page.p_alias
               }
               element={
                 <PageRenderer

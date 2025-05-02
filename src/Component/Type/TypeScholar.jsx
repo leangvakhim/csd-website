@@ -6,6 +6,7 @@ const TypeScholar = ({ section }) => {
   const [scholarships, setScholarships] = useState([]);
   const [mainTitle, setMainTitle] = useState('');
   const [description, setDescription] = useState('');
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   // Fetching Scholarship Types (Full-Funded, Merit-Based, etc.)
   useEffect(() => {
@@ -16,7 +17,11 @@ const TypeScholar = ({ section }) => {
         .then((data) => {
           const scholarshipData = data?.data;
           if (scholarshipData) {
-            setScholarships(scholarshipData);
+            // Filter scholarships by currentLang
+            const filteredScholarships = scholarshipData.filter(
+              (scholarship) => scholarship.lang === section.lang
+            );
+            setScholarships(filteredScholarships);
           }
         })
         .catch((error) => console.error("Error fetching scholarships from getSubType:", error));
@@ -26,14 +31,17 @@ const TypeScholar = ({ section }) => {
         .then((data) => {
           const scholarshipData = data?.data;
           if (scholarshipData && scholarshipData.length > 0) {
-            const mainData = scholarshipData[0];
+            // Filter by currentLang or pick the first matching language
+            const mainData = scholarshipData.find(
+              (item) => item.lang === currentLang
+            ) || scholarshipData[0]; // Fallback to first item if no match
             setMainTitle(mainData?.text?.title || 'Default Title');
             setDescription(mainData?.text?.desc || 'No description available.');
           }
         })
         .catch((error) => console.error("Error fetching scholarships from getType:", error));
     }
-  }, [section]);  // Fetch scholarships when `section` is available or changes
+  }, [section, currentLang]); // Add currentLang to dependency array
 
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },
