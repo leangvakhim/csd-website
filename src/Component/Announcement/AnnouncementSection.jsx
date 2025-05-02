@@ -74,21 +74,23 @@ const AnnouncementSection = ({ section, menuLang }) => {
         setLoading(true);
         const response = await axios.get(API_ENDPOINTS.getAnnouncement); // Replace with correct endpoint
 
-        const announcement = response.data.data;
+        const announcements = Array.isArray(response.data?.data) ? response.data.data : [];
 
-        const transformed = [{
+        const transformed = announcements.map((announcement) => ({
           id: announcement.am_id,
           title: announcement.am_title,
           description: announcement.am_shortdesc || '',
           date: announcement.am_postdate
             ? new Date(announcement.am_postdate).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            })
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              })
             : 'TBD',
-            imageUrl: announcement.img.img ? `${BASE_IMAGE_URL}/${announcement.img.img}` : DEFAULT_IMAGE
-        }];
+          imageUrl: announcement?.img?.img
+            ? `${BASE_IMAGE_URL}/${announcement.img.img}`
+            : DEFAULT_IMAGE
+        }));
 
         setNewsItems(transformed);
       } catch (error) {
@@ -184,7 +186,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
                   )}
                 </div>
 
-               
+
               </div>
             </div>
           )}
@@ -231,7 +233,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
 
                 {/* Text Content */}
                 <div className="p-6 flex flex-col justify-center">
-                 
+
                   <h3 className="text-lg font-semibold mb-4">{item.title}</h3>
                   <p className="text-gray-600">{item.description}</p>
                   <p className="text-gray-500 text-sm mt-2">{item.date}</p>

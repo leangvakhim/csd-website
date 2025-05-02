@@ -72,24 +72,27 @@ const NewsSection = ({ section, menuLang }) => {
     const fetchAnnouncements = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(API_ENDPOINTS.getNews); // Replace with correct endpoint
+        const response = await axios.get(API_ENDPOINTS.getNews);
+        const newsList = Array.isArray(response.data?.data) ? response.data.data : [];
 
-        const announcement = response.data.data;
-
-        const transformed = [{
+        // Filter out items where announcement.img or announcement.img.img is undefined
+        const filteredList = newsList.filter(item => item.img && item.img.img);
+        const transformed = filteredList.map(announcement => ({
           id: announcement.n_id,
           tag: announcement.n_tags,
           title: announcement.n_title,
           description: announcement.n_shorttitle || '',
           date: announcement.n_postdate
             ? new Date(announcement.n_postdate).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            })
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              })
             : 'TBD',
-          imageUrl: announcement.img.img ? `${BASE_IMAGE_URL}/${announcement.img.img}` : DEFAULT_IMAGE
-        }];
+          imageUrl: announcement?.img?.img
+            ? `${BASE_IMAGE_URL}/${announcement.img.img}`
+            : DEFAULT_IMAGE
+        }));
 
         setNewsItems(transformed);
       } catch (error) {
@@ -185,7 +188,7 @@ const NewsSection = ({ section, menuLang }) => {
                   )}
                 </div>
 
-               
+
               </div>
             </div>
           )}
