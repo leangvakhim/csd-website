@@ -39,6 +39,7 @@ import PotentialSection from './Potential/PotentialSection';
 import AnnouncementSection from './Announcement/AnnouncementSection';
 import EventSection from './Event/EventSection';
 import ResearchController from './Research/ResearchController';
+import NewsSection from './New/NewsSection';
 
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
@@ -166,8 +167,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Partner':
                                 return <PartnerControllSection key={section.sec_id} section={section} menuLang={menuLang} />;
 
-                            // case 'New':
-                            //     return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'New':
+                                return <NewsSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             // case 'Lab':
                             //     return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
 

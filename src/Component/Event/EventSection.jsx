@@ -26,11 +26,7 @@ const EventSection = ({ section, menuLang }) => {
     const [headerError, setHeaderError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTag, setSelectedTag] = useState('');
-    const [headerData, setHeaderData] = useState({
-        hsec_title: 'Events & News',
-        hsec_amount: 4,
-        hsec_subtitle: '',
-    });
+    const [headerData, setHeaderData] = useState([]);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
@@ -48,7 +44,7 @@ const EventSection = ({ section, menuLang }) => {
                         );
                         if (eventSplit) {
                             setHeaderData({
-                                hsec_title: eventSplit.hsec_title || 'Events & News',
+                                hsec_title: eventSplit.hsec_title ,
                                 hsec_amount: eventSplit.hsec_amount || 4,
                                 hsec_subtitle: eventSplit.hsec_subtitle || '',
                             });
@@ -121,10 +117,7 @@ const EventSection = ({ section, menuLang }) => {
     const handleClearSearch = () => setSearchTerm('');
     const handleClearFilter = () => setSelectedTag('');
 
-    const displayTitle = isHomePage
-        ? headerData.hsec_title.split('&')[0].trim() || 'Events'
-        : headerData.hsec_title;
-
+  
     if (headerLoading || loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -161,7 +154,7 @@ const EventSection = ({ section, menuLang }) => {
                 >
                     <div>
                         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-3 sm:mb-4">
-                            {displayTitle}
+                            {headerData.hsec_title }
                         </h1>
                         {headerData.hsec_subtitle && (
                             <p className="text-xs sm:text-sm text-gray-500">

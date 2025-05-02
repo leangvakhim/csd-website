@@ -58,8 +58,9 @@ function App() {
                         ? '/researchlab/*'
                         : page.p_alias === '/news&events'
                           ? '/news&events/*'
-                          : page.p_alias
-
+                          : page.p_alias === '/news'
+                            ? '/news/*'
+                              : page.p_alias 
               }
               element={
                 <PageRenderer

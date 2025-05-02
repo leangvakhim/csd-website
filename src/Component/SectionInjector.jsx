@@ -8,7 +8,7 @@ import ResearchDetails from './Research/ResearchDetails';
 import ResearchSection from './Research/ResearchSection';
 import ResearchLabDetails from './ResearchDetails/ResearchLabDetails';
 import ScholarshipDetails from './Scholarship/ScholarshipDetails';
-import EventsDetails from './Event/EventsDetails';
+import EventsNewsDetails from './Event/EventsNewsDetails';
 import { useParams } from 'react-router-dom';
 
 const SectionInjector = ({ alias, setOnlyContentMode }) => {
@@ -30,14 +30,13 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
       return <FacultyDepartment />;
 
     case '/developer':
-      if (lastSegment && lastSegment !== 'developer') {
-        setOnlyContentMode(true);
-        // Replace with actual DeveloperDetail component if available
-        return <div>Developer Detail (ID: {lastSegment})</div>;
-        // return <DeveloperDetail developerId={lastSegment} />;
+      if (alias.endsWith('/developer')) {
+        if (lastSegment && lastSegment !== 'developer') {
+          setOnlyContentMode(true);
+          return <DeveloperDetail developerId={lastSegment} />;
+        }
+        return <DeveloperSection />;
       }
-      setOnlyContentMode(false);
-      return '';
 
     case '/research':
       if (lastSegment && lastSegment !== 'research') {
@@ -45,7 +44,7 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
         return <ResearchDetails researchId={lastSegment} />;
       }
       setOnlyContentMode(false);
-      return ''; // Replaced empty string with ResearchSection
+      return '';
 
     case '/researchlab': // Added leading '/' for consistency
       if (lastSegment && lastSegment !== 'researchlab') {
@@ -66,10 +65,11 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
     case '/news&events':
       if (lastSegment && lastSegment !== 'news&events') {
         setOnlyContentMode(true);
-        return <EventsDetails eventId={lastSegment} />;
+        return <EventsNewsDetails eventId={lastSegment} newId={lastSegment} />;
       }
       setOnlyContentMode(false);
-      return <div></div>; // Placeholder; replace with actual component
+      return <div></div>; // Main page content
+
 
     default:
       setOnlyContentMode(false);

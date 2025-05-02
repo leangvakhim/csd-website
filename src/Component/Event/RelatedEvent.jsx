@@ -24,7 +24,7 @@ const RelatedEvent = ({ sectionId, menuLang }) => {
                     imageUrl: item.e_img || 'https://via.placeholder.com/300',
                     description: item.e_shorttitle || 'No description available.',
                     date: item.e_date || 'TBD',
-                    category: item.e_tags || 'General',
+                    category: item.e_tags ,
                 }));
                 setEvents(formattedEvents);
                 setLoading(false);

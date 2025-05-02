@@ -24,10 +24,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
   const [headerError, setHeaderError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
-  const [headerData, setHeaderData] = useState({
-    hsec_title: "News & Announcements",
-    hsec_amount: 4
-  });
+  const [headerData, setHeaderData] = useState([]);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
@@ -46,7 +43,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
             );
             if (newsSplit) {
               setHeaderData({
-                hsec_title: newsSplit.hsec_title || "News & Announcements",
+                hsec_title: newsSplit.hsec_title || "",
                 hsec_amount: newsSplit.hsec_amount || 4
               });
             } else {
@@ -81,7 +78,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
 
         const transformed = [{
           id: announcement.am_id,
-          tag: 'Announcement',
+          tag: announcement.am_tag || 'General',
           title: announcement.am_title,
           description: announcement.am_shortdesc || '',
           date: announcement.am_postdate
@@ -121,9 +118,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
   const handleClearFilter = () => setSelectedTag('');
 
   // Split title for homepage
-  const displayTitle = isHomePage
-    ? headerData.hsec_title.split(' ')[2].trim() || 'Announcement'
-    : headerData.hsec_title;
 
   if (headerLoading || loading) {
     return (
@@ -160,8 +154,9 @@ const AnnouncementSection = ({ section, menuLang }) => {
           className="flex flex-col md:flex-row justify-between items-center mb-8"
         >
           <h1 className="text-3xl font-semibold mb-4">
-            {displayTitle}
+            {headerData.hsec_title}
           </h1>
+
           {isHomePage ? '' : (
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               {/* Search and Filter Container */}
