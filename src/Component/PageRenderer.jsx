@@ -17,6 +17,7 @@ import Overview from './Overview/overviewContent';
 import FacilitiesSection from './Facilities/FacilitiesSection';
 import StudySection from './Study/StudySection';
 import FAQSection from './FAQ/FAQSection';
+import UnlockSection from './Unlock/UnlockSection';
 import Introduction from './Introduction/IntroductionSection';
 import InnovationSection from './Innovation/InnovationSection';
 import FeeSection from './Fee/FeeSection';
@@ -168,8 +169,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'CSD':
                                 return <CSDSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                            // case 'Unlock':
-                            //     return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Unlock':
+                                return <UnlockSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Avaialable':
                                 return <AvailableSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Feedback':
