@@ -11,6 +11,8 @@ const ResearchInnovations = () => {
   const [researchData, setResearchData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
 
   useEffect(() => {
     const fetchResearch = async () => {
@@ -19,7 +21,7 @@ const ResearchInnovations = () => {
         const data = res.data?.data || [];
 
         const filtered = data
-          .filter((item) => item.display === 1 && item.active === 1)
+          .filter((item) => item.display === 1 && item.active === 1 && item.lang === currentLang)
           .map((item) => ({
             id: item.rsd_id,
             title: item.rsd_title,
@@ -72,6 +74,10 @@ const ResearchInnovations = () => {
                   src={item.image}
                   alt={item.title}
                   className="w-full h-auto object-cover rounded-lg shadow-md aspect-[4/3] sm:aspect-[16/9]"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/placeholder-image.jpg";
+                  }}
                 />
               </div>
 
@@ -153,6 +159,10 @@ const ResearchInnovations = () => {
                 src={section.image}
                 alt={section.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/placeholder-image.jpg";
+                }}
               />
               <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
               <div className="absolute inset-0 p-3 sm:p-4 lg:p-6 flex flex-col justify-between text-white">
@@ -173,7 +183,7 @@ const ResearchInnovations = () => {
                 </div>
                 <div>
                   <motion.h3
-                    className=" text-xl font-normal mb-2 sm:mb-3"
+                    className="text-xl font-normal mb-2 sm:mb-3"
                     initial={{ opacity: 0, x: -50 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
@@ -182,7 +192,7 @@ const ResearchInnovations = () => {
                     {section.title}
                   </motion.h3>
                   <motion.p
-                    className="text-sm mb-3 sm:mb-4  line-clamp-2"
+                    className="text-sm mb-3 sm:mb-4 line-clamp-2"
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, delay: 0.6 }}
