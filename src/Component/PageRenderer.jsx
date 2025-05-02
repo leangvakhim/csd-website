@@ -148,8 +148,13 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <FAQSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Faculty':
                                 return <FacultyCarouselSection key={section.sec_id} section={section} menuLang={menuLang} />;
+<<<<<<< Updated upstream
                             case 'Research':
                                 return <ResearchSection key={section.sec_id} section={section} menuLang={menuLang} />;
+=======
+                            // case 'Research':
+                            //     return <ResearchController key={section.sec_id} section={section} menuLang={menuLang} />;
+>>>>>>> Stashed changes
                             case 'Scholarship':
                                 return <ScholarshipSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Career':
@@ -165,18 +170,32 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Feedback':
                                 return <FeedbackSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Partner':
+<<<<<<< Updated upstream
                                 return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             // case 'New':
                             //     return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
+=======
+                                return <PartnerControllSection key={section.sec_id} section={section} menuLang={menuLang} />;
+
+                            // case 'New':
+                            //     return <NewsSection key={section.sec_id} section={section} menuLang={menuLang} />;
+>>>>>>> Stashed changes
                             // case 'Lab':
                             //     return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Potential':
                                 return <PotentialSection key={section.sec_id} section={section} menuLang={menuLang} />;
+<<<<<<< Updated upstream
                             case 'Announcement':
                                 return <AnnouncementSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Event':
                                 return <EventSection key={section.sec_id} section={section} menuLang={menuLang} />;
 
+=======
+                            // case 'Announcement':
+                            //     return <AnnouncementSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            // case 'Event':
+                            //     return <EventSection key={section.sec_id} section={section} menuLang={menuLang} />;
+>>>>>>> Stashed changes
 
 
                             default:
@@ -192,12 +211,17 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
             )}
 
             <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
+<<<<<<< Updated upstream
             {page?.p_alias === '/developer' && (
                 <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
             )}
             {page?.p_alias === '/research' && (
                 <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
             )}
+=======
+
+
+>>>>>>> Stashed changes
             <div>
                 <Footer />
             </div>
