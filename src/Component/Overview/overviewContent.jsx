@@ -60,7 +60,6 @@ const Overview = ({section}) => {
             item.text_sec?.sec_type === "Information" && item.text_type === 2
           );
 
-          console.log("content.type is; ",content.type);
         if (infoItem) {
           setContent({
             title: infoItem.title,
@@ -88,12 +87,6 @@ const Overview = ({section}) => {
         setIsLoading(false);
       });
   }, [degree]);
-
-  useEffect(() => {
-    if (content.type !== null) {
-      console.log("Updated content.type is:", content.type);
-    }
-  }, [content.type]);
 
   if (isLoading) {
     return <div className="text-center py-8 text-gray-600">Loading...</div>;
