@@ -1,217 +1,160 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS } from '../../service/APIConfig';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Papa from "papaparse";
+import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
-const AnnouncementDetails = ({ announcementId }) => {
-  const [announcement, setAnnouncement] = useState(null);
+const AnnouncementDetails = ({announcementID}) => {
+
   const [students, setStudents] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [announcement, setAnnouncement] = useState({ title: '', detail: '' });
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(students.length / itemsPerPage);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(students.length / rowsPerPage);
-  const indexOfLastStudent = currentPage * rowsPerPage;
-  const indexOfFirstStudent = indexOfLastStudent - rowsPerPage;
-  const currentStudents = students.slice(indexOfFirstStudent, indexOfLastStudent);
+  const indexOfLastStudent = currentPage * itemsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - itemsPerPage;
+  const displayedData = students.slice(indexOfFirstStudent, indexOfLastStudent);
 
-  // Fetch announcement and student results
   useEffect(() => {
-    if (!announcementId) {
-      setError('No announcement ID provided.');
-      setLoading(false);
-      return;
-    }
-
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // Fetch announcement details
-        const announcementResponse = await axios.get(API_ENDPOINTS.getAnnouncement);
-        const announcements = announcementResponse.data?.data || [];
-        const targetAnnouncement = announcements.find(
-          (ann) => ann.am_id === parseInt(announcementId)
-        );
-        if (targetAnnouncement) {
-          setAnnouncement({
-            title: targetAnnouncement.am_title || 'Untitled Announcement',
-            description: targetAnnouncement.am_shortdesc || 'No description available.',
-            date: targetAnnouncement.am_postdate
-              ? new Date(targetAnnouncement.am_postdate).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })
-              : 'TBD',
+    axios.get(API_ENDPOINTS.getAnnouncementStudent)
+      .then(response => {
+        const rawData = Array.isArray(response.data) ? response.data : [];
+        const formatted = rawData.map((item, index) => {
+          const subjects = {};
+          Object.keys(item).forEach(key => {
+            if (!["student_id", "student_identity", "result", "NO", "STUDENT_IDENTITY"].includes(key)) {
+              subjects[key] = item[key];
+            }
           });
-        } else {
-          setError('Announcement not found.');
-        }
+          return {
+            id: item.NO || index + 1,
+            studentId: item.student_identity || item.STUDENT_IDENTITY || "",
+            subjects: subjects,
+            result: item.result || ""
+          };
+        });
+        setStudents(formatted);
+      })
+      .catch(error => {
+        console.error("Error fetching data:", error);
+      });
 
-        // Fetch student results
-        const studentResponse = await axios.get(
-          `${API_ENDPOINTS.getAnnouncementStudent}?announcement_id=${announcementId}`
-        );
-        const studentData = studentResponse.data?.data || [];
-        setStudents(studentData);
-
-        // Extract dynamic subject keys
-        if (studentData.length > 0) {
-          const subjectKeys = Object.keys(studentData[0]).filter(
-            (key) =>
-              !['student_id', 'student_identity', 'result', 'NO', 'announcement_id'].includes(key)
-          );
-          setSubjects(subjectKeys);
+    axios.get(`${API_ENDPOINTS.getAnnouncement}/${announcementID}`)
+      .then(response => {
+        const data = response.data?.data;
+        if (data && data.am_title && data.am_detail) {
+          setAnnouncement({ title: data.am_title, detail: data.am_detail });
         }
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load announcement or student data.');
-      } finally {
-        setLoading(false);
-      }
+      })
+      .catch(error => {
+        console.error("Error fetching announcement detail:", error);
+      });
+  }, [announcementID]);
+
+  const subjects = students.length > 0 ? Object.keys(students[0].subjects) : [];
+
+    const handlePageChange = (page) => {
+      if (page >= 1 && page <= totalPages) setCurrentPage(page);
     };
 
-    fetchData();
-  }, [announcementId]);
+    // Calculate page range for pagination
+    const paginationRange = () => {
+      if (totalPages <= 3) return Array.from({ length: totalPages }, (_, i) => i + 1);
+      if (currentPage <= 2) return [1, 2, 3];
+      if (currentPage >= totalPages - 1) return [totalPages - 2, totalPages - 1, totalPages];
+      return [currentPage - 1, currentPage, currentPage + 1];
+    };
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+    return (
+      <div className="my-10">
+        <div className="container mx-auto px-4">
+          <h1 className="text-2xl font-bold mb-4">{announcement.title}</h1>
+          <p className="text-gray-600 mb-6">{announcement.detail}</p>
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  return (
-    <motion.div
-      className="my-10"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="container mx-auto px-4 flex flex-col items-center">
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-lg text-gray-500">Loading announcement details...</p>
+          <div className="overflow-x-auto bg-white rounded-lg shadow-md">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-red-800 text-white text-left">
+                  <th className="p-3 text-sm md:text-base">NO.</th>
+                  <th className="p-3 text-sm md:text-base">Student ID</th>
+                  {subjects.map((subject) => (
+                    <th key={subject} className="p-3 text-sm md:text-base">{subject}</th>
+                  ))}
+                  <th className="p-3 text-sm md:text-base">Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayedData.map((item, index) => (
+                  <tr key={index} className="odd:bg-white even:bg-red-50 text-gray-700">
+                    <td className="p-3 text-sm">{item.id}</td>
+                    <td className="p-3 text-sm">{item.studentId}</td>
+                    {subjects.map((subject) => (
+                      <td key={subject} className="p-3 text-sm">{item.subjects[subject]}</td>
+                    ))}
+                    <td className="p-3 text-sm">
+                      <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-semibold">
+                        {item.result}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ) : error ? (
-          <div className="flex items-center justify-center h-64 flex-col">
-            <p className="text-lg text-red-500">{error}</p>
+
+          {/* Pagination */}
+          <div className="flex justify-center mt-6 space-x-2">
             <button
-              onClick={() => {
-                setError(null);
-                setLoading(true);
-                
-              }}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={() => handlePageChange(currentPage - 1)}
+              className={`sm:px-3 py-1 border rounded-md text-gray-700 hover:bg-gray-200 ${
+                currentPage === 1 && "opacity-50 cursor-not-allowed"
+              }`}
             >
-              Retry
+              <HiChevronLeft size={18} />
+            </button>
+
+            {paginationRange().map((page, index) => (
+              <button
+                key={index}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1 border rounded-md ${
+                  currentPage === page ? "bg-red-800 text-white" : "text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            {/* Show Last Page if not displayed */}
+            {totalPages > 3 && currentPage < totalPages - 1 && (
+              <span className="px-3 py-1 text-gray-700">...</span>
+            )}
+
+            {/* Last Page Button */}
+            {totalPages > 3 && currentPage < totalPages - 1 && (
+              <button
+                onClick={() => handlePageChange(totalPages)}
+                className={`px-3 py-1 border rounded-md ${
+                  currentPage === totalPages ? "bg-red-800 text-white" : "text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {totalPages}
+              </button>
+            )}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              className={`sm:px-3 py-1 border rounded-md text-gray-700 hover:bg-gray-200 ${
+                currentPage === totalPages && "opacity-50 cursor-not-allowed"
+              }`}
+            >
+              <HiChevronRight size={18} />
             </button>
           </div>
-        ) : announcement || students.length > 0 ? (
-          <div className="w-full max-w-6xl">
-            {announcement && (
-              <>
-                <h1 className="text-2xl font-bold mb-4 text-center">{announcement.title}</h1>
-                <p className="text-gray-600 mb-6 text-center">{announcement.description}</p>
-              </>
-            )}
-            {students.length === 0 ? (
-              <div className="flex items-center justify-center h-64">
-                <p className="text-lg text-gray-500">No student results available.</p>
-              </div>
-            ) : (
-              <div className="relative overflow-x-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <label htmlFor="rowsPerPage" className="mr-2">
-                      Rows per page:
-                    </label>
-                    <select
-                      id="rowsPerPage"
-                      value={rowsPerPage}
-                      onChange={(e) => {
-                        setRowsPerPage(parseInt(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                      className="border rounded px-2 py-1 border-gray-300"
-                    >
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                    </select>
-                  </div>
-                </div>
-                <table className="w-full text-sm text-left text-gray-500 border">
-                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b">
-                    <tr>
-                      <th className="px-6 py-3">NO.</th>
-                      <th className="px-6 py-3">Student ID</th>
-                      {subjects.map((subject, idx) => (
-                        <th key={idx} className="px-6 py-3">
-                          {subject}
-                        </th>
-                      ))}
-                      <th className="px-6 py-3">Result</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentStudents.map((student, index) => (
-                      <tr key={index} className="bg-white border-b border-gray-200">
-                        <td className="px-6 py-4">{student.NO}</td>
-                        <td className="px-6 py-4">{student.student_identity}</td>
-                        {subjects.map((subject, idx) => (
-                          <td key={idx} className="px-6 py-4">
-                            {student[subject] ?? '-'}
-                          </td>
-                        ))}
-                        <td className="px-6 py-4">
-                          <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-semibold">
-                            {student.result}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="flex justify-between items-center mt-4">
-                  <button
-                    onClick={handlePreviousPage}
-                    disabled={currentPage === 1}
-                    className="py-2 px-4 border rounded disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
-                  <span>
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
-                    className="py-2 px-4 border rounded disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-lg text-gray-500">No announcement or student data available.</p>
-          </div>
-        )}
+        </div>
       </div>
-    </motion.div>
-  );
+    );
 };
 
 export default AnnouncementDetails;

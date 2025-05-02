@@ -72,13 +72,9 @@ const AnnouncementSection = ({ section, menuLang }) => {
         const response = await axios.get(API_ENDPOINTS.getAnnouncement);
         const announcements = response.data.data || [];
 
-        // Filter announcements by menuLang (assuming menuLang is a number, e.g., 1 for English, 2 for Khmer)
-        const filteredAnnouncements = announcements.filter(
-          announcement => announcement.lang === menuLang
-        );
+        const announcements = Array.isArray(response.data?.data) ? response.data.data : [];
 
-        // Transform filtered announcements
-        const transformed = filteredAnnouncements.map(announcement => ({
+        const transformed = announcements.map((announcement) => ({
           id: announcement.am_id,
           title: announcement.am_title,
           description: announcement.am_shortdesc || '',
@@ -89,17 +85,12 @@ const AnnouncementSection = ({ section, menuLang }) => {
                 day: 'numeric'
               })
             : 'TBD',
-          imageUrl: announcement.img?.img
+          imageUrl: announcement?.img?.img
             ? `${BASE_IMAGE_URL}/${announcement.img.img}`
             : DEFAULT_IMAGE
         }));
 
-        // Limit the number of items based on headerData.hsec_amount if on homepage
-        setNewsItems(
-          isHomePage
-            ? transformed.slice(0, headerData.hsec_amount || 4)
-            : transformed
-        );
+        setNewsItems(transformed);
       } catch (error) {
         console.error('Failed to fetch announcements:', error);
         setError('Failed to load announcements. Please try again later.');
@@ -171,15 +162,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaSearch className="text-gray-400" />
                 </div>
-                {searchTerm && (
-                  <button
-                    onClick={handleClearSearch}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                    aria-label="Clear search"
-                  >
-                    <FaTimes className="text-sm" />
-                  </button>
-                )}
               </div>
             </div>
           )}
@@ -221,7 +203,8 @@ const AnnouncementSection = ({ section, menuLang }) => {
                     }}
                   />
                 </div>
-                <div className="p-6 flex flex-col w-1/2 justify-center">
+                {/* Text Content */}
+                <div className="p-6 flex flex-col justify-center">
                   <h3 className="text-lg font-semibold mb-4">{item.title}</h3>
                   <p className="text-gray-600">{item.description}</p>
                   <p className="text-gray-500 text-sm mt-2">{item.date}</p>

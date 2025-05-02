@@ -65,22 +65,25 @@ const NewsSection = ({ section, menuLang }) => {
       try {
         setLoading(true);
         const response = await axios.get(API_ENDPOINTS.getNews);
-        const news = response.data.data || [];
-        const filteredNews = news.filter(newsItem => newsItem.lang === menuLang);
+        const newsList = Array.isArray(response.data?.data) ? response.data.data : [];
 
-        const transformed = filteredNews.map(newsItem => ({
-          id: newsItem.n_id,
-          tag: newsItem.n_tags || '',
-          title: newsItem.n_title,
-          description: newsItem.n_shorttitle || '',
-          date: newsItem.n_date
-            ? new Date(newsItem.n_date).toLocaleDateString('en-US', {
+        // Filter out items where announcement.img or announcement.img.img is undefined
+        const filteredList = newsList.filter(item => item.img && item.img.img);
+        const transformed = filteredList.map(announcement => ({
+          id: announcement.n_id,
+          tag: announcement.n_tags,
+          title: announcement.n_title,
+          description: announcement.n_shorttitle || '',
+          date: announcement.n_postdate
+            ? new Date(announcement.n_postdate).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
-                day: 'numeric',
+                day: 'numeric'
               })
             : 'TBD',
-          imageUrl: newsItem.img?.img ? `${BASE_IMAGE_URL}/${newsItem.img.img}` : DEFAULT_IMAGE,
+          imageUrl: announcement?.img?.img
+            ? `${BASE_IMAGE_URL}/${announcement.img.img}`
+            : DEFAULT_IMAGE
         }));
 
         setNewsItems(
@@ -159,15 +162,6 @@ const NewsSection = ({ section, menuLang }) => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaSearch className="text-gray-400" />
                 </div>
-                {searchTerm && (
-                  <button
-                    onClick={handleClearSearch}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                    aria-label="Clear search"
-                  >
-                    <FaTimes className="text-sm" />
-                  </button>
-                )}
               </div>
            
             </div>
