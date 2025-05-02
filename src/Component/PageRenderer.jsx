@@ -21,7 +21,8 @@ import InnovationSection from './Innovation/InnovationSection';
 import FeeSection from './Fee/FeeSection';
 import FutureSection from './Future/FutureSection';
 import TestimonialSection from './Testimonial/TestimonialSection';
-import TypeSection from './Type/TypeScholar';
+// import TypeSection from './Type/TypeScholar';
+import TypeSection from './Type/TypeSection';
 import AboutSection from './About/AboutSection';
 import QuestionSection from './Question/QuestionSection';
 import ContactSection from './Contact/ContactSection';
@@ -137,7 +138,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Testimonial':
                                 return <TestimonialSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Type':
-                                return <TypeController key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <TypeSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Criteria':
                                 return <BasicRequirements key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Question':
