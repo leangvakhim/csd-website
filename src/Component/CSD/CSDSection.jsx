@@ -2,14 +2,17 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { FaCheck } from "react-icons/fa";
+import { PiGraduationCapDuotone } from "react-icons/pi";
+import { BsPeople } from "react-icons/bs";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
 
 const sectionVariants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0, y: 50 },
   visible: {
     opacity: 1,
+    y: 0,
     transition: {
-      duration: 0.5,
+      duration: 0.8,
       when: "beforeChildren",
       staggerChildren: 0.2,
     },
@@ -17,8 +20,13 @@ const sectionVariants = {
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, x: -50 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.8 } },
+};
+
+const imageVariants = {
+  hidden: { opacity: 0, x: 50 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.8, delay: 0.4 } },
 };
 
 const CSDSection = ({ section }) => {
@@ -40,10 +48,7 @@ const CSDSection = ({ section }) => {
           const addOnData = addOnRes.data?.data || [];
 
           const filteredSpecData = specData.filter(
-            (item) =>
-              item.section?.sec_page === section.sec_page &&
-              item.section.display === 1 &&
-              item.section.active === 1
+            (item) => item.section.display === 1 && item.section.active === 1
           );
 
           if (filteredSpecData.length > 0) {
@@ -52,14 +57,14 @@ const CSDSection = ({ section }) => {
             // Extract key metrics from add-on data
             const keyMetrics = addOnData.length > 0
               ? {
-                  count: addOnData[0].rason_amount || "2000+",
-                  description: addOnData[0].rason_subtitle || "Student Enrollments",
-                  title: addOnData[0].rason_title || "Program Impact",
+                  count: addOnData[0].rason_amount,
+                  description: addOnData[0].rason_subtitle,
+                  title: addOnData[0].rason_title,
                 }
               : {
                   count: "2000+",
                   description: "Student Enrollments",
-                  title: "Program Impact",
+                  title: "Key Metrics",
                 };
 
             // Fetch subservice data
@@ -68,16 +73,24 @@ const CSDSection = ({ section }) => {
             );
 
             const subserviceData = (subserviceRes.data?.data || []).filter(
-              (s) => s.ras?.ras_sec === item.ras_sec
+              (s) => s.ras?.ras_sec === item.ras_sec && s.display === 1 && s.active === 1
             );
 
             setSubservices(
-              subserviceData.map((s) => ({
-                ss_id: s.ss_id,
-                title: s.ss_title || "Untitled Subservice",
-                description: s.ss_subtitle || "No description available",
-                icon: s.image?.img ? `${API}/storage/uploads/${s.image.img}` : "",
-              }))
+              subserviceData.map((s) => {
+                let icon = s.image?.img ? `${API}/storage/uploads/${s.image.img}` : '';
+                if (!icon && s.ras?.image1?.img) {
+                  icon = `${API}/storage/uploads/${s.ras.image1.img}`;
+                } else if (!icon && s.ras?.image2?.img) {
+                  icon = `${API}/storage/uploads/${s.ras.image2.img}`;
+                }
+                return {
+                  ss_id: s.ss_id,
+                  title: s.ss_title || "Untitled Subservice",
+                  description: s.ss_subtitle || "No description available",
+                  icon,
+                };
+              })
             );
 
             // Parse description for paragraphs
@@ -88,7 +101,7 @@ const CSDSection = ({ section }) => {
               .map((p) => p.textContent?.trim?.())
               .filter((p) => p);
 
-            // Set program data
+            // Set program data with dynamic icons for objectives
             setProgramData({
               programTitle: item.text?.title || 'Untitled Program',
               description: item.text?.desc || '',
@@ -98,20 +111,31 @@ const CSDSection = ({ section }) => {
                 {
                   src: item.image1?.img
                     ? `${API}/storage/uploads/${item.image1.img}`
+
                     : null,
                   alt: `${item.text?.title || 'Untitled Program'} Image 1`,
+
+                  
+
                 },
                 {
                   src: item.image2?.img
                     ? `${API}/storage/uploads/${item.image2.img}`
                     : null,
                   alt: `${item.text?.title || 'Untitled Program'} Image 2`,
+  
+
                 },
               ],
               objectives: subserviceData.map((s) => ({
                 title: s.ss_title || "Untitled Objective",
                 description: s.ss_subtitle || "No description available",
-                icon: FaCheck,
+                icon: s.image?.img ? `${API}/storage/uploads/${s.image.img}` : null,
+                fallbackIcon: s.ss_title === "Robust Technical Foundation"
+                  ? PiGraduationCapDuotone
+                  : s.ss_title === "Professional and Ethical Growth"
+                  ? BsPeople
+                  : FaCheck,
               })),
             });
           }
@@ -137,82 +161,48 @@ const CSDSection = ({ section }) => {
   const { programTitle, description, keyMetrics, objectives, images } = programData;
 
   return (
-    <div className="my-8 sm:my-12 lg:my-16">
-      <motion.section
-        className="container mx-auto px-4 sm:px-6 lg:px-8"
+    <div className="my-16">
+      <motion.div
         variants={sectionVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
+        className="container mx-auto px-4"
       >
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-6 sm:gap-8 lg:gap-10">
-          {/* Left: Text Content */}
+        <div className="flex flex-col lg:flex-row items-center gap-8">
+          {/* Right Column - Images and Key Metrics */}
           <motion.div
-            className="w-full lg:max-w-[679px] order-2 lg:order-1"
-            variants={cardVariants}
+            variants={imageVariants}
+            className="xl:w-1/2 w-full flex flex-col items-center relative order-1 lg:order-2"
           >
-            <motion.h1
-              className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-gray-800"
-              variants={cardVariants}
-              transition={{ delay: 0.2 }}
-            >
-              {programTitle}
-            </motion.h1>
-            <p
-              className="text-gray-800 text-[12px] sm:text-[14px] lg:text-[16px] mb-4 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: description }}
-            />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 text-[12px] sm:text-[14px] lg:text-[16px]">
-              {subservices.map((s, i) => (
-                <motion.div
-                  key={s.ss_id}
-                  className="flex gap-3 sm:gap-4 border border-red-800 p-3 sm:p-4 rounded-xl items-center hover:shadow-lg transition-shadow duration-300"
-                  variants={cardVariants}
-                  transition={{ delay: i * 0.2 }}
+            {/* Image Flex Layout */}
+            <div className="flex flex-col lg:flex-row justify-center items-center gap-4">
+              {images.map((image, index) => (
+                <div
+                  key={index}
+                  className={`w-full sm:w-auto ${
+                    index === 0
+                      ? "w-[325px] h-[211px] rounded-tl-[50px] sm:rounded-tl-[100px]"
+                      : "w-[309px] h-[418px] rounded-tr-[50px] sm:rounded-tr-[100px]"
+                  } overflow-hidden rounded-xl shadow-lg`}
                 >
-                  <div className="border border-red-800 rounded-full p-2 min-w-[40px] min-h-[40px] flex items-center justify-center">
-                    {s.icon ? (
-                      <img
-                        src={s.icon}
-                        alt={s.title}
-                        className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "/placeholder-icon.png";
-                        }}
-                      />
-                    ) : (
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-200 rounded-full" />
-                    )}
-                  </div>
-                  <p className="text-gray-800">{s.description}</p>
-                </motion.div>
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/placeholder-image.png";
+                    }}
+                  />
+                </div>
               ))}
             </div>
-          </motion.div>
-
-          {/* Right: Images and Key Metrics */}
-          <motion.div
-            className="w-full lg:w-[600px] h-auto lg:h-[510px] order-1 lg:order-2"
-            variants={cardVariants}
-          >
-            {images[0].src && (
-              <img
-                src={images[0].src}
-                alt={images[0].alt}
-                className="w-full h-full object-cover rounded-3xl"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/placeholder-image.png";
-                }}
-              />
-            )}
             <motion.div
-              className="relative -top-16 z-10 bg-white p-4 rounded-lg shadow-md w-11/12 sm:w-52 text-center mx-auto"
               variants={cardVariants}
-              transition={{ delay: 0.4 }}
+              className="absolute bottom-4 right-4 sm:bottom-0 sm:right-0 z-10 bg-white p-4 rounded-lg shadow-md w-11/12 sm:w-52 text-center"
             >
-              <h2 className="text-md sm:text-lg font-bold flex items-center justify-center mb-4">
+              <h2 className="text-md sm:text-lg font-bold flex items-center justify-center mb-2">
                 <FaCheck className="mr-2 text-xl sm:text-2xl text-red-700" />
                 {keyMetrics.title}
               </h2>
@@ -222,8 +212,50 @@ const CSDSection = ({ section }) => {
               <p className="text-sm sm:text-md mt-2">{keyMetrics.description}</p>
             </motion.div>
           </motion.div>
+
+          {/* Left Column - Text Content */}
+          <motion.div
+            variants={cardVariants}
+            className="xl:w-1/2 w-full order-2 lg:order-1"
+          >
+            <h2 className="text-3xl font-bold mb-4">{programTitle}</h2>
+            <p
+              className="text-base sm:text-lg mb-6">{description}</p>
+            <div className="space-y-6">
+              {objectives.map((objective, index) => (
+                <motion.div
+                  key={objective.title}
+                  className="flex items-start gap-4"
+                  variants={cardVariants}
+                  transition={{ delay: index * 0.2 }}
+                >
+                  <div className="border border-red-800 rounded-full p-2 bg-white">
+                    {objective.icon ? (
+                      <img
+                        src={objective.icon}
+                        alt={objective.title}
+                        className="w-6 h-6 object-contain"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "/placeholder-icon.png";
+                        }}
+                      />
+                    ) : (
+                      <objective.fallbackIcon size={24} className="text-red-800" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-semibold mb-2">
+                      {objective.title}
+                    </h3>
+                    <p className="text-sm sm:text-base">{objective.description}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         </div>
-      </motion.section>
+      </motion.div>
     </div>
   );
 };

@@ -9,7 +9,7 @@ const CareerSection = ({ section, menuLang }) => {
     const navigate = useNavigate();
     const [careers, setCareers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [currentLang, setCurrentLang] = useState(1); // Assuming a default language of 1
+   
     const [headerData, setHeaderData] = useState({
         hsec_title: 'default title',
         hsec_subtitle: 'default subtitle',
@@ -17,6 +17,9 @@ const CareerSection = ({ section, menuLang }) => {
 
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
     const DEFAULT_IMAGE = '/placeholder-image.jpg';
+
+
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
         const fetchCareerData = async () => {
@@ -30,24 +33,24 @@ const CareerSection = ({ section, menuLang }) => {
                 }
 
                 const careerRes = await axios.get(API_ENDPOINTS.getCareer);
-                const formattedCareers = careerRes.data.data
+                const formattedCareers = careerRes.data?.data
                     .filter(
                         (item) =>
                             item.display === 1 &&
                             item.active === 1 &&
-                            item.c_order === 1 &&
+                    
                             item.lang === currentLang
                     )
                     .map((item) => ({
                         id: item.c_id,
                         title: item.c_title,
-                        description: item.c_shortdesc,
+                        description: item.c_shorttitle,
                         date: new Date(item.c_date).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric',
                         }),
-                        imageUrl: item.image?.c_img ? `${BASE_IMAGE_URL}/${item.image.c_img}` : DEFAULT_IMAGE,
+                        imageUrl: item.img?.img ? `${BASE_IMAGE_URL}/${item.img?.img}` : DEFAULT_IMAGE,
                     }));
 
                 setCareers(formattedCareers);
@@ -61,11 +64,7 @@ const CareerSection = ({ section, menuLang }) => {
         fetchCareerData();
     }, [currentLang]); // Re-fetch data if the language changes
 
-    useEffect(() => {
-        if (menuLang) {
-            setCurrentLang(menuLang);
-        }
-    }, [menuLang]);
+   
 
     const containerVariants = {
         hidden: { opacity: 0, y: 50 },
