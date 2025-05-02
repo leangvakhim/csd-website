@@ -2,8 +2,6 @@ import React from 'react';
 import FacultyDepartment from './Faculty/FacultyDepartment';
 import FacultyDetail from './Faculty/FacultyDetail';
 import DeveloperSection from './developer/DeveloperSection';
-// Assuming DeveloperDetail exists; import it if available
-// import DeveloperDetail from './developer/DeveloperDetail';
 import ResearchDetails from './Research/ResearchDetails';
 import ResearchSection from './Research/ResearchSection';
 import ResearchLabDetails from './ResearchDetails/ResearchLabDetails';
@@ -68,7 +66,7 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
     case '/events':
       if (lastSegment && lastSegment !== 'events') {
         setOnlyContentMode(true);
-        return <EventsNewsDetails eventId={lastSegment} />;
+        return <EventsNewsDetails  />;
       }
       setOnlyContentMode(false);
       return <div></div>; // Main page content

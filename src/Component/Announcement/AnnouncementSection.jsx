@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaSearch, FaFilter, FaTimes, FaSpinner, FaArrowRight } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaSpinner, FaArrowRight } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
@@ -13,22 +13,22 @@ const useDebounce = (value, delay) => {
   }, [value, delay]);
   return debouncedValue;
 };
+
 const AnnouncementSection = ({ section, menuLang }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === "/home";
   const [newsItems, setNewsItems] = useState([]);
+  const [headerData, setHeaderData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [headerLoading, setHeaderLoading] = useState(true);
   const [error, setError] = useState(null);
   const [headerError, setHeaderError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTag, setSelectedTag] = useState('');
-  const [headerData, setHeaderData] = useState([]);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
-  const DEFAULT_IMAGE = '/placeholder-image.jpg'; // Ensure this path is valid
+  const DEFAULT_IMAGE = '/placeholder-image.jpg';
 
   useEffect(() => {
     const fetchHeaderData = async () => {
@@ -37,7 +37,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
         const response = await axios.get(API_ENDPOINTS.getHeaderSection);
         if (response.data) {
           if (isHomePage && response.data.splits) {
-            // On homepage, find the "News" section in splits
             const newsSplit = response.data.splits.find(
               split => split.section_type === "news" || split.hsec_title.toLowerCase().includes("news")
             );
@@ -47,14 +46,12 @@ const AnnouncementSection = ({ section, menuLang }) => {
                 hsec_amount: newsSplit.hsec_amount || 4
               });
             } else {
-              // Fallback to default if no news section in splits
               setHeaderData({
                 hsec_title: "News & Announcements",
                 hsec_amount: 4
               });
             }
           } else if (response.data.hsec_title) {
-            // Non-homepage: use section-specific header data
             setHeaderData({
               hsec_title: response.data.hsec_title,
               hsec_amount: response.data.hsec_amount || 4
@@ -72,7 +69,8 @@ const AnnouncementSection = ({ section, menuLang }) => {
     const fetchAnnouncements = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(API_ENDPOINTS.getAnnouncement); // Replace with correct endpoint
+        const response = await axios.get(API_ENDPOINTS.getAnnouncement);
+        const announcements = response.data.data || [];
 
         const announcements = Array.isArray(response.data?.data) ? response.data.data : [];
 
@@ -101,24 +99,17 @@ const AnnouncementSection = ({ section, menuLang }) => {
       }
     };
 
-
     fetchHeaderData().then(fetchAnnouncements);
-  }, [headerData.hsec_amount, section, menuLang, isHomePage]);
-
-  const tags = [...new Set(newsItems.map(item => item.tag))];
+  }, [headerData?.hsec_amount, section, menuLang, isHomePage]);
 
   const filteredNews = newsItems.filter(item => {
     const matchesSearch =
       item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-    const matchesTag = selectedTag ? item.tag === selectedTag : true;
-    return matchesSearch && matchesTag;
+    return matchesSearch;
   });
 
   const handleClearSearch = () => setSearchTerm('');
-  const handleClearFilter = () => setSelectedTag('');
-
-  // Split title for homepage
 
   if (headerLoading || loading) {
     return (
@@ -130,12 +121,12 @@ const AnnouncementSection = ({ section, menuLang }) => {
 
   if (headerError || error) {
     return (
-      <div className="text-center py-12 text-red-800">
+      <div className="text-center py-12 text-red-600">
         {headerError && <p>{headerError}</p>}
         {error && <p>{error}</p>}
         <button
           onClick={() => window.location.reload()}
-          className="mt-4 bg-red-800 text-white px-4 py-2 rounded-xl hover:bg-red-900"
+          className="mt-4 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700"
         >
           Retry
         </button>
@@ -146,7 +137,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
   return (
     <div className="my-16">
       <div className="container mx-auto px-4">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -158,35 +148,20 @@ const AnnouncementSection = ({ section, menuLang }) => {
             {headerData.hsec_title}
           </h1>
 
-          {isHomePage ? '' : (
+          {!isHomePage && (
             <div className="flex flex-col sm:flex-row gap-4 items-center">
-              {/* Search and Filter Container */}
-              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                {/* Search Field */}
-                <div className="relative w-full">
-                  <input
-                    type="text"
-                    placeholder="Search news"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-blue-300 w-full"
-                    aria-label="Search news"
-                  />
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaSearch className="text-gray-400" />
-                  </div>
-                  {searchTerm && (
-                    <button
-                      onClick={handleClearSearch}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                      aria-label="Clear search"
-                    >
-                      <FaTimes className="text-sm" />
-                    </button>
-                  )}
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  placeholder="Search news"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-blue-300 w-full"
+                  aria-label="Search news"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaSearch className="text-gray-400" />
                 </div>
-
-
               </div>
             </div>
           )}
@@ -209,17 +184,15 @@ const AnnouncementSection = ({ section, menuLang }) => {
           )}
         </motion.div>
 
-        {/* News List */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
           {filteredNews.length > 0 ? (
             filteredNews.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-lg flex flex-col xl:flex-row shadow-md overflow-hidden cursor-pointer"
+                className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
                 onClick={() => navigate(`/announcement/${item.id}`)}
               >
-                {/* Image Section */}
-                <div className="p-3 w-full h-auto">
+                <div className="p-3 w-1/2 h-full">
                   <img
                     src={item.imageUrl}
                     alt={item.title}
@@ -230,10 +203,8 @@ const AnnouncementSection = ({ section, menuLang }) => {
                     }}
                   />
                 </div>
-
                 {/* Text Content */}
                 <div className="p-6 flex flex-col justify-center">
-
                   <h3 className="text-lg font-semibold mb-4">{item.title}</h3>
                   <p className="text-gray-600">{item.description}</p>
                   <p className="text-gray-500 text-sm mt-2">{item.date}</p>
@@ -243,15 +214,12 @@ const AnnouncementSection = ({ section, menuLang }) => {
           ) : (
             <div className="text-center text-gray-600 col-span-full py-12">
               <p>No news found matching your criteria.</p>
-              {(searchTerm || selectedTag) && (
+              {searchTerm && (
                 <button
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedTag('');
-                  }}
+                  onClick={() => setSearchTerm('')}
                   className="mt-4 text-red-800 hover:underline"
                 >
-                  Clear all filters
+                  Clear search
                 </button>
               )}
             </div>

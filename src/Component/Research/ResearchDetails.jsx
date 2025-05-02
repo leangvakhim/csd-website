@@ -53,7 +53,6 @@ const ResearchDetails = ({ researchId }) => {
                 </div>
             ))}
             <StudentResearch />
-            <ResearchInnovations />
             <RecentResearch />
         </div>
     );

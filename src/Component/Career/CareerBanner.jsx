@@ -15,7 +15,7 @@ const CareerBanner = ({careerId}) => {
                     setBannerSection({
                         title: data.c_title,
                         description: data.c_shortdesc,
-                        image: `${API}/storage/uploads/${data.image?.c_img}`,
+                        image: `${API}/storage/uploads/${data.img?.img}`,
                         
                     });
                 })

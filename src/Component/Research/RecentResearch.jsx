@@ -13,6 +13,7 @@ const RecentResearch = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,7 +29,7 @@ const RecentResearch = () => {
           .filter((item) => {
             // Ensure item is active and displayed
             if (item.display !== 1 || item.active !== 1) return false;
-
+            if (item.lang !== currentLang) return false;
             // Check if the item is recent based on created_at or published_date
             const itemDate = item.created_at
               ? new Date(item.created_at)
@@ -42,9 +43,9 @@ const RecentResearch = () => {
           .map((item) => ({
             id: item.rsdl_id,
             title: item.rsdl_title || 'Untitled Research',
-            description: item.rsdl_subtitle || 'No description available',
-            image: item.image?.img
-              ? `${API}/storage/uploads/${item.image.img}`
+          
+            image: item.img?.img
+              ? `${API}/storage/uploads/${item.img?.img}`
               : '/placeholder-image.jpg',
             lead: item.rsdl_lead || 'Unknown Lead',
           }))
@@ -131,9 +132,7 @@ const RecentResearch = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
           <div className="mb-4 sm:mb-6 sm:mb-0">
             <h2 className="text-2xl sm:text-3xl font-semibold mb-2">{headerData?.title}</h2>
-            <p className="text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base max-w-2xl">
-              {headerData?.subtitle}
-            </p>
+          
           </div>
           <div className="flex gap-3 sm:gap-4 items-center">
             <button
