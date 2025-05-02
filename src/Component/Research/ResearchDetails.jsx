@@ -38,7 +38,7 @@ const ResearchDetails = ({ researchId }) => {
                 return <ResearchProject rsdtId={section.rsdt_id} />;
             case 'Meeting':
                 return <ResearchMeeting rsdtId={section.rsdt_id} />;
-           
+
             default:
                 return null;
         }

@@ -49,9 +49,15 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
     const [sections, setSections] = useState([]);
     const [error, setError] = useState(null);
     const [onlyContentMode, setOnlyContentMode] = useState(false);
+    const [shouldRender, setShouldRender] = useState(false);
     const location = useLocation();
     const isKhmer = location.pathname.startsWith("/km");
     const menuLang = isKhmer ? 2 : 1;
+
+    useEffect(() => {
+      const timer = setTimeout(() => setShouldRender(true), 0);
+      return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         if (page?.p_id) {
@@ -81,7 +87,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
         return <div className="text-center py-8 text-red-600">{error}</div>;
     }
 
-    if (sections.length === 0) {
+    if (sections.length === 0 && !onlyContentMode && shouldRender) {
         // console.log("PageRenderer: No sections to render");
         return (
             <>
