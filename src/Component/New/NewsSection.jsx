@@ -199,7 +199,7 @@ const NewsSection = ({ section, menuLang }) => {
                 className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
                 onClick={() => navigate(`/news/${item.id}`)}
               >
-                <div className="p-3 w-1/2 h-full">
+                <div className="p-3  w-full lg:w-1/2 h-full">
                   <img
                     src={item.imageUrl}
                     alt={item.title}
@@ -207,7 +207,7 @@ const NewsSection = ({ section, menuLang }) => {
                     
                   />
                 </div>
-                <div className="p-6 flex flex-col w-1/2 justify-center">
+                <div className="p-6 flex flex-col  w-full lg:w-1/2 justify-center">
                   {item.tag && (
                     <span className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2">
                       {item.tag}
