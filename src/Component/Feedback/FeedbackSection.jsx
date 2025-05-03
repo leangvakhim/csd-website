@@ -13,14 +13,21 @@ const FeedbackSection = () => {
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
+        const currentLang = window.location.pathname.includes("/km") ? 2 : 1;
         const response = await axios.get(API_ENDPOINTS.getFeedback);
         const data = response.data?.data || [];
 
         // Map API data to component structure
         const formattedData = data
-          .filter((item) => item.display === 1 && item.active === 1)
+          .filter(
+            (item) =>
+              item.display === 1 &&
+              item.active === 1 &&
+              item.lang === currentLang
+          )
           .map((item) => ({
-            name: item.fb_writer || "Anonymous",
+            title: item.fb_writer || "Anonymous",
+            name: item.fb_title || "Anonymous",
             text: [item.fb_subtitle || "No feedback provided"],
             image: item.image?.img
               ? `${API}/storage/uploads/${item.image.img}`
@@ -74,8 +81,8 @@ const FeedbackSection = () => {
   const { name, text, image } = feedbackData[currentIndex];
 
   return (
-    <div className="my-8 sm:my-12 lg:my-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 bg-red-900 text-gray-50 rounded-3xl">
+    <div className="my-8 sm:my-12 lg:my-16 ">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 bg-red-900 text-gray-50 rounded-3xl min-h-max">
         <div className="py-8 sm:py-12 lg:py-16 relative">
           <div
             className="flex flex-col lg:flex-row items-center w-full h-full overflow-hidden"
@@ -101,7 +108,7 @@ const FeedbackSection = () => {
             {/* Content */}
             <AnimatePresence mode="wait">
               <motion.div
-                key={currentIndex}
+                key={feedbackData[currentIndex]?.name || currentIndex}
                 className="flex flex-col lg:flex-row items-center w-full"
                 initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -109,9 +116,9 @@ const FeedbackSection = () => {
                 transition={{ duration: 0.5 }}
               >
                 {/* Left - Text Content */}
-                <div className="w-full lg:w-1/2 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 flex flex-col justify-center order-2 lg:order-1">
+                <div className="w-full lg:w-1/2 px-4 sm:px-6 lg:px-18 py-6 sm:py-8 flex flex-col justify-center order-2 lg:order-1">
                   <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-4 sm:mb-6">
-                    Student Feedback on Research Experience
+                    {feedbackData[currentIndex].title}
                   </h2>
                   {text.map((paragraph, index) => (
                     <p
@@ -121,19 +128,19 @@ const FeedbackSection = () => {
                       {`"${paragraph}"`}
                     </p>
                   ))}
-                  <h2 className="text-sm sm:text-base lg:text-lg font-semibold mt-4">
+                  <h2 className="text-sm sm:text-base lg:text-xl font-semibold mt-4">
                     {name}
                   </h2>
                 </div>
 
                 {/* Right - Image */}
-                <div className="w-full lg:w-1/2 flex justify-center lg:justify-end order-1 lg:order-2 relative px-4 sm:px-6">
+                <div className="w-full lg:w-1/2 flex justify-center lg:justify-end order-1 lg:order-2 relative px-4 sm:px-10">
                   <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[450px] aspect-[4/3] rounded-3xl overflow-hidden">
-                    <div className="absolute inset-0 bg-pink-100 transform -translate-x-3 -translate-y-3 rounded-3xl z-0"></div>
+                    <div className="absolute inset-0 transform -translate-x-3 -translate-y-3 rounded-3xl z-0"></div>
                     <img
                       src={image}
                       alt={name}
-                      className="relative w-full h-full object-cover rounded-lg shadow-md z-10"
+                      className="relative w-full h-[28rem] sm:h-[32rem] object-contain rounded-2xl shadow-lg z-10"
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = "/placeholder-image.jpg";
