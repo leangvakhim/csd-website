@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaCheck } from "react-icons/fa";
 
+
 const FutureSection = ({key, section, menuLang}) => {
   const [selectedBenefitIndex, setSelectedBenefitIndex] = useState(1);
 

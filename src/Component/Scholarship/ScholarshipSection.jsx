@@ -36,7 +36,7 @@ const ScholarshipSection = ({ section }) => {
   return (
     <div>
       {hsec_amount === 4 && <FourColScholarshipSection />}
-      {( hsec_amount === 'all') && (
+      {( hsec_amount === 5) && (
         <OverFlowScholarshipSection  />
       )}
     </div>

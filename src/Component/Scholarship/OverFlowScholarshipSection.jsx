@@ -1,86 +1,114 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaArrowRight } from 'react-icons/fa';
+import { FaArrowRight, FaSpinner } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
-import { FaSpinner } from 'react-icons/fa';
 
 const OverFlowScholarshipSection = () => {
   const navigate = useNavigate();
   const scrollContainerRef = useRef(null);
   const [scholarships, setScholarships] = useState([]);
+  const [headerData, setHeaderData] = useState({ hsec_title: '', hsec_amount: 4, hsec_btntitle: 'View All' });
   const [loading, setLoading] = useState(true);
-  const [headerData, setHeaderData] = useState([]);
+  const [error, setError] = useState(null);
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
-
+  // Fetch header data
   useEffect(() => {
-    const fetchHeaderAndScholarships = async () => {
+    const fetchHeaderData = async () => {
       try {
         const headerRes = await axios.get(API_ENDPOINTS.getHeaderSection);
-        if (headerRes.data?.hsec_title) {
-          setHeaderData({
-            hsec_title: headerRes.data.hsec_title,
-            hsec_amount: headerRes.data.hsec_amount
-          });
+        
+        if (!headerRes?.data) {
+          throw new Error('No data received from API');
         }
 
+        const { hsec_title, hsec_amount, hsec_btntitle } = headerRes.data;
+
+        if (hsec_title && typeof hsec_amount === 'number') {
+          setHeaderData({
+            hsec_title: hsec_title || '',
+            hsec_amount: hsec_amount || 4,
+            hsec_btntitle: hsec_btntitle || 'View All',
+          });
+        } else {
+          throw new Error('Missing or invalid required fields');
+        }
+      } catch (error) {
+        console.error('Failed to fetch header data:', error.message, error);
+        setHeaderData({
+          hsec_title: '',
+          hsec_amount: 4,
+          hsec_btntitle: 'View All',
+        });
+      }
+    };
+
+    fetchHeaderData();
+  }, []);
+
+  // Fetch scholarship data
+  useEffect(() => {
+    const fetchScholarships = async () => {
+      try {
+        setLoading(true);
         const scRes = await axios.get(API_ENDPOINTS.getScholarship);
         const formattedScholarships = (scRes.data?.data || [])
-        .filter((item) => {
-          if (!item) return false;
-          return (
-            item.lang === currentLang && // Match language
-            item.display === 1 && // Only visible scholarships
-            item.active === 1 // Only active scholarships
-          );
-        })
-        .sort((a, b) => (a.sc_orders ?? 0) - (b.sc_orders ?? 0)) // Sort by sc_orders
-        .map((item) => {
-          let formattedDeadline = "TBD";
-          try {
-            if (item.sc_deadline) {
-              formattedDeadline = new Date(item.sc_deadline).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              });
+          .filter((item) => {
+            if (!item) return false;
+            return (
+              item.lang === currentLang &&
+              item.display === 1 &&
+              item.active === 1
+            );
+          })
+          .sort((a, b) => (a.sc_orders ?? 0) - (b.sc_orders ?? 0))
+          .map((item) => {
+            let formattedDeadline = 'TBD';
+            try {
+              if (item.sc_deadline) {
+                formattedDeadline = new Date(item.sc_deadline).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                });
+              }
+            } catch (error) {
+              console.warn(`Invalid deadline for scholarship ${item.sc_id}:`, error);
             }
-          } catch (error) {
-            console.warn(`Invalid deadline for scholarship ${item.sc_id}:`, error);
-          }
-      
-          return {
-            id: item.sc_id ?? null,
-            tag: item.sc_sponsor ?? "",
-            title: item.sc_title ?? "",
-            description: item.sc_shortdesc ?? "",
-            deadline: formattedDeadline,
-            imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
-          };
-        })
-        .slice(0, 4); // Use hsec_amount state
+
+            return {
+              id: item.sc_id ?? null,
+              tag: item.sc_sponsor ?? '',
+              title: item.sc_title ?? '',
+              description: item.sc_shortdesc ?? '',
+              deadline: formattedDeadline,
+              imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
+            };
+          })
+          .slice(0, headerData.hsec_amount);
 
         setScholarships(formattedScholarships);
       } catch (err) {
         console.error('Error fetching scholarships:', err);
+        setError('Failed to load scholarships');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHeaderAndScholarships();
-  }, []);
+    fetchScholarships();
+  }, [currentLang, headerData.hsec_amount]);
 
   // Auto-scroll effect
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
+    if (!scrollContainer || !scholarships.length) return;
 
     let currentScroll = 0;
     const scrollSpeed = 1.5;
@@ -88,7 +116,7 @@ const OverFlowScholarshipSection = () => {
 
     const autoScroll = () => {
       currentScroll += scrollSpeed;
-      if (currentScroll > scrollContainer.scrollWidth - scrollContainer.clientWidth) {
+      if (currentScroll >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
         currentScroll = 0;
       }
       scrollContainer.scrollTo({ left: currentScroll, behavior: 'smooth' });
@@ -96,18 +124,33 @@ const OverFlowScholarshipSection = () => {
 
     scrollInterval = setInterval(autoScroll, 30);
 
-    scrollContainer.addEventListener('mouseenter', () => clearInterval(scrollInterval));
-    scrollContainer.addEventListener('mouseleave', () => {
+    const handleMouseEnter = () => clearInterval(scrollInterval);
+    const handleMouseLeave = () => {
       scrollInterval = setInterval(autoScroll, 30);
-    });
+    };
 
-    return () => clearInterval(scrollInterval);
-  }, []);
+    scrollContainer.addEventListener('mouseenter', handleMouseEnter);
+    scrollContainer.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      clearInterval(scrollInterval);
+      scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
+      scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [scholarships]);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <FaSpinner className="animate-spin text-4xl text-red-800" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-red-500">{error}</p>
       </div>
     );
   }
@@ -129,7 +172,7 @@ const OverFlowScholarshipSection = () => {
             viewport={{ once: true }}
             className="text-2xl md:text-3xl font-semibold text-gray-900 mb-3 md:mb-0"
           >
-            {headerData.hsec_title}
+            {headerData.hsec_title || 'Check Out Scholarship Opportunities'}
           </motion.h2>
 
           <motion.div
@@ -139,7 +182,7 @@ const OverFlowScholarshipSection = () => {
             viewport={{ once: true }}
           >
             <Link to="/scholarship" className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1">
-              <span className="mr-2 text-sm">View All</span>
+              <span className="mr-2 text-sm">{headerData.hsec_btntitle}</span>
               <FaArrowRight className="text-red-800" />
             </Link>
           </motion.div>

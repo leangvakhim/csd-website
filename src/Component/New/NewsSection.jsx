@@ -25,57 +25,57 @@ const NewsSection = ({ section, menuLang }) => {
   const [headerError, setHeaderError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
-  const [headerData, setHeaderData] = useState({});
+  const [headerData, setHeaderData] = useState([]);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
-
+  // Fetch header data
   useEffect(() => {
     const fetchHeaderData = async () => {
       try {
         setHeaderLoading(true);
         const response = await axios.get(API_ENDPOINTS.getHeaderSection);
-        if (response.data) {
-          if (isHomePage && response.data.splits) {
-            const newsSplit = response.data.splits.find(
-              split => split.section_type === 'news' || split.hsec_title.toLowerCase().includes('news')
-            );
-            setHeaderData({
-              hsec_title: newsSplit?.hsec_title ,
-              hsec_amount: newsSplit?.hsec_amount || 4,
-            });
-          } else {
-            setHeaderData({
-              hsec_title: response.data.hsec_title ,
-              hsec_amount: response.data.hsec_amount || 4,
-            });
-          }
+        
+        if (!response.data?.data) {
+          throw new Error('No data received from API');
         }
+
+        const { hsec_title, hsec_amount } = response.data?.data || [];
+
+        setHeaderData({
+          hsec_title: hsec_title || 'News',
+          hsec_amount: typeof hsec_amount === 'number' && hsec_amount !== null ? hsec_amount : 4,
+        });
       } catch (error) {
-        console.error('Failed to fetch header data:', error);
+        console.error('Failed to fetch header data:', error.message, error);
         setHeaderError('Failed to load section header.');
-        setHeaderData({ hsec_title: '', hsec_amount: 4 });
+        setHeaderData({
+          hsec_title: '',
+          hsec_amount: 4,
+        });
       } finally {
         setHeaderLoading(false);
       }
     };
 
+    fetchHeaderData();
+  }, []);
+
+  // Fetch news data
+  useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
         setLoading(true);
         const response = await axios.get(API_ENDPOINTS.getNews);
         const newsList = Array.isArray(response.data?.data) ? response.data.data : [];
 
-        // Filter out items where announcement.img or announcement.img.img is undefined
-        const filteredList = newsList.filter(item => item.img && item.img.img
-          && item.lang === currentLang
+        const filteredList = newsList.filter(
+          item => item.img && item.img.img && item.lang === currentLang
         );
-        const transformed = filteredList
-        .slice(0, 4)
-        .map(announcement => ({
+        const transformed = filteredList.map(announcement => ({
           id: announcement.n_id,
           tag: announcement.n_tags,
           title: announcement.n_title,
@@ -84,16 +84,16 @@ const NewsSection = ({ section, menuLang }) => {
             ? new Date(announcement.n_postdate).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
-                day: 'numeric'
+                day: 'numeric',
               })
             : 'TBD',
           imageUrl: announcement?.img?.img
             ? `${BASE_IMAGE_URL}/${announcement.img.img}`
-            : DEFAULT_IMAGE
+            : DEFAULT_IMAGE,
         }));
 
         setNewsItems(
-          isHomePage ? transformed.slice(0, headerData.hsec_amount || 4) : transformed
+          isHomePage ? transformed.slice(0, headerData.hsec_amount) : transformed
         );
       } catch (error) {
         console.error('Failed to fetch news:', error);
@@ -103,8 +103,8 @@ const NewsSection = ({ section, menuLang }) => {
       }
     };
 
-    fetchHeaderData().then(fetchAnnouncements);
-  }, [headerData?.hsec_amount, section, menuLang, isHomePage]);
+    fetchAnnouncements();
+  }, [currentLang, headerData.hsec_amount, isHomePage]);
 
   const tags = [...new Set(newsItems.map(item => item.tag).filter(tag => tag))];
 
@@ -144,7 +144,7 @@ const NewsSection = ({ section, menuLang }) => {
 
   return (
     <div className="sm:my-16">
-      <div className="container mx-auto px-4 ">
+      <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -152,11 +152,13 @@ const NewsSection = ({ section, menuLang }) => {
           viewport={{ once: true }}
           className="flex flex-col sm:flex-row justify-between items-center mb-8"
         >
-          <h1 className="text-3xl font-semibold mb-4">{headerData.hsec_title}</h1>
+          <h1 className="text-3xl font-semibold mb-4">
+            {headerData.hsec_title}
+          </h1>
 
           {!isHomePage && (
             <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="relative w-full sm:W-64">
+              <div className="relative w-full sm:w-64">
                 <input
                   type="text"
                   placeholder="Search by title"
@@ -169,7 +171,6 @@ const NewsSection = ({ section, menuLang }) => {
                   <FaSearch className="text-gray-400" />
                 </div>
               </div>
-           
             </div>
           )}
           {isHomePage && (
@@ -199,15 +200,14 @@ const NewsSection = ({ section, menuLang }) => {
                 className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
                 onClick={() => navigate(`/news/${item.id}`)}
               >
-                <div className="p-3  w-full lg:w-1/2 h-58">
+                <div className="p-3 w-full lg:w-1/2 h-58">
                   <img
                     src={item.imageUrl}
                     alt={item.title}
                     className="w-full h-full object-cover rounded-lg"
-                    
                   />
                 </div>
-                <div className="p-6 flex flex-col  w-full lg:w-1/2 justify-center">
+                <div className="p-6 flex flex-col w-full lg:w-1/2 justify-center">
                   {item.tag && (
                     <span className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2">
                       {item.tag}

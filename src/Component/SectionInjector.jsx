@@ -93,6 +93,7 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
         setOnlyContentMode(true);
         return <AnnouncementDetails announcementID={lastSegment}/>;
       }
+        
       setOnlyContentMode(false);
       return <div></div>; // Main page content
 

@@ -12,6 +12,7 @@ const CSDSection = ({key, section, menuLang}) => {
   const [objectives, setObjectives] = useState([]);
 
   useEffect(() => {
+
     const fetchKeyMetrics = async () => {
       try {
         const res = await axios.get(API_ENDPOINTS.getAddOnCSD);
@@ -71,6 +72,7 @@ const CSDSection = ({key, section, menuLang}) => {
 
   return (
     <div className="my-16">
+
           <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -136,6 +138,8 @@ const CSDSection = ({key, section, menuLang}) => {
                   </div>
               </motion.div>
           </div>
+
+     
       </motion.div>
     </div>
   );

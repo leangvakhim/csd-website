@@ -112,14 +112,23 @@ const ApplySection = ({key, section, menuLang}) => {
   return (
     <div className="my-16">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col xl:flex-row gap-6 items-center justify-between">
+        <div className="flex flex-col lg:flex-row items-center justify-between">
           {/* Left Side: Steps and Text */}
+         
+          {/* Right Side: New Semester and Contact Info */}
           <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, amount: 0.5 }}
+            className="flex flex-col lg:flex-row gap-6 w-full justify-center  items-center"
+          >
+             <motion.div
             initial={{ opacity: 0, y: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true, amount: 0.5 }} // Trigger when 50% of the element is in view
-            className="xl:w-1/2 mb-8 xl:mb-0"
+            className="lg:w-1/2  lg:mb-0"
           >
             <motion.h2
               initial={{ opacity: 0, y: -50 }}
@@ -140,7 +149,7 @@ const ApplySection = ({key, section, menuLang}) => {
                   viewport={{ once: true, amount: 0.5 }}
                 >
                   <div className="p-6 border rounded-2xl flex items-center justify-between">
-                    <span className="xl:text-xl text-md">{step}</span>
+                    <span className="lg:text-xl text-md">{step}</span>
                     <FaArrowRight className="ml-2" />
                   </div>
                 </motion.li>
@@ -148,20 +157,12 @@ const ApplySection = ({key, section, menuLang}) => {
             </ul>
           </motion.div>
 
-          {/* Right Side: New Semester and Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true, amount: 0.5 }}
-            className="flex flex-col-reverse xl:flex-row xl:w-1/2 justify-center items-center"
-          >
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
               viewport={{ once: true, amount: 0.5 }}
-              className="bg-white p-6 rounded-md space-y-10 xl:w-1/2 xl:order-2 order-1"
+              className="bg-white  rounded-md space-y-4 lg:w-1/2 lg:order-2 order-1"
             >
               {applyInfo && (
                 <div className="bg-white p-6 rounded-md shadow-md">
@@ -174,7 +175,7 @@ const ApplySection = ({key, section, menuLang}) => {
                 </div>
               )}
 
-              <div className="py-6 px-4 bg-red-900 text-white shadow-lg rounded-2xl flex justify-center">
+              <div className="py-6 w-full px-4 bg-red-900 text-white shadow-lg rounded-2xl flex justify-center">
                 <div className="space-y-5">
                   <h3 className="text-lg font-semibold">Contact Info</h3>
                   <p className="flex items-center">
@@ -206,7 +207,7 @@ const ApplySection = ({key, section, menuLang}) => {
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
               viewport={{ once: true, amount: 0.5 }}
-              className="xl:w-1/2 xl:order-1 order-2"
+              className="lg:w-1/3 h-full lg:order-1 order-2"
             >
               <img src={`${API}/storage/uploads/${applyInfo?.image?.img}`} alt="Admission Image" className="rounded-2xl w-full h-full object-cover" />
             </motion.div>

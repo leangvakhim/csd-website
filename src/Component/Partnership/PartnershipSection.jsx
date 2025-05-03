@@ -37,7 +37,7 @@ const PartnershipSection = ({ section, headerTitle }) => {
                 }
 
                 const formatted = data
-                    .filter((partner) => partner.active === 1 && partner.ps_type === 1) // Filter active partners
+                    .filter((partner) => partner.active === 1 && partner.ps_type === 1).slice(0, 4) // Filter active partners
                     .map((partner) => ({
 
                         src: partner.ps_img
