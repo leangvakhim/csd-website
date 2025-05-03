@@ -72,7 +72,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
       try {
         setLoading(true);
         const response = await axios.get(API_ENDPOINTS.getAnnouncement);
-        const announcements = response.data.data || [];
 
         // const announcements = Array.isArray(response.data?.data) ? response.data.data : [];
 

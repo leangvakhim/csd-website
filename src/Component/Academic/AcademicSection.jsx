@@ -26,34 +26,45 @@ const AcademicSection = ({ section }) => {
   const navigate = useNavigate();
   const [academics, setAcademics] = useState(null);
 
+  const resolvePageAlias = async (routePage) => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.getPage);
+      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
+
+      const matched = pages.find((page) => page.p_title === routePage);
+      return matched?.p_alias || null;
+    } catch (error) {
+      console.error("Failed to fetch page alias:", error);
+      return null;
+    }
+  }
+
   // Fetch academics info from API
   useEffect(() => {
-    axios
-      .get(`${API_ENDPOINTS.getAcademic}?section_id=${section.sec_id}`)
-      .then((res) => {
-        const item = res.data?.data?.[0];
+    (async () => {
+      try {
+        const res = await axios.get(API_ENDPOINTS.getAcademic);
+        const items = Array.isArray(res.data?.data) ? res.data.data : [];
+        const item = items.find((entry) => entry.acad_sec === section.sec_id);
         if (item) {
-          // Split detail into paragraphs
           const details = item.acad_detail.split("\n\n");
+          const resolvedRoute = await resolvePageAlias(item.acad_routepage);
           setAcademics({
             title: item.acad_title,
             description: details,
             image: item.image?.img ? `${API}/storage/uploads/${item.image.img}` : null,
-            programs: [
-              item.acad_btntext1,
-              item.acad_btntext2,
-            ],
+            programs: [item.acad_btntext1, item.acad_btntext2],
             buttonText: item.acad_routetext,
-            route: item.acad_routepage || "#",
+            route: resolvedRoute || "#",
           });
         } else {
           setAcademics(false);
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("AcademicSection fetch error:", err);
         setAcademics(false);
-      });
+      }
+    })();
   }, [section]);
 
   if (!academics) {
