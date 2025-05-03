@@ -55,7 +55,6 @@ const FutureSection = ({key, section, menuLang}) => {
             title: item.ufa_title,
             description: item.ufa_subtitle,
           }));
-          console.log("filtered is:",filtered);
 
         setBenefitsData(filtered);
       } catch (error) {

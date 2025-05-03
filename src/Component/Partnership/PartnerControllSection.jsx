@@ -8,6 +8,23 @@ const PartnerControllSection = ({ section }) => {
     const [sectionData, setSectionData] = useState(section || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [headerAmount, setHeaderAmount] = useState(null);
+    const [headerTitle, setHeaderTitle] = useState(null);
+    const fetchHeaderSection = useCallback(async () => {
+        try {
+            const response = await axios.get(API_ENDPOINTS.getHeaderSection);
+            const data = response.data;
+            if (Array.isArray(data.data)) {
+                const filtered = data.data.find(item => item.hsec_sec === section?.sec_id && item.section?.sec_type === "Partner");
+                if (filtered?.hsec_amount !== undefined) {
+                    setHeaderAmount(filtered.hsec_amount);
+                    setHeaderTitle(filtered.hsec_title);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch header section:', error);
+        }
+    }, []);
 
     const fetchPartnerSection = useCallback(async (sectionId, pageId) => {
         setLoading(true);
@@ -32,12 +49,15 @@ const PartnerControllSection = ({ section }) => {
     useEffect(() => {
         if (section?.sec_id) {
             setSectionData(section);
+            fetchHeaderSection();
         } else if (section?.sec_page) {
             fetchPartnerSection('partner', section.sec_page);
+            fetchHeaderSection();
         } else {
             setSectionData(null);
+            fetchHeaderSection();
         }
-    }, [section, fetchPartnerSection]);
+    }, [section, fetchPartnerSection, fetchHeaderSection]);
 
     if (loading) return <p>Loading partnership section...</p>;
     if (error) return <p>{error}</p>;
@@ -45,15 +65,19 @@ const PartnerControllSection = ({ section }) => {
 
     // Render based on sec_page
     const renderSection = () => {
-        if (sectionData.sec_page === 1) {
-            return <PartnershipSection section={sectionData} />;
-        } else if (sectionData.sec_page === 9) {
-            return <UniPartnerships section={sectionData} />;
+        if (headerAmount === 1) {
+            return <PartnershipSection section={sectionData} headerTitle={headerTitle} />;
+        } else if (headerAmount === 2) {
+            return <UniPartnerships section={sectionData} headerTitle={headerTitle} />;
         }
         return null; // fallback if neither matches
     };
 
-    return <div>{renderSection()}</div>;
+    return (
+        <div>
+            {renderSection()}
+        </div>
+    );
 };
 
 export default PartnerControllSection;
