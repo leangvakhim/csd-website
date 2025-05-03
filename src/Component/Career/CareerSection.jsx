@@ -9,7 +9,7 @@ const CareerSection = ({ section, menuLang }) => {
     const navigate = useNavigate();
     const [careers, setCareers] = useState([]);
     const [loading, setLoading] = useState(true);
-   
+
     const [headerData, setHeaderData] = useState({
         hsec_title: 'default title',
         hsec_subtitle: 'default subtitle',
@@ -24,12 +24,18 @@ const CareerSection = ({ section, menuLang }) => {
     useEffect(() => {
         const fetchCareerData = async () => {
             try {
-                const headerRes = await axios.get(API_ENDPOINTS.getHeaderSection);
-                if (headerRes.data) {
-                    setHeaderData({
-                        hsec_title: headerRes.data.hsec_title || 'default title',
-                        hsec_subtitle: headerRes.data.hsec_subtitle || 'default subtitle',
-                    });
+                const response = await axios.get(API_ENDPOINTS.getHeaderSection);
+                const data = response.data;
+                if (Array.isArray(data.data)) {
+                    const filtered = data.data.find(
+                        item => item.hsec_sec === section?.sec_id && item.section?.sec_type === "Career"
+                    );
+                    if(filtered){
+                        setHeaderData({
+                            hsec_title: filtered.hsec_title || 'default title',
+                            hsec_subtitle: filtered.hsec_subtitle || 'default subtitle',
+                        });
+                    }
                 }
 
                 const careerRes = await axios.get(API_ENDPOINTS.getCareer);
@@ -38,7 +44,7 @@ const CareerSection = ({ section, menuLang }) => {
                         (item) =>
                             item.display === 1 &&
                             item.active === 1 &&
-                    
+
                             item.lang === currentLang
                     )
                     .map((item) => ({
@@ -64,7 +70,7 @@ const CareerSection = ({ section, menuLang }) => {
         fetchCareerData();
     }, [currentLang]); // Re-fetch data if the language changes
 
-   
+
 
     const containerVariants = {
         hidden: { opacity: 0, y: 50 },
