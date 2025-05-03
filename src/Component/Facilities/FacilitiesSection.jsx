@@ -45,7 +45,7 @@ const FacilitiesSection = ({ section }) => {
 
       // Fetch facilities data
       const facilitiesRes = await axios.get(
-        `${API_ENDPOINTS.getAcadFacilities}?page_id=${section.sec_page}`
+        `${API_ENDPOINTS.getAcadFacilities}`
       );
 
       const data = facilitiesRes.data?.data || [];
@@ -96,7 +96,6 @@ const FacilitiesSection = ({ section }) => {
             : "",
         }))
       );
-      console.log("Subservices:", subserviceData);
     } catch (err) {
       console.error("API error:", err);
       setError(err.response?.data?.message || "Failed to load data");
