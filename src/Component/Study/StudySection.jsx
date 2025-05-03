@@ -77,48 +77,6 @@ const StudySection = ({key, section, menuLang}) => {
                 >
                     {studyInfo.subtitle}
                 </motion.p>
-
-                {/* <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                    viewport={{ once: true }}
-                    className={`grid gap-6 ${selectedStudyPlan.length === 2 ? 'max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 justify-center' : ''} ${selectedStudyPlan.length === 3 ? 'max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-center' : ''}  ${selectedStudyPlan.length === 4 ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : ''}`}
-                >
-                    {selectedStudyPlan.map((year, index) => (
-                        <motion.div
-                            key={year.year}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5, delay: 0.2 + index * 0.2 }}
-                            viewport={{ once: true }}
-                            className={`rounded-xl p-6 shadow-md transition-all ${selectedYear === year.year ? 'bg-red-900' : 'bg-white'}`}
-                            // onClick={() => setSelectedYear(year.year)}
-
-                        >
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4`}>
-                                <PiGraduationCapDuotone size={32} className={`${selectedYear === year.year ? 'text-white' : 'text-black'}`} />
-                            </div>
-                            <h3 className={`text-2xl font-semibold mb-2 text-start ${selectedYear === year.year ? 'text-white' : 'text-black'}`}>
-                                {year.title}
-                            </h3>
-                            <p className={`mb-4 text-start ${selectedYear === year.year ? 'text-gray-50' : 'text-black'}`}>
-                                {year.subtitle}
-                            </p>
-                            <ul className={`text-left text-sm space-y-6 ${selectedYear === year.year ? 'text-gray-50' : 'text-gray-600'}`}>
-                                {year.courses.map((course, i) => (
-                                    <li key={i} className="flex items-start">
-                                        <div className="flex mr-2 md:mr-4 mt-2">
-                                            <FaCheck size={18} className={`${selectedYear === year.year ? 'text-gray-50' : 'text-red-900'}`} />
-                                        </div>
-                                        <span className="md:text-base">{course}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </motion.div>
-                    ))}
-                </motion.div> */}
-
                 <motion.div
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
