@@ -143,19 +143,19 @@ const NewsSection = ({ section, menuLang }) => {
   }
 
   return (
-    <div className="my-16">
-      <div className="container mx-auto px-4">
+    <div className="sm:my-16">
+      <div className="container mx-auto px-4 ">
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="flex flex-col md:flex-row justify-between items-center mb-8"
+          className="flex flex-col sm:flex-row justify-between items-center mb-8"
         >
           <h1 className="text-3xl font-semibold mb-4">{headerData.hsec_title}</h1>
 
           {!isHomePage && (
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="flex flex-col md:flex-row gap-4 items-center">
               <div className="relative w-full sm:W-64">
                 <input
                   type="text"
@@ -191,7 +191,7 @@ const NewsSection = ({ section, menuLang }) => {
           )}
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {filteredNews.length > 0 ? (
             filteredNews.slice(0, isHomePage ? 4 : undefined).map(item => (
               <div
@@ -199,7 +199,7 @@ const NewsSection = ({ section, menuLang }) => {
                 className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
                 onClick={() => navigate(`/news/${item.id}`)}
               >
-                <div className="p-3  w-full lg:w-1/2 h-full">
+                <div className="p-3  w-full lg:w-1/2 h-58">
                   <img
                     src={item.imageUrl}
                     alt={item.title}
