@@ -22,13 +22,13 @@ const cardVariants = {
     visible: { opacity: 1, y: 0 },
 };
 
-const PartnershipSection = ({ section }) => {
+const PartnershipSection = ({ section, headerTitle }) => {
     const [partners, setPartners] = useState([]);
 
     useEffect(() => {
         const fetchPartners = async () => {
             try {
-                const res = await axios.get(`${API_ENDPOINTS.getPartnership}?section_id=${section.sec_id}`);
+                const res = await axios.get(`${API_ENDPOINTS.getPartnership}`);
                 let data = res.data?.data ?? [];
 
                 // Ensure data is an array
@@ -37,7 +37,7 @@ const PartnershipSection = ({ section }) => {
                 }
 
                 const formatted = data
-                    .filter((partner) => partner.active === 1) // Filter active partners
+                    .filter((partner) => partner.active === 1 && partner.ps_type === 1) // Filter active partners
                     .map((partner) => ({
 
                         src: partner.ps_img
@@ -84,7 +84,7 @@ const PartnershipSection = ({ section }) => {
                     {/* Title */}
                     <div className="text-center md:text-left">
                         <h2 className="text-3xl font-semibold mb-4">
-                            Our Partnerships
+                            {headerTitle}
                         </h2>
                     </div>
 
@@ -102,7 +102,7 @@ const PartnershipSection = ({ section }) => {
                         {partners.map((partner, index) => (
                             <motion.div
                                 key={index}
-                                className="flex items-center justify-center"
+                                className="flex items-center justify-center "
                                 variants={cardVariants}
                                 whileHover={{ scale: 1.1 }}
                                 transition={{ duration: 0.3 }}
@@ -111,7 +111,7 @@ const PartnershipSection = ({ section }) => {
                                     <img
                                         src={partner.src}
                                         alt={partner.alt}
-                                        className="h-16 w-auto"
+                                        className="h-16 w-auto "
                                         aria-label={partner.alt}
                                         loading="lazy"
                                         onError={(e) => (e.currentTarget.src = '/fallback-logo.png')}

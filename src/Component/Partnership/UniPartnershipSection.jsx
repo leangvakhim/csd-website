@@ -26,7 +26,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const UniPartnerships = ({ section }) => {
+const UniPartnerships = ({ section, headerTitle }) => {
   const [partners, setPartners] = useState([]);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const UniPartnerships = ({ section }) => {
         }
 
         const formatted = data
-          .filter((partner) => partner.active === 1) // Filter active partners
+          .filter((partner) => partner.active === 1 && partner.ps_type === 2) // Filter active partners
           .map((partner) => ({
             src: partner.img?.img
               ? `${API}/storage/uploads/${partner.img.img}` // Use img.img for image file name
@@ -82,8 +82,8 @@ const UniPartnerships = ({ section }) => {
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
       >
-        <h2 className="text-3xl font-semibold mb-4">
-          Partnerships With Universities
+        <h2 className="text-3xl font-semibold mb-8">
+          {headerTitle}
         </h2>
 
         {/* Swiper Slider */}
