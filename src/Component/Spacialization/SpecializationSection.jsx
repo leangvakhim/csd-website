@@ -34,7 +34,7 @@ const SpecializationSection = ({ section }) => {
 
       try {
         const res = await axios.get(
-          `${API_ENDPOINTS.getSpecialization}?section_id=${section.sec_id}`
+          `${API_ENDPOINTS.getSpecialization}`
         );
         const data = res.data?.data || [];
 
@@ -138,12 +138,12 @@ const SpecializationSection = ({ section }) => {
                   className="mb-6 flex gap-4 items-start"
                 >
                   <div className="flex items-center justify-center">
-                    <div className="border border-red-800 rounded-full p-2 min-w-[40px] min-h-[40px] flex items-center justify-center">
+                    <div className="border border-red-800 rounded-full p-2 min-w-[50px] min-h-[50px] flex items-center justify-center">
                       {s.icon ? (
                         <img
                           src={s.icon}
                           alt={s.title}
-                          className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
+                          className="w-7 h-7 object-contain p-auto"
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = "/placeholder-icon.png";
