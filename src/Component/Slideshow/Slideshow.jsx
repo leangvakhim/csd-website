@@ -10,34 +10,54 @@ import axios from 'axios';
 
 
 const Slideshow = ({key, section, menuLang}) => {
-    // const { t } = useTranslation();
-
     const [slides, setSlides] = useState([]);
+
+    const resolvePageAlias = async (routePage) => {
+        try {
+            const res = await axios.get(API_ENDPOINTS.getPage);
+            const pages = Array.isArray(res.data?.data) ? res.data.data : [];
+
+            const matched = pages.find((page) => page.p_title === routePage);
+            return matched?.p_alias || null;
+        } catch (error) {
+            console.error("Failed to fetch page alias:", error);
+            return null;
+        }
+    }
 
     useEffect(() => {
         if (section?.sec_id) {
             axios.get(`${API_ENDPOINTS.getSlideshow}`)
                 .then(res => {
-                    const data = res.data?.data || [];
-                    const formatted = data
-                        .filter(slide =>
+                    const resolveLinks = async () => {
+                        const data = res.data?.data || [];
+                        const filtered = data.filter(slide =>
                             slide.display === 1 &&
                             slide.active === 1 &&
                             slide.slider_sec?.sec_id === section.sec_id
-                        )
-                        .map(slide => ({
-                            image: `${API}/storage/uploads/${slide.img?.img}`,
-                            title: slide.slider_title,
-                            description: slide.slider_text,
-                            buttonText1: slide.btn1?.bss_title || '',
-                            buttonLink1: slide.btn1?.bss_routepage || '#',
-                            buttonText2: slide.btn2?.bss_title || '',
-                            buttonLink2: slide.btn2?.bss_routepage || '#',
-                            buttonColor: 'bg-red-900',
-                            linkIcon: <BsFillInfoCircleFill className="ml-2 text-white" />,
-                            logo: `${API}/storage/uploads/${slide.logo?.img}`
+                        );
+
+                        const resolvedSlides = await Promise.all(filtered.map(async (slide) => {
+                            const link1 = await resolvePageAlias(slide.btn1?.bss_routepage);
+                            const link2 = await resolvePageAlias(slide.btn2?.bss_routepage);
+                            return {
+                                image: `${API}/storage/uploads/${slide.img?.img}`,
+                                title: slide.slider_title,
+                                description: slide.slider_text,
+                                buttonText1: slide.btn1?.bss_title || '',
+                                buttonLink1: link1 || '#',
+                                buttonText2: slide.btn2?.bss_title || '',
+                                buttonLink2: link2 || '#',
+                                buttonColor: 'bg-red-900',
+                                linkIcon: <BsFillInfoCircleFill className="ml-2 text-white" />,
+                                logo: `${API}/storage/uploads/${slide.logo?.img}`
+                            };
                         }));
-                    setSlides(formatted);
+
+                        setSlides(resolvedSlides);
+                    };
+
+                    resolveLinks();
                 })
                 .catch(err => console.error("Failed to fetch slideshow:", err));
         }
