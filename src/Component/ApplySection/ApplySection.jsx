@@ -33,7 +33,7 @@ const ApplySection = ({key, section, menuLang}) => {
         console.error('Failed to fetch Apply Info:', err);
       }
     };
-    
+
     fetchApplyInfo();
 
     // Fetch steps from subha endpoint
