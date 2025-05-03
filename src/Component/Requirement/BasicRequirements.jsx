@@ -11,7 +11,6 @@ const BasicRequirements = ({ key, section, menuLang}) => {
     const fetchGcAddon = async () => {
       try {
         const res = await axios.get(API_ENDPOINTS.getSubRequirement);
-        console.log("res.data is; ",res.data?.data);
         const data = res.data?.data;
         const filtered = data.find(
           (item) =>
