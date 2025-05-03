@@ -155,6 +155,7 @@ const AnnouncementDetails = ({announcementID}) => {
         </div>
       </div>
     );
+
 };
 
 export default AnnouncementDetails;
