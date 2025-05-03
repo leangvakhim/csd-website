@@ -41,39 +41,40 @@ const GallerySection = ({ section }) => {
     }
 
     setIsLoading(true);
-    axios
-      .get(`${API_ENDPOINTS.getGallery}?section_id=${section.sec_id}`)
+    axios.get(`${API_ENDPOINTS.getGallery}`)
       .then((res) => {
-        console.log("API Response:", res.data); // Debug: Log full response
-        // Check if response has data array
         if (!res.data?.data || !Array.isArray(res.data.data)) {
-          console.log("GallerySection: Invalid or empty data array");
           setError("No gallery data found");
           setIsLoading(false);
           return;
         }
 
-        const data = res.data.data.length > 0 ? res.data.data[0] : {};
-        console.log("Selected Data:", data); // Debug: Log selected gallery object
+        // Filter gallery item matching section ID and type
+        const matchedGallery = res.data.data.find(
+          (item) =>
+            item.gal_sec === section.sec_id &&
+            section.sec_type === "Gallery"
+        );
+
+        if (!matchedGallery) {
+          setError("No matching gallery section found");
+          setIsLoading(false);
+          return;
+        }
 
         const formatted = {
-          title: data.text?.title || "",
-          description:
-            data.text?.desc ||
-            "",
+          title: matchedGallery.text?.title || "",
+          description: matchedGallery.text?.desc || "",
           images: [
-            data.image1?.img ? `${API}/storage/uploads/${data.image1.img}` : null,
-            data.image2?.img ? `${API}/storage/uploads/${data.image2.img}` : null,
-            data.image3?.img ? `${API}/storage/uploads/${data.image3.img}` : null,
-            data.image4?.img ? `${API}/storage/uploads/${data.image4.img}` : null,
-            data.image5?.img ? `${API}/storage/uploads/${data.image5.img}` : null,
+            matchedGallery.image1?.img ? `${API}/storage/uploads/${matchedGallery.image1.img}` : null,
+            matchedGallery.image2?.img ? `${API}/storage/uploads/${matchedGallery.image2.img}` : null,
+            matchedGallery.image3?.img ? `${API}/storage/uploads/${matchedGallery.image3.img}` : null,
+            matchedGallery.image4?.img ? `${API}/storage/uploads/${matchedGallery.image4.img}` : null,
+            matchedGallery.image5?.img ? `${API}/storage/uploads/${matchedGallery.image5.img}` : null,
           ].filter(Boolean),
         };
-        console.log("Formatted Data:", formatted); // Debug: Log formatted data
-
 
         if (formatted.images.length === 0) {
-          console.log("GallerySection: No images to render (formatted.images is empty)");
           setError("No images available for this gallery");
         }
 
@@ -99,8 +100,6 @@ const GallerySection = ({ section }) => {
       </div>
     );
   }
-
-  console.log("GallerySection: Rendering data:", galleryData);
 
   return (
     <div className="my-16">
