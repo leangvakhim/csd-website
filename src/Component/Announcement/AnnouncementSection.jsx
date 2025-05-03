@@ -207,7 +207,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
           )}
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {filteredNews.length > 0 ? (
             filteredNews.map((item) => (
               <div
