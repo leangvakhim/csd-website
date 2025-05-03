@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { MdVerified } from 'react-icons/md';
 import { BsPeople } from "react-icons/bs";
 import { PiGraduationCapDuotone } from "react-icons/pi";
-import { API_ENDPOINTS, API } from '../../../../csd-dashboard/src/service/APIConfig';
+import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
 const CSDSection = ({key, section, menuLang}) => {
   const [keyMetrics, setKeyMetrics] = useState({title: '', count: '', description: '' });
