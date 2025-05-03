@@ -130,16 +130,14 @@ const BasicRequirements = ({ key, section, menuLang}) => {
                 className="grid grid-cols-1 text-sm xl:text-lg space-y-3"
                 dangerouslySetInnerHTML={{ __html: gcData.gc_detail }}
               />
-              {gcAddon && (
-                <>
-                  <div className="">
-                    <a href={gcAddon.gca_btnlink} target="_blank" rel="noopener noreferrer">
-                      <button className="bg-red-800 p-2 rounded-3xl px-6 text-white">
-                        {gcAddon.gca_btntitle}
-                      </button>
-                    </a>
-                  </div>
-                </>
+              {gcAddon?.gca_btntitle && gcAddon?.gca_btnlink && (
+                <div className="">
+                  <a href={gcAddon.gca_btnlink} target="_blank" rel="noopener noreferrer">
+                    <button className="bg-red-800 p-2 rounded-3xl px-6 text-white">
+                      {gcAddon.gca_btntitle}
+                    </button>
+                  </a>
+                </div>
               )}
             </motion.div>
           </div>
