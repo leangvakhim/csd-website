@@ -30,6 +30,8 @@ const AnnouncementSection = ({ section, menuLang }) => {
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
 
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
   useEffect(() => {
     const fetchHeaderData = async () => {
       try {
@@ -71,23 +73,45 @@ const AnnouncementSection = ({ section, menuLang }) => {
         setLoading(true);
         const response = await axios.get(API_ENDPOINTS.getAnnouncement);
 
-        const announcements = Array.isArray(response.data?.data) ? response.data.data : [];
+        // const announcements = Array.isArray(response.data?.data) ? response.data.data : [];
 
-        const transformed = announcements.map((announcement) => ({
-          id: announcement.am_id,
-          title: announcement.am_title,
-          description: announcement.am_shortdesc || '',
-          date: announcement.am_postdate
-            ? new Date(announcement.am_postdate).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })
-            : 'TBD',
-          imageUrl: announcement?.img?.img
-            ? `${BASE_IMAGE_URL}/${announcement.img.img}`
-            : DEFAULT_IMAGE
-        }));
+        const transformed = response.data.data
+          .filter((announcement) => {
+            // Ensure announcement exists and has required properties
+            if (!announcement) return false;
+
+            return (
+              announcement.display === 1 &&
+              announcement.active === 1 &&
+              announcement.lang === currentLang
+            );
+          })
+          .slice(0, 4)
+          .map((announcement) => {
+            // Safely handle date conversion
+            let formattedDate = 'TBD';
+            try {
+              if (announcement.am_postdate) {
+                formattedDate = new Date(announcement.am_postdate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                });
+              }
+            } catch (error) {
+              console.warn(`Invalid date format for announcement ${announcement.am_id}:`, error);
+            }
+
+            return {
+              id: announcement.am_id ?? null,
+              title: announcement.am_title ?? '',
+              description: announcement.am_shortdesc ?? '',
+              date: formattedDate,
+              imageUrl: announcement?.img?.img
+                ? `${BASE_IMAGE_URL}/${announcement.img.img}`
+                : DEFAULT_IMAGE
+            };
+          });
 
         setNewsItems(transformed);
       } catch (error) {
@@ -99,7 +123,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
     };
 
     fetchHeaderData().then(fetchAnnouncements);
-  }, [headerData?.hsec_amount, section, menuLang, isHomePage]);
+  }, []);
 
   const filteredNews = newsItems.filter(item => {
     const matchesSearch =
@@ -141,7 +165,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="flex flex-col md:flex-row justify-between items-center mb-8"
+          className="flex flex-col sm:flex-row justify-between items-center mb-8"
         >
           <h1 className="text-3xl font-semibold mb-4">
             {headerData.hsec_title}
@@ -183,7 +207,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
           )}
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {filteredNews.length > 0 ? (
             filteredNews.map((item) => (
               <div
@@ -191,7 +215,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
                 className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
                 onClick={() => navigate(`/announcement/${item.id}`)}
               >
-                <div className="p-3 w-1/2 h-full">
+                <div className="p-3 w-full lg:w-1/2 h-full">
                   <img
                     src={item.imageUrl}
                     alt={item.title}
@@ -203,7 +227,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
                   />
                 </div>
                 {/* Text Content */}
-                <div className="p-6 flex flex-col justify-center">
+                <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
                   <h3 className="text-lg font-semibold mb-4">{item.title}</h3>
                   <p className="text-gray-600">{item.description}</p>
                   <p className="text-gray-500 text-sm mt-2">{item.date}</p>

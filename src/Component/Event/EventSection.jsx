@@ -31,6 +31,8 @@ const EventSection = ({ section, menuLang }) => {
 
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
     const DEFAULT_IMAGE = '/placeholder-image.jpg';
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -74,7 +76,10 @@ const EventSection = ({ section, menuLang }) => {
                     : [response.data.data];
 
                 const transformed = data
-                    .filter(() => true)
+                    .filter((item) => 
+                        item.img && item.img.img && item.lang === currentLang
+                    )
+                    .slice(0, 4)
                     .map(item => ({
                         id: item.e_id,
                         tag: item.e_tags || 'Events',
@@ -139,7 +144,7 @@ const EventSection = ({ section, menuLang }) => {
     }
 
     return (
-        <div className="my-8 sm:my-12 lg:my-16">
+        <div className="my-16">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <motion.div
@@ -147,7 +152,7 @@ const EventSection = ({ section, menuLang }) => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                     viewport={{ once: true }}
-                    className="flex flex-col lg:flex-row justify-between items-center mb-6 sm:mb-8"
+                    className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8"
                 >
                     <div>
                         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-3 sm:mb-4">
@@ -159,7 +164,7 @@ const EventSection = ({ section, menuLang }) => {
                             </p>
                         )}
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-4 items-center mt-4 lg:mt-0">
+                    <div className="flex flex-col sm:flex-row gap-4 items-center  lg:mt-0">
                         {!isHomePage && (
                             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                                 <div className="relative w-full">
@@ -224,7 +229,7 @@ const EventSection = ({ section, menuLang }) => {
                                         className="block group"
                                         aria-label={event.title}
                                     >
-                                        <div className="bg-white h-[300px] rounded-2xl p-4 sm:p-5 shadow-md flex flex-col lg:flex-row items-center hover:shadow-lg transition-shadow duration-300">
+                                        <div className="bg-white h-full lg:h-[300px] rounded-2xl p-4 sm:p-5 shadow-md flex flex-col lg:flex-row items-center hover:shadow-lg transition-shadow duration-300">
                                             <div className="w-full lg:w-1/2 h-full flex justify-center items-center mb-4 lg:mb-0">
                                                 <img
                                                     src={event.imageUrl}

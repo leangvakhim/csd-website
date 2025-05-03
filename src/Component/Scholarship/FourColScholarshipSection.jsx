@@ -56,6 +56,7 @@ const FourColScholarshipSection = () => {
         setLoading(true);
         const response = await axios.get(API_ENDPOINTS.getScholarship);
         const transformed = response.data.data
+         
           .map(item => ({
             id: item.sc_id,
             tag: item.sc_sponsor,
@@ -181,18 +182,18 @@ const FourColScholarshipSection = () => {
           {filteredScholarships.length > 0 ? (
             filteredScholarships.map((scholarship) => (
               <div key={scholarship.id} className="bg-white flex flex-col xl:flex-row rounded-lg shadow-md p-4 items-center overflow-hidden">
-                <div className="w-78 h-68 bg-gray-100 flex items-center justify-center rounded-2xl">
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-2xl">
                   <img
                     src={scholarship.imageUrl}
                     alt={`${scholarship.tag} scholarship`}
-                    className="w-full h-full object-contain p-4"
+                    className="w-full h-full object-contain sm:object-cover p-4"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = DEFAULT_IMAGE;
                     }}
                   />
                 </div>
-                <div className="p-4">
+                <div className="p-4 w-full">
                   <p className='text-red-800 mb-4'>{scholarship.tag}</p>
                   <h3 className="text-lg font-semibold mb-2">{scholarship.title}</h3>
                   <p className="text-gray-800 mb-2">{scholarship.description}</p>

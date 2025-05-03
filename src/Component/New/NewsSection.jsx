@@ -30,6 +30,8 @@ const NewsSection = ({ section, menuLang }) => {
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
 
   useEffect(() => {
     const fetchHeaderData = async () => {
@@ -68,8 +70,12 @@ const NewsSection = ({ section, menuLang }) => {
         const newsList = Array.isArray(response.data?.data) ? response.data.data : [];
 
         // Filter out items where announcement.img or announcement.img.img is undefined
-        const filteredList = newsList.filter(item => item.img && item.img.img);
-        const transformed = filteredList.map(announcement => ({
+        const filteredList = newsList.filter(item => item.img && item.img.img
+          && item.lang === currentLang
+        );
+        const transformed = filteredList
+        .slice(0, 4)
+        .map(announcement => ({
           id: announcement.n_id,
           tag: announcement.n_tags,
           title: announcement.n_title,
@@ -137,19 +143,19 @@ const NewsSection = ({ section, menuLang }) => {
   }
 
   return (
-    <div className="my-16">
-      <div className="container mx-auto px-4">
+    <div className="sm:my-16">
+      <div className="container mx-auto px-4 ">
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="flex flex-col md:flex-row justify-between items-center mb-8"
+          className="flex flex-col sm:flex-row justify-between items-center mb-8"
         >
           <h1 className="text-3xl font-semibold mb-4">{headerData.hsec_title}</h1>
 
           {!isHomePage && (
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="flex flex-col md:flex-row gap-4 items-center">
               <div className="relative w-full sm:W-64">
                 <input
                   type="text"
@@ -185,7 +191,7 @@ const NewsSection = ({ section, menuLang }) => {
           )}
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {filteredNews.length > 0 ? (
             filteredNews.slice(0, isHomePage ? 4 : undefined).map(item => (
               <div
@@ -193,7 +199,7 @@ const NewsSection = ({ section, menuLang }) => {
                 className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
                 onClick={() => navigate(`/news/${item.id}`)}
               >
-                <div className="p-3 w-1/2 h-full">
+                <div className="p-3  w-full lg:w-1/2 h-58">
                   <img
                     src={item.imageUrl}
                     alt={item.title}
@@ -201,7 +207,7 @@ const NewsSection = ({ section, menuLang }) => {
                     
                   />
                 </div>
-                <div className="p-6 flex flex-col w-1/2 justify-center">
+                <div className="p-6 flex flex-col  w-full lg:w-1/2 justify-center">
                   {item.tag && (
                     <span className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2">
                       {item.tag}

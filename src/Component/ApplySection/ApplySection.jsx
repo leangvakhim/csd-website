@@ -33,7 +33,7 @@ const ApplySection = ({key, section, menuLang}) => {
         console.error('Failed to fetch Apply Info:', err);
       }
     };
-
+    
     fetchApplyInfo();
 
     // Fetch steps from subha endpoint
@@ -50,7 +50,6 @@ const ApplySection = ({key, section, menuLang}) => {
               item.active === 1
           )
           .sort((a, b) => a.sha_order - b.sha_order);
-
         setSteps(filteredSteps.map(item => item.sha_title));
       } catch (error) {
         console.error("Failed to fetch steps from subha:", error);
