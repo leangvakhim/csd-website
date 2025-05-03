@@ -61,12 +61,12 @@ const ImportantSection = ({ section, menuLang }) => {
               .then((datesRes) => {
                 const datesData = datesRes.data?.data || [];
                 const formattedDates = datesData
-                  .filter((date) => date.display === 1 && date.idd.idd_sec === sectionData.idd_id)
+                  .filter((date) => date.display === 1 )
                   .map((date) => ({
-                    sidd_tag: date.sidd_tag || "",
-                    sidd_date: date.sidd_date || "",
-                    sidd_title: date.sidd_title || "",
-                    sidd_subtitle: date.sidd_subtitle || "",
+                    tag: date.sidd_tag || "",
+                    date: date.sidd_date || "",
+                    title: date.sidd_title || "",
+                    subtitle: date.sidd_subtitle || "",
                   }));
                 setDates(formattedDates);
               })
@@ -157,20 +157,20 @@ const ImportantSection = ({ section, menuLang }) => {
                 >
                   <div className="grid lg:grid-cols-12 items-center gap-4">
                     <div className="bg-pink-100 px-4 py-2 flex flex-col items-center xl:col-span-4 col-span-12 rounded-lg">
-                      <h3 className="text-lg font-normal mb-2">{item.sidd_tag}</h3>
+                      <h3 className="text-lg font-normal mb-2">{item.tag}</h3>
                       <p className="text-pink-700 text-lg text-center font-semibold">
                         <FaCalendarAlt className="inline-block mr-2" />
-                        {item.sidd_date
-                          ? new Date(item.sidd_date).toLocaleDateString(undefined, {
-                              day: "numeric",
-                              month: "short",
-                            })
+                        {item.date
+                          ? new Date(item.date).toLocaleDateString(undefined, {
+                            day: "numeric",
+                            month: "short",
+                          })
                           : "Date not specified"}
                       </p>
                     </div>
                     <div className="lg:col-span-8 col-span-12">
-                      <h6 className="text-lg font-semibold mt-2">{item.sidd_title}</h6>
-                      <p className="text-gray-800">{item.sidd_subtitle}</p>
+                      <h6 className="text-lg font-semibold mt-2">{item.title}</h6>
+                      <p className="text-gray-800">{item.subtitle}</p>
                     </div>
                   </div>
                 </motion.div>

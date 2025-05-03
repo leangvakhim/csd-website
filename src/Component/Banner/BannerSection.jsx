@@ -84,7 +84,7 @@ const BannerSection = ({ section }) => {
     console.log("BannerSection: Render error or no image", { error, bannerData });
     return (
       <motion.div
-        className="relative w-full h-[600px] flex items-center justify-center text-center text-white bg-cover bg-center z-0"
+        className="relative w-full h-[600px] flex items-center justify-center text-center text-white object-contain sm:object-cover bg-cover bg-center z-0"
         style={{
           backgroundImage: `url(/path/to/fallback-image.jpg)`, // Replace with actual fallback image path
         }}

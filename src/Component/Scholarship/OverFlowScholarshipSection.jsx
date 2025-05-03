@@ -12,13 +12,12 @@ const OverFlowScholarshipSection = () => {
   const scrollContainerRef = useRef(null);
   const [scholarships, setScholarships] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [headerData, setHeaderData] = useState({
-    hsec_title: 'Check Out Scholarship Opportunities',
-    hsec_amount: 5
-  });
+  const [headerData, setHeaderData] = useState([]);
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
 
   useEffect(() => {
     const fetchHeaderAndScholarships = async () => {
@@ -27,27 +26,47 @@ const OverFlowScholarshipSection = () => {
         if (headerRes.data?.hsec_title) {
           setHeaderData({
             hsec_title: headerRes.data.hsec_title,
-            hsec_amount: headerRes.data.hsec_amount || 5
+            hsec_amount: headerRes.data.hsec_amount
           });
         }
 
         const scRes = await axios.get(API_ENDPOINTS.getScholarship);
-        const formatted = scRes.data.data
-          .map(item => ({
-            id: item.sc_id,
-            tag: item.sc_sponsor,
-            title: item.sc_title,
-            description: item.sc_shortdesc,
-            deadline: new Date(item.sc_deadline).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            }),
-            imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE
-          }))
-          .slice(0, headerData.hsec_amount);
+        const formattedScholarships = (scRes.data?.data || [])
+        .filter((item) => {
+          if (!item) return false;
+          return (
+            item.lang === currentLang && // Match language
+            item.display === 1 && // Only visible scholarships
+            item.active === 1 // Only active scholarships
+          );
+        })
+        .sort((a, b) => (a.sc_orders ?? 0) - (b.sc_orders ?? 0)) // Sort by sc_orders
+        .map((item) => {
+          let formattedDeadline = "TBD";
+          try {
+            if (item.sc_deadline) {
+              formattedDeadline = new Date(item.sc_deadline).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              });
+            }
+          } catch (error) {
+            console.warn(`Invalid deadline for scholarship ${item.sc_id}:`, error);
+          }
+      
+          return {
+            id: item.sc_id ?? null,
+            tag: item.sc_sponsor ?? "",
+            title: item.sc_title ?? "",
+            description: item.sc_shortdesc ?? "",
+            deadline: formattedDeadline,
+            imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
+          };
+        })
+        .slice(0, 4); // Use hsec_amount state
 
-        setScholarships(formatted);
+        setScholarships(formattedScholarships);
       } catch (err) {
         console.error('Error fetching scholarships:', err);
       } finally {
@@ -128,8 +147,8 @@ const OverFlowScholarshipSection = () => {
 
         {/* Horizontal scroll container */}
         <div className="w-full overflow-x-auto pb-4 no-scrollbar">
-          <div 
-            ref={scrollContainerRef} 
+          <div
+            ref={scrollContainerRef}
             className="flex gap-4 md:gap-6 pb-4 min-w-min"
           >
             {scholarships.map((scholarship, index) => (
@@ -142,13 +161,13 @@ const OverFlowScholarshipSection = () => {
                 className="flex-shrink-0 bg-white rounded-2xl shadow-md w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px]"
               >
                 <div className="h-48 overflow-hidden rounded-t-2xl">
-                  <img 
-                    src={scholarship.imageUrl} 
-                    alt={scholarship.title} 
+                  <img
+                    src={scholarship.imageUrl}
+                    alt={scholarship.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.target.src = DEFAULT_IMAGE;
-                    }} 
+                    }}
                   />
                 </div>
 
@@ -158,16 +177,16 @@ const OverFlowScholarshipSection = () => {
                       {scholarship.tag}
                     </span>
                   )}
-                  
+
                   <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 h-14">{scholarship.title}</h3>
-                  
+
                   <p className="mt-2 text-sm text-gray-700 line-clamp-3 h-14 mb-2">{scholarship.description}</p>
-                  
+
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3">
                     <span className="text-sm text-gray-800 mb-3 sm:mb-0">
                       <span className="font-medium">Deadline:</span> {scholarship.deadline}
                     </span>
-                    
+
                     <button
                       className="bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl text-sm w-full sm:w-auto text-center transition-colors duration-200"
                       onClick={() => navigate(`/scholarship/${scholarship.id}`)}

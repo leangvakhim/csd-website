@@ -74,7 +74,7 @@ const PartnershipSection = ({ section }) => {
     return (
         <div className="my-16">
             <motion.section
-                className="container mx-auto px-4"
+                className="container mx-auto px-8"
                 variants={sectionVariants}
                 initial="hidden"
                 whileInView="visible"

@@ -30,6 +30,8 @@ const NewsSection = ({ section, menuLang }) => {
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
 
   useEffect(() => {
     const fetchHeaderData = async () => {
@@ -68,8 +70,12 @@ const NewsSection = ({ section, menuLang }) => {
         const newsList = Array.isArray(response.data?.data) ? response.data.data : [];
 
         // Filter out items where announcement.img or announcement.img.img is undefined
-        const filteredList = newsList.filter(item => item.img && item.img.img);
-        const transformed = filteredList.map(announcement => ({
+        const filteredList = newsList.filter(item => item.img && item.img.img
+          && item.lang === currentLang
+        );
+        const transformed = filteredList
+        .slice(0, 4)
+        .map(announcement => ({
           id: announcement.n_id,
           tag: announcement.n_tags,
           title: announcement.n_title,

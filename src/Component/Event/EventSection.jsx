@@ -31,6 +31,8 @@ const EventSection = ({ section, menuLang }) => {
 
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
     const DEFAULT_IMAGE = '/placeholder-image.jpg';
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -74,7 +76,10 @@ const EventSection = ({ section, menuLang }) => {
                     : [response.data.data];
 
                 const transformed = data
-                    .filter(() => true)
+                    .filter((item) => 
+                        item.img && item.img.img && item.lang === currentLang
+                    )
+                    .slice(0, 4)
                     .map(item => ({
                         id: item.e_id,
                         tag: item.e_tags || 'Events',

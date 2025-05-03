@@ -62,19 +62,31 @@ const ApplySection = ({ section, menuLang }) => {
         .get(`${API_ENDPOINTS.getApply}?section_id=${section.sec_id}&lang=${menuLang}`)
         .then((res) => {
           const data = res.data?.data || [];
-          if (data.length > 0) {
-            const sectionData = data[0];
+          const filter = data.filter((item) => {
+            // Ensure item and section exist
+            if (!item || !item.section) return false;
+
+            return (
+              item.section.lang === menuLang &&
+              item.section.display === 1 && 
+              item.section.active === 1 
+            );
+          });
+
+          if (filter.length > 0) {
+            const sectionData = filter[0]; // Use filtered data
             const formattedSection = {
-              ha_title: sectionData.ha_title || "Default Title",
-              ha_tagtitle: sectionData.ha_tagtitle || "",
-              ha_subtitletag: sectionData.ha_subtitletag || "",
-              ha_date: sectionData.ha_date || "",
+              ha_title: sectionData.ha_title ?? "Default Title",
+              ha_tagtitle: sectionData.ha_tagtitle ?? "",
+              ha_subtitletag: sectionData.ha_subtitletag ?? "",
+              ha_date: sectionData.ha_date ?? "",
               image: sectionData.image?.img
                 ? `${API}/storage/uploads/${sectionData.image.img}`
                 : null,
-              ha_id: sectionData.ha_id || null,
+              ha_id: sectionData.ha_id ?? null,
             };
             setSectionData(formattedSection);
+
 
             // Fetch social settings with language filter
             axios
@@ -120,7 +132,7 @@ const ApplySection = ({ section, menuLang }) => {
               .then((stepRes) => {
                 const stepsData = stepRes.data?.data || [];
                 const formattedSteps = stepsData
-                  .filter((step) => step.display === 1 && step.ha.ha_sec === sectionData.ha_id)
+                  .filter((step) => step.display === 1)
                   .map((step) => step.sha_title);
                 setSteps(formattedSteps);
               })
@@ -130,7 +142,7 @@ const ApplySection = ({ section, menuLang }) => {
               });
           } else {
             setSectionData({
-              ha_title: "Step By Step: How to Apply to Computer Science Department",
+              ha_title: "",
               ha_tagtitle: "",
               ha_subtitletag: "",
               ha_date: "",
@@ -143,7 +155,7 @@ const ApplySection = ({ section, menuLang }) => {
         .catch((error) => {
           console.error("Error fetching apply section data:", error);
           setSectionData({
-            ha_title: "Step By Step: How to Apply to Computer Science Department",
+            ha_title: "",
             ha_tagtitle: "",
             ha_subtitletag: "",
             ha_date: "",
@@ -155,7 +167,7 @@ const ApplySection = ({ section, menuLang }) => {
     } else {
       console.log("ApplySection: No section.sec_id or menuLang provided, skipping API call");
       setSectionData({
-        ha_title: "Step By Step: How to Apply to Computer Science Department",
+        ha_title: "",
         ha_tagtitle: "",
         ha_subtitletag: "",
         ha_date: "",
