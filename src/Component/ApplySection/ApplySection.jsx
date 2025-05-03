@@ -1,281 +1,221 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   FaPhoneAlt,
   FaEnvelope,
   FaArrowRight,
   FaCalendarAlt,
-} from "react-icons/fa";
+} from 'react-icons/fa';
+import axios from 'axios';
+import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { useLocation } from 'react-router-dom';
 
-const sectionVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      when: "beforeChildren",
-      staggerChildren: 0.2,
-    },
-  },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const ApplySection = ({ section, menuLang }) => {
-  const [sectionData, setSectionData] = useState({});
-  const [contactInfo, setContactInfo] = useState({
-    contactDetails: {
-      phone: "",
-      email: "",
-    },
-  });
-  const [socialData, setSocialData] = useState({
-    contactDetails: {
-      socialLinks: [],
-    },
-  });
+const ApplySection = ({key, section, menuLang}) => {
+  const location = useLocation();
+  const [applyInfo, setApplyInfo] = useState(null);
   const [steps, setSteps] = useState([]);
-
-  const fallbackContactInfo = {
-    contactDetails: {
-      phone: "885 234 876 987",
-      email: "rupp@email.edu.kh",
-      socialLinks: [
-        {
-          title: "telegram",
-          link: "https://t.me/university_channel",
-          image: "telegram-university.png",
-        },
-      ],
-    },
-  };
+  const [contactDetails, setContactDetails] = useState({ phone: '', email: '' });
+  const [socialLinks, setSocialLinks] = useState([]);
 
   useEffect(() => {
-    if (section?.sec_id && menuLang) {
-      // Fetch main section data with language filter
-      axios
-        .get(`${API_ENDPOINTS.getApply}?section_id=${section.sec_id}&lang=${menuLang}`)
-        .then((res) => {
-          const data = res.data?.data || [];
-          if (data.length > 0) {
-            const sectionData = data[0];
-            const formattedSection = {
-              ha_title: sectionData.ha_title || "Default Title",
-              ha_tagtitle: sectionData.ha_tagtitle || "",
-              ha_subtitletag: sectionData.ha_subtitletag || "",
-              ha_date: sectionData.ha_date || "",
-              image: sectionData.image?.img
-                ? `${API}/storage/uploads/${sectionData.image.img}`
-                : null,
-              ha_id: sectionData.ha_id || null,
-            };
-            setSectionData(formattedSection);
+    const fetchApplyInfo = async () => {
+      try {
+        const res = await axios.get(API_ENDPOINTS.getApply);
+        const data = res.data?.data || [];
 
-            // Fetch social settings with language filter
-            axios
-              .get(`${API_ENDPOINTS.getSocialSetting}?section_id=${section.sec_id}&lang=${menuLang}`)
-              .then((socialRes) => {
-                const socialData = socialRes.data?.data || [];
-                const contactDetails = {
-                  socialLinks: socialData.map((item) => ({
-                    title: item.setsoc_title || "",
-                    link: item.setsoc_link || "",
-                    image: item.img?.img ? `${API}/storage/uploads/${item.img.img}` : "",
-                  })),
-                };
-                setSocialData({ contactDetails });
-              })
-              .catch((error) => {
-                console.error("Error fetching social settings:", error);
-                setSocialData(fallbackContactInfo);
-              });
+        const filtered = data.find(item =>
+          item.section?.sec_type === 'Apply' &&
+          item.ha_sec === section?.sec_id
+        );
 
-            // Fetch contact info with language filter
-            axios
-              .get(`${API_ENDPOINTS.getContact}?section_id=${section.sec_id}&lang=${menuLang}`)
-              .then((contactRes) => {
-                const contactData = contactRes.data?.data || [];
-                const contactDetails = {
-                  phone: contactData.contact_phone || "",
-                  email: contactData.contact_email || "",
-                };
-                setContactInfo((prev) => ({
-                  ...prev,
-                  contactDetails,
-                }));
-              })
-              .catch((error) => {
-                console.error("Error fetching contact info:", error);
-                setContactInfo(fallbackContactInfo);
-              });
+        setApplyInfo(filtered);
+      } catch (err) {
+        console.error('Failed to fetch Apply Info:', err);
+      }
+    };
 
-            // Fetch steps with language filter
-            axios
-              .get(`${API_ENDPOINTS.getSubApply}?ha_id=${sectionData.ha_id}&lang=${menuLang}`)
-              .then((stepRes) => {
-                const stepsData = stepRes.data?.data || [];
-                const formattedSteps = stepsData
-                  .filter((step) => step.display === 1 && step.ha.ha_sec === sectionData.ha_id)
-                  .map((step) => step.sha_title);
-                setSteps(formattedSteps);
-              })
-              .catch((error) => {
-                console.error("Error fetching steps:", error);
-                setSteps([]);
-              });
-          } else {
-            setSectionData({
-              ha_title: "Step By Step: How to Apply to Computer Science Department",
-              ha_tagtitle: "",
-              ha_subtitletag: "",
-              ha_date: "",
-              image: null,
-              ha_id: null,
-            });
-            setContactInfo(fallbackContactInfo);
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching apply section data:", error);
-          setSectionData({
-            ha_title: "Step By Step: How to Apply to Computer Science Department",
-            ha_tagtitle: "",
-            ha_subtitletag: "",
-            ha_date: "",
-            image: null,
-            ha_id: null,
-          });
-          setContactInfo(fallbackContactInfo);
+    fetchApplyInfo();
+
+    // Fetch steps from subha endpoint
+    const fetchSteps = async () => {
+      try {
+        const res = await axios.get(API_ENDPOINTS.getSubApply);
+        const subhaData = res.data?.data || [];
+
+        const filteredSteps = subhaData
+          .filter(
+            (item) =>
+              item.ha?.ha_sec === section?.sec_id &&
+              item.display === 1 &&
+              item.active === 1
+          )
+          .sort((a, b) => a.sha_order - b.sha_order);
+
+        setSteps(filteredSteps.map(item => item.sha_title));
+      } catch (error) {
+        console.error("Failed to fetch steps from subha:", error);
+      }
+    };
+
+    fetchSteps();
+
+    const fetchContactInfo = async () => {
+      try {
+        const langId = window.location.pathname.includes('/km') ? 2 : 1;
+        const res = await axios.get(`${API_ENDPOINTS.getContactByLang}/${langId}`);
+        const data = res.data?.data || {};
+        const subcontact2 = data.subcontact2;
+        const subcontact3 = data.subcontact3;
+        setContactDetails({
+          phone: subcontact2?.scon_detail || '',
+          email: subcontact3?.scon_detail || '',
         });
-    } else {
-      console.log("ApplySection: No section.sec_id or menuLang provided, skipping API call");
-      setSectionData({
-        ha_title: "Step By Step: How to Apply to Computer Science Department",
-        ha_tagtitle: "",
-        ha_subtitletag: "",
-        ha_date: "",
-        image: null,
-        ha_id: null,
-      });
-      setContactInfo(fallbackContactInfo);
-    }
-  }, [section?.sec_id, menuLang]);
+      } catch (error) {
+        console.error("Failed to fetch contact info:", error);
+      }
+    };
+
+    fetchContactInfo();
+
+    const fetchSocialLinks = async () => {
+      try {
+        const res = await axios.get(API_ENDPOINTS.getSocialSetting);
+        const data = Array.isArray(res.data?.data) ? res.data.data : [];
+
+        const filtered = data
+          .filter(item => item.display === 1 && item.active === 1)
+          .sort((a, b) => a.setsoc_order - b.setsoc_order);
+        setSocialLinks(filtered);
+      } catch (error) {
+        console.error("Failed to fetch social links:", error);
+      }
+    };
+
+    fetchSocialLinks();
+  }, [section]);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const daySuffix = (d) => {
+      if (d > 3 && d < 21) return 'th';
+      switch (d % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
+    };
+    const month = date.toLocaleString('default', { month: 'long' });
+    return `${day}${daySuffix(day)} ${month}`;
+  };
 
   return (
     <div className="my-16">
-      <motion.section
-        className="container mx-auto px-4"
-        variants={sectionVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.5 }}
-      >
-        <div className="flex flex-col xl:flex-row gap-8 items-center justify-between">
-          {/* Left Side: Steps */}
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col xl:flex-row gap-6 items-center justify-between">
+          {/* Left Side: Steps and Text */}
           <motion.div
-            className="lg:w-1/2 mb-8 xl:mb-0"
-            variants={cardVariants}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, amount: 0.5 }} // Trigger when 50% of the element is in view
+            className="xl:w-1/2 mb-8 xl:mb-0"
           >
             <motion.h2
+              initial={{ opacity: 0, y: -50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true, amount: 0.5 }}
               className="text-3xl font-semibold mb-6"
-              variants={cardVariants}
-              transition={{ duration: 0.6 }}
             >
-              {sectionData.ha_title}
+              Step By Step: How to Apply to Computer Science Department
             </motion.h2>
-            <div className="space-y-4">
+            <ul className="list-none space-y-4">
               {steps.map((step, index) => (
-                <motion.div
+                <motion.li
                   key={index}
-                  className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
-                  variants={cardVariants}
-                  transition={{ duration: 0.6 }}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  viewport={{ once: true, amount: 0.5 }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="lg:text-xl text-md">{step}</span>
+                  <div className="p-6 border rounded-2xl flex items-center justify-between">
+                    <span className="xl:text-xl text-md">{step}</span>
                     <FaArrowRight className="ml-2" />
                   </div>
-                </motion.div>
+                </motion.li>
               ))}
-            </div>
+            </ul>
           </motion.div>
 
-          {/* Right Side: Semester and Contact Info */}
+          {/* Right Side: New Semester and Contact Info */}
           <motion.div
-            className="xl:w-1/2 flex flex-col xl:flex-row justify-center items-center gap-6"
-            variants={cardVariants}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, amount: 0.5 }}
+            className="flex flex-col-reverse xl:flex-row xl:w-1/2 justify-center items-center"
           >
             <motion.div
-              className="bg-white p-6 rounded-lg shadow-lg xl:w-1/2 order-1 xl:order-2"
-              variants={cardVariants}
-              transition={{ duration: 0.6 }}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true, amount: 0.5 }}
+              className="bg-white p-6 rounded-md space-y-10 xl:w-1/2 xl:order-2 order-1"
             >
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">{sectionData.ha_tagtitle}</h3>
-                  <p className="mb-4">{sectionData.ha_subtitletag}</p>
-                  <p className="text-center text-lg xl:text-xl">
+              {applyInfo && (
+                <div className="bg-white p-6 rounded-md shadow-md">
+                  <h2 className="text-xl font-semibold mb-4">{applyInfo.ha_tagtitle}</h2>
+                  <p className="mb-4">{applyInfo.ha_subtitletag}</p>
+                  <p className="mb-4 text-center text-lg xl:text-xl">
                     <FaCalendarAlt className="inline-block mr-2" />
-                    {sectionData.ha_date}
+                    {formatDate(applyInfo.ha_date)}
                   </p>
                 </div>
-                <div className="py-6 px-4 bg-red-900 text-white shadow-lg rounded-lg">
-                  <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
-                  <p className="flex items-center mb-2">
+              )}
+
+              <div className="py-6 px-4 bg-red-900 text-white shadow-lg rounded-2xl flex justify-center">
+                <div className="space-y-5">
+                  <h3 className="text-lg font-semibold">Contact Info</h3>
+                  <p className="flex items-center">
                     <FaPhoneAlt className="mr-2" />
-                    {contactInfo.contactDetails.phone}
+                    {contactDetails.phone}
                   </p>
-                  <p className="flex items-center mb-4">
+                  <p className="flex items-center">
                     <FaEnvelope className="mr-2" />
-                    {contactInfo.contactDetails.email}
+                    {contactDetails.email}
                   </p>
-                  <div className="flex space-x-4">
-                    {socialData.contactDetails.socialLinks.map((link, index) => (
-                      <a
-                        key={index}
-                        href={link.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-gray-50 p-2 rounded-lg"
-                      >
-                        {link.image && (
+                  <div className="flex space-x-3">
+                    {socialLinks.map((link, index) => (
+                      <a key={index} href={link.setsoc_link || "#"} target="_blank" rel="noopener noreferrer">
+                        <div className="bg-gray-50 p-2 rounded-lg text-red-700">
                           <img
-                            src={link.image}
-                            alt={link.title}
-                            className="w-6 h-6 object-contain"
+                            src={`${API}/storage/uploads/${link.img?.img}`}
+                            alt={link.setsoc_title}
+                            className="w-5 h-5 object-contain"
                           />
-                        )}
+                        </div>
                       </a>
                     ))}
                   </div>
                 </div>
               </div>
             </motion.div>
-            {sectionData.image && (
-              <motion.div
-                className="lg:w-1/2 order-2 lg:order-1 shadow-2some-2xs bg-white"
-                variants={cardVariants}
-                transition={{ duration: 0.6 }}
-              >
-                <img
-                  src={sectionData.image}
-                  alt="Admission Image"
-                  className="rounded-lg w-full h-full object-cover"
-                />
-              </motion.div>
-            )}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              viewport={{ once: true, amount: 0.5 }}
+              className="xl:w-1/2 xl:order-1 order-2"
+            >
+              <img src={`${API}/storage/uploads/${applyInfo?.image?.img}`} alt="Admission Image" className="rounded-2xl w-full h-full object-cover" />
+            </motion.div>
           </motion.div>
         </div>
-      </motion.section>
+      </div>
     </div>
   );
-};
+}
 
-export default ApplySection;
+export default ApplySection
