@@ -29,17 +29,26 @@ const Introduction = ({ section }) => {
   useEffect(() => {
     if (section?.sec_id) {
       axios
-        .get(`${API_ENDPOINTS.getIntroduction}?section_id=${section.sec_id}`)
+        .get(`${API_ENDPOINTS.getIntroduction}`)
         .then((res) => {
-          const data = res.data?.data[0] || null;
+          const filteredData = Array.isArray(res.data?.data)
+            ? res.data.data.find(
+                (item) =>
+                  item.in_sec === section.sec_id &&
+                  item.section.sec_type === "Introduction" &&
+                  item.section?.display === 1 &&
+                  item.section?.active === 1
+              )
+            : null;
+
+          const data = filteredData || null;
           if (data) {
             setIntroduction({
               title: data.in_title,
               detail: data.in_detail,
               image: data.image?.img ? `${API}/storage/uploads/${data.image.img}` : null,
-              established: "Established on January 13, 1960",
-              subtitle:
-                "The country's largest university, hosting around 30,000 students in undergraduate and postgraduate programmes.",
+              established: data.inadd_title,
+              subtitle: data.in_addsubtitle,
             });
           }
         })
@@ -85,9 +94,9 @@ const Introduction = ({ section }) => {
 
             {/* Fixed Text Box */}
             <motion.div
-              className="absolute w-[80%] sm:w-[280px] lg:w-[300px] bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 
-                         bottom-4 sm:bottom-6 lg:bottom-10 right-0 sm:right-[-40px] lg:right-[-50px] 
-                         border-t-4 sm:border-t-6 lg:border-t-8 border-t-red-700 p-3 sm:p-4 flex flex-col justify-end 
+              className="absolute w-[80%] sm:w-[280px] lg:w-[300px] bg-white shadow-lg hover:shadow-xl transition-shadow duration-300
+                         bottom-4 sm:bottom-6 lg:bottom-10 right-0 sm:right-[-40px] lg:right-[-50px]
+                         border-t-4 sm:border-t-6 lg:border-t-8 border-t-red-700 p-3 sm:p-4 flex flex-col justify-end
                          sm:transform sm:translate-x-0 mx-auto sm:mx-0"
               variants={cardVariants}
               transition={{ duration: 0.6, delay: 0.2 }}
