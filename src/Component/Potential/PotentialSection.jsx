@@ -175,12 +175,12 @@ const PotentialSection = ({ section, menuLang }) => {
                   variants={cardVariants}
                   transition={{ delay: i * 0.2 }}
                 >
-                  <div className="border border-red-800 rounded-full p-2 mr-4 min-w-[40px] min-h-[40px] flex items-center justify-center">
+                  <div className="p-1.5 min-w-[60px] min-h-[60px] flex items-center justify-center">
                     {typeof s.icon === "string" ? (
                       <img
                         src={s.icon}
                         alt={s.title}
-                        className="w-5 h-5 object-contain"
+                        className="w-10 h-10 object-contain"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = "/placeholder-icon.png";
