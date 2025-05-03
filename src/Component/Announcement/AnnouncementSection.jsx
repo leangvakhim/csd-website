@@ -165,7 +165,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="flex flex-col md:flex-row justify-between items-center mb-8"
+          className="flex flex-col sm:flex-row justify-between items-center mb-8"
         >
           <h1 className="text-3xl font-semibold mb-4">
             {headerData.hsec_title}
