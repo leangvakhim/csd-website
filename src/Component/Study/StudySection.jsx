@@ -1,83 +1,53 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { useParams } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect, useRef } from 'react'
+import { motion } from 'framer-motion';
+import axios from 'axios';
 import { API_ENDPOINTS } from "../../Service/APIconfig";
-import { FaCheck } from "react-icons/fa";
+import { PiGraduationCapDuotone } from "react-icons/pi";
 
-const parseHTMLDetails = (htmlString) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString, "text/html");
-    const spans = doc.querySelectorAll("div span");
-    return Array.from(spans).map((el) => el.textContent.trim());
-};
-
-const StudySection = () => {
-    const { degree, subdegree } = useParams();
-    const [selectedYear, setSelectedYear] = useState(null);
-    const [studyPlans, setStudyPlans] = useState([]);
-    const [studyHeader, setStudyHeader] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+const StudySection = ({key, section, menuLang}) => {
+    const [studyInfo, setStudyInfo] = useState({ title: '', subtitle: '' });
+    const [yearCards, setYearCards] = useState([]);
 
     useEffect(() => {
-        const fetchStudyData = async () => {
-            setIsLoading(true);
-            setError(null);
-
+        const fetchStudyInfo = async () => {
             try {
-                const [subdegreeRes, degreeRes] = await Promise.all([
-                    axios.get(API_ENDPOINTS.getSubStudyDegree),
-                    axios.get(API_ENDPOINTS.getStudy),
-                ]);
+                const res = await axios.get(API_ENDPOINTS.getStudy);
+                const data = Array.isArray(res.data?.data) ? res.data.data : [];
 
-                const subPlans = subdegreeRes.data?.data || [];
-                const degreeData = degreeRes.data?.data;
+                const matched = data.find(
+                  (item) => item.section?.sec_type === 'Study' && item.std_sec === section.sec_id
+                );
 
-                if (degreeData && degreeData.length > 0) {
-                    setStudyHeader({
-                        title: degreeData[0].std_title,
-                        subtitle: degreeData[0].std_subtitle,
-                    });
+                if (matched) {
+                  setStudyInfo({
+                    title: matched.std_title,
+                    subtitle: matched.std_subtitle,
+                  });
                 }
-
-                const formattedPlans = subPlans.map((item) => ({
-                    id: item.y_id,
-                    year: item.y_order,
-                    title: item.y_title,
-                    subtitle: item.y_subtitle,
-                    courses: item.y_detail ? parseHTMLDetails(item.y_detail) : [],
-                }));
-
-                setStudyPlans(formattedPlans);
-                setSelectedYear(formattedPlans[0]?.year);
             } catch (err) {
-                console.error("API error:", err);
-                setError("Failed to load study plans");
-            } finally {
-                setIsLoading(false);
+                console.error('Failed to fetch study info:', err);
             }
         };
 
-        fetchStudyData();
-    }, [degree, subdegree]);
+        fetchStudyInfo();
 
-    if (isLoading) {
-        return <div className="text-center py-8 text-gray-600">Loading...</div>;
-    }
+        const fetchYears = async () => {
+            try {
+                const res = await axios.get(API_ENDPOINTS.getSubStudyDegree);
+                const allYears = Array.isArray(res.data?.data) ? res.data.data : [];
 
-    if (error) {
-        return <div className="text-center py-8 text-gray-600">{error}</div>;
-    }
+                const filteredYears = allYears
+                  .filter(y => y.studydegree?.std_id === y.y_std && y.studydegree?.std_sec === section.sec_id)
+                  .sort((a, b) => a.y_order - b.y_order);
 
-    const gridCols =
-        studyPlans.length === 2
-            ? "grid-cols-1 sm:grid-cols-2"
-            : studyPlans.length === 3
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                : studyPlans.length === 4
-                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-                    : "grid-cols-1 sm:grid-cols-2";
+                setYearCards(filteredYears);
+            } catch (err) {
+                console.error("Failed to fetch year data:", err);
+            }
+        };
+
+        fetchYears();
+    }, [section.sec_id]);
 
     return (
         <div className="my-16 py-4">
@@ -86,79 +56,101 @@ const StudySection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true }}
-                className="container mx-auto text-center px-4"
+                className="container mx-auto text-center px-4 "
             >
                 <motion.h2
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
+                    viewport={{ once: true }}
                     className="text-3xl font-semibold mb-4"
                 >
-                    {studyHeader?.title || "No title available"}
+                    {studyInfo.title}
                 </motion.h2>
 
                 <motion.p
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
+                    viewport={{ once: true }}
                     className="text-lg xl:max-w-[743px] w-full mx-auto text-gray-600 mb-8"
                 >
-                    {studyHeader?.subtitle || "No subtitle available"}
+                    {studyInfo.subtitle}
                 </motion.p>
 
-                <div className="flex justify-center">
+                {/* <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.6 }}
+                    viewport={{ once: true }}
+                    className={`grid gap-6 ${selectedStudyPlan.length === 2 ? 'max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 justify-center' : ''} ${selectedStudyPlan.length === 3 ? 'max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-center' : ''}  ${selectedStudyPlan.length === 4 ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : ''}`}
+                >
+                    {selectedStudyPlan.map((year, index) => (
+                        <motion.div
+                            key={year.year}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5, delay: 0.2 + index * 0.2 }}
+                            viewport={{ once: true }}
+                            className={`rounded-xl p-6 shadow-md transition-all ${selectedYear === year.year ? 'bg-red-900' : 'bg-white'}`}
+                            // onClick={() => setSelectedYear(year.year)}
+
+                        >
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4`}>
+                                <PiGraduationCapDuotone size={32} className={`${selectedYear === year.year ? 'text-white' : 'text-black'}`} />
+                            </div>
+                            <h3 className={`text-2xl font-semibold mb-2 text-start ${selectedYear === year.year ? 'text-white' : 'text-black'}`}>
+                                {year.title}
+                            </h3>
+                            <p className={`mb-4 text-start ${selectedYear === year.year ? 'text-gray-50' : 'text-black'}`}>
+                                {year.subtitle}
+                            </p>
+                            <ul className={`text-left text-sm space-y-6 ${selectedYear === year.year ? 'text-gray-50' : 'text-gray-600'}`}>
+                                {year.courses.map((course, i) => (
+                                    <li key={i} className="flex items-start">
+                                        <div className="flex mr-2 md:mr-4 mt-2">
+                                            <FaCheck size={18} className={`${selectedYear === year.year ? 'text-gray-50' : 'text-red-900'}`} />
+                                        </div>
+                                        <span className="md:text-base">{course}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </motion.div>
+                    ))}
+                </motion.div> */}
+
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                  viewport={{ once: true }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10"
+                >
+                  {yearCards.map((card, index) => (
                     <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.6 }}
-                        className={`grid gap-6 ${gridCols} max-w-7xl w-full `}
+                      key={card.y_id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 0.2 + index * 0.2 }}
+                      viewport={{ once: true }}
+                      className={`rounded-xl p-6 shadow-md transition-all ${index === 0 ? 'bg-red-900 text-white' : 'bg-white text-black'}`}
                     >
-                        {studyPlans.map((year, index) => (
-                            <motion.div
-                                key={year.id}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.5, delay: 0.2 + index * 0.2 }}
-                                className={`rounded-xl p-6 shadow-md transition-all bg-white cursor-pointer ${studyPlans.length % 2 !== 0 && index === studyPlans.length - 1 ? "bg-red-900 text-white" : ""
-                                    }`}
-                                onClick={() => setSelectedYear(year.year)}
-                            >
-                                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4">
-                                    <img
-                                        src="/path/to/your/image/graduation-cap.png"
-                                        alt="Graduation Cap"
-                                        className="opacity-100 rounded-full"
-                                        width={40}
-                                        height={40}
-                                    />
-                                </div>
-
-                                <h3 className="text-2xl font-semibold mb-2 text-start">
-                                    {year.title}
-                                </h3>
-
-                                <p className="mb-4 text-start">
-                                    {year.subtitle}
-                                </p>
-
-                                <ul className="text-left text-sm space-y-6">
-                                    {year.courses.map((course, i) => (
-                                        <li key={i} className="flex items-start">
-                                            <div className="flex mr-2 md:mr-4 mt-2">
-                                                <FaCheck size={18} className="text-white md:text-red-900" />
-                                            </div>
-                                            <span className="md:text-base">{course}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </motion.div>
-                        ))}
-
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-0`}>
+                            <PiGraduationCapDuotone size={32} className={`${index === 0 ? 'text-white' : 'text-black'}`} />
+                        </div>
+                      <h3 className="text-2xl font-semibold mb-2 text-start">{card.y_title}</h3>
+                      <p className="mb-4 text-start">{card.y_subtitle}</p>
+                      <div
+                        className="text-md leading-relaxed text-left"
+                        dangerouslySetInnerHTML={{ __html: card.y_detail || '' }}
+                      />
                     </motion.div>
-                </div>
+                  ))}
+                </motion.div>
+
             </motion.div>
         </div>
     );
-};
+}
 
-export default StudySection;
+export default StudySection

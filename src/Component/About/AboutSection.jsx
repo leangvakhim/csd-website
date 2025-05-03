@@ -51,7 +51,7 @@ const AboutSection = ({ section }) => {
                 const formattedStats = [
                     { value: data.set_amstu.toLocaleString(), rank: "Students" },
                     { value: data.set_enroll.toLocaleString(), rank: "Increase Enrollment" },
-                    { value: "1<sup class='text-md'>st</sup>", rank: "University In Cambodia" },
+                    { value: "1<sup class='text-md'>st</sup>", rank: "CS Program in Cambodia" },
                 ];
                 setStats(formattedStats);
                 setIsLoading(false);
@@ -61,7 +61,7 @@ const AboutSection = ({ section }) => {
                 const fallbackStats = [
                     { value: "2,000", rank: "Students" },
                     { value: "5,000", rank: "Increase Enrollment" },
-                    { value: "1<sup class='text-md'>st</sup>", rank: "University In Cambodia" },
+                    { value: "1<sup class='text-md'>st</sup>", rank: "CS Program in Cambodia" },
                 ];
                 setStats(fallbackStats);
                 setError("Failed to load statistics");
