@@ -41,24 +41,25 @@ const FAQSection = ({section}) => {
   useEffect(() => {
     setIsLoading(true);
     setError(null);
-  
+
     Promise.all([axios.get(API_ENDPOINTS.getFAQ), axios.get(API_ENDPOINTS.getSubFAQ)])
       .then(([faqRes, subFaqRes]) => {
-        console.log("getFAQ response:", faqRes.data);
-        console.log("getSubFAQ response:", subFaqRes.data);
-  
+
         if (!faqRes.data?.data || !subFaqRes.data?.data) {
           throw new Error("Invalid API response structure");
         }
-  
+
         const faqData = faqRes.data.data;
         const subFaqData = subFaqRes.data.data;
-  
+
         // Find the FAQ section based on the 'section' prop
         const faqSection = faqData.find(
-          (item) => item.section?.sec_type === "FAQ"
+          (item) => item.section?.sec_type === "FAQ" &&
+                    item.faq_sec === section.sec_id &&
+                    item.section?.display === 1 &&
+                    item.section?.active === 1
         );
-  
+
         // Set title and description
         if (faqSection) {
           setContent({
@@ -71,25 +72,26 @@ const FAQSection = ({section}) => {
             description: content.description,
           });
         }
-  
+
         // Filter sub-FAQ items based on the section id if needed, or simply display all active ones
         const subFaqItems = subFaqData
-          .filter((item) => item.display === 1 && item.active === 1)
+          .filter((item) => item.display === 1 &&
+                            item.active === 1 &&
+                            item.faq?.faq_sec === section?.sec_id
+                          )
           .map((item) => ({
             question: item.fa_question,
             answer: item.fa_answer,
             order: item.fa_order,
           }))
           .sort((a, b) => a.order - b.order);
-  
-        console.log("subFaqItems:", subFaqItems);
-  
+
         if (subFaqItems.length === 0) {
           setError("No FAQ items found");
         } else {
           setFaqItems(subFaqItems);
         }
-  
+
         setIsLoading(false);
       })
       .catch((err) => {
@@ -98,7 +100,7 @@ const FAQSection = ({section}) => {
         setIsLoading(false);
       });
   }, [section]);
-  
+
   if (isLoading) {
     return <div className="text-center py-8 text-gray-600">Loading...</div>;
   }
