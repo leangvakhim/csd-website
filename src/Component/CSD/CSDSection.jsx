@@ -126,7 +126,7 @@ const CSDSection = ({key, section, menuLang}) => {
                   <div className="space-y-6">
                       {objectives.map((objective, index) => (
                           <div key={index} className="flex items-start gap-3">
-                              <div className="size-16 p-2.5 ">
+                              <div className="w-24 h-24 p-2.5 ">
                                   <objective.icon />
                               </div>
                               <div>
@@ -139,7 +139,7 @@ const CSDSection = ({key, section, menuLang}) => {
               </motion.div>
           </div>
 
-     
+
       </motion.div>
     </div>
   );
