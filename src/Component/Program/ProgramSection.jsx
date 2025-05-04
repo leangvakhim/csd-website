@@ -34,9 +34,15 @@ const ProgramSection = ({ section }) => {
   useEffect(() => {
     if (section?.sec_id) {
       axios
-        .get(`${API_ENDPOINTS.getDepartment}?section_id=${section.sec_id}`)
+        .get(API_ENDPOINTS.getDepartment)
         .then((res) => {
-          const entry = res.data?.data?.[0];
+          const filteredEntry = res.data?.data?.find(entry =>
+            entry.dep_sec === section.sec_id &&
+            entry.section?.sec_type === "Programs" &&
+            entry.section?.display === 1 &&
+            entry.section?.active === 1
+          );
+          const entry = filteredEntry;
           if (entry && entry.section.display === 1) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(entry.dep_detail, 'text/html');

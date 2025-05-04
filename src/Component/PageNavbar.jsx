@@ -8,8 +8,6 @@ const PageNavbar = ({ menus }) => {
   const location = useLocation();
   const navbarRef = useRef(null); // Renamed for clarity
 
-  console.log("menus is: ",menus);
-
   // Close dropdown if the user clicks outside
   useEffect(() => {
     const handleClickOutside = (event) => {
