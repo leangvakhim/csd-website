@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
 import { API_ENDPOINTS } from "../../Service/APIconfig";
+import axios from 'axios';
 
 // Animation variants
 const quoteVariants = {
@@ -21,12 +22,17 @@ const TestimonialSection = ({ section }) => {
   useEffect(() => {
     if (section?.sec_id) {
       // Fetch testimonial based on section.sec_id
-      fetch(`${API_ENDPOINTS.getTestimonial}?section_id=${section.sec_id}`)
-        .then((response) => response.json())
-        .then((data) => {
-          const testimonial = data?.data?.[0];
-          if (testimonial) {
-            setQuote(testimonial.t_title);
+      axios.get(`${API_ENDPOINTS.getTestimonial}`)
+        .then((response) => {
+          const data = Array.isArray(response.data) ? response.data : response.data.data;
+          const filtered = data.find(item =>
+            item.t_sec === section?.sec_id &&
+            section.sec_type === "Testimonial" &&
+            section.display === 1 &&
+            section.active === 1
+          );
+          if (filtered) {
+            setQuote(filtered.t_title);
           }
         })
         .catch((error) => {
@@ -66,7 +72,7 @@ const TestimonialSection = ({ section }) => {
 
           {/* Quote Text */}
           <motion.h1
-            className="text-lg sm:text-2xl md:text-3xl font-semibold leading-relaxed text-gray-800 px-6"
+            className="text-lg sm:text-2xl md:text-3xl font-semibold leading-relaxed text-gray-800 px-20"
             variants={quoteVariants}
             transition={{ delay: 0.4 }}
           >

@@ -22,7 +22,7 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-const ResearchSection = () => {
+const ResearchSection = ({section}) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('');
@@ -191,7 +191,7 @@ const ResearchSection = () => {
                   <div className="flex flex-col justify-center items-end py-2 sm:py-3">
                     <button className="text-black text-[9px] sm:text-[10px] lg:text-xs bg-gray-300 py-1 sm:py-1.5 px-2 sm:px-3 lg:px-4 shadow-md rounded-full flex items-center mb-2">
                       <MdComputer className="mr-1 text-xs sm:text-sm" />
-                      <span className="truncate max-w-[120px] sm:max-w-[150px] lg:max-w-[200px]">
+                      <span className="truncate w-full">
                         {section.lead}
                       </span>
                     </button>
@@ -210,7 +210,7 @@ const ResearchSection = () => {
                       className="bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center"
                     >
                       <MdExplore className="mr-1 text-xs sm:text-base" />
-                      Explore
+                      {currentLang === 1 ? "Explore" : "មើលបន្ថែម"}
                     </button>
                   </div>
                 </div>
