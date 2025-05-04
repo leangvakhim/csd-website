@@ -13,7 +13,7 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-const FourColScholarshipSection = () => {
+const FourColScholarshipSection = ({sectionData}) => {
   const navigate = useNavigate();
   const [scholarships, setScholarships] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +26,7 @@ const FourColScholarshipSection = () => {
     hsec_title: "Available Scholarships", // Default title
     hsec_amount: 4 // Default number of scholarships
   });
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
@@ -37,10 +38,18 @@ const FourColScholarshipSection = () => {
         setHeaderLoading(true);
         // Assuming API_ENDPOINTS.getHeaderSection is the endpoint for header data
         const response = await axios.get(API_ENDPOINTS.getHeaderSection);
-        if (response.data && response.data.hsec_title) {
+        const data = Array.isArray(response.data) ? response.data : response.data.data;
+        const filtered = data.find(
+          item =>
+            item.hsec_sec === sectionData?.sec_id &&
+            item.section?.sec_type === "Scholarship" &&
+            item.section?.display === 1 &&
+            item.section?.active === 1
+        );
+        if (filtered) {
           setHeaderData({
-            hsec_title: response.data.hsec_title,
-            hsec_amount: response.data.hsec_amount || 4
+            hsec_title: sectionData.hsec_title,
+            hsec_amount: sectionData.hsec_amount || 4
           });
         }
       } catch (error) {
@@ -54,24 +63,43 @@ const FourColScholarshipSection = () => {
     const fetchScholarships = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(API_ENDPOINTS.getScholarship);
-        const transformed = response.data.data
-         
-          .map(item => ({
-            id: item.sc_id,
-            tag: item.sc_sponsor,
-            title: item.sc_title,
-            description: item.sc_shortdesc,
-            deadline: new Date(item.sc_deadline).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            }),
-            imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE
-          }))
-          .slice(0, headerData.hsec_amount); // Use the amount from header data
-        
-        setScholarships(transformed);
+        const scRes = await axios.get(API_ENDPOINTS.getScholarship);
+        const formattedScholarships = (scRes.data?.data || [])
+          .filter((item) => {
+            if (!item) return false;
+            return (
+              item.lang === currentLang &&
+              item.display === 1 &&
+              item.active === 1
+            );
+          })
+          .sort((a, b) => (a.sc_orders ?? 0) - (b.sc_orders ?? 0))
+          .map((item) => {
+            let formattedDeadline = 'TBD';
+            try {
+              if (item.sc_deadline) {
+                formattedDeadline = new Date(item.sc_deadline).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                });
+              }
+            } catch (error) {
+              console.warn(`Invalid deadline for scholarship ${item.sc_id}:`, error);
+            }
+
+            return {
+              id: item.sc_id ?? null,
+              tag: item.sc_sponsor ?? '',
+              title: item.sc_title ?? '',
+              description: item.sc_shortdesc ?? '',
+              deadline: formattedDeadline,
+              imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
+            };
+          })
+          .slice(0, headerData.hsec_amount);// Use the amount from header data
+
+        setScholarships(formattedScholarships);
       } catch (error) {
         console.error('Failed to fetch scholarships:', error);
         setError('Failed to load scholarships. Please try again later.');
@@ -109,7 +137,7 @@ const FourColScholarshipSection = () => {
       <div className="text-center py-12 text-red-800">
         {headerError && <p>{headerError}</p>}
         {error && <p>{error}</p>}
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="mt-4 bg-red-800 text-white px-4 py-2 rounded-xl hover:bg-red-900"
         >
@@ -124,7 +152,7 @@ const FourColScholarshipSection = () => {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex flex-col xl:flex-row xl:justify-between items-center gap-8 mb-6">
-          <h2 className="text-2xl font-semibold">{headerData.hsec_title}</h2>
+          <h2 className="text-2xl font-semibold">{sectionData.hsec_title}</h2>
           <div className='flex flex-col sm:flex-row gap-6 sm:gap-4'>
             {/* Search Field */}
             <div className="relative w-full">
@@ -199,14 +227,14 @@ const FourColScholarshipSection = () => {
                   <p className="text-gray-800 mb-2">{scholarship.description}</p>
                   <p className="text-md py-4 text-gray-800 mb-2 flex items-center">
                     <FaCalendarAlt className="mr-2" />
-                    Deadline: {scholarship.deadline}
+                    {currentLang === 1 ? "Deadline" : "ថ្ងៃផុតកំណត់"}: {scholarship.deadline}
                   </p>
                   <button
                     className="bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl cursor-pointer"
                     onClick={() => navigate(`/scholarship/${scholarship.id}`)}
                     aria-label={`View details for ${scholarship.title}`}
                   >
-                    View Detail
+                    {currentLang === 1 ? "View Detail" : "មើលលម្អិត"}
                   </button>
                 </div>
               </div>

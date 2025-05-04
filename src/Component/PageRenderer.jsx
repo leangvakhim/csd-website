@@ -45,6 +45,7 @@ import ResearchController from './Research/ResearchController';
 import NewsSection from './New/NewsSection';
 import TypeController from './Type/TypeController';
 import CSDSection from './CSD/CSDSection';
+import CriteriaSection from './Criteria/CriteriaSection';
 
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
@@ -154,7 +155,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Type':
                                 return <TypeSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Criteria':
-                                return <BasicRequirements key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <CriteriaSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Question':
                                 return <QuestionSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'About':

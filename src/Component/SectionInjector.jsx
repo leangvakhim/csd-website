@@ -21,19 +21,31 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
   // Use sec_page if available, otherwise fall back to normalizedAlias
   const sectionKey = sec_page || normalizedAlias;
 
+  React.useEffect(() => {
+    const shouldOnlyShowContent =
+      (sectionKey === '/faculty' && lastSegment && lastSegment !== 'faculty') ||
+      (sectionKey === '/developer' && lastSegment && lastSegment !== 'developer') ||
+      (sectionKey === '/research' && lastSegment && lastSegment !== 'research') ||
+      (sectionKey === '/researchlab' && lastSegment && lastSegment !== 'researchlab') ||
+      (sectionKey === '/scholarship' && lastSegment && lastSegment !== 'scholarship') ||
+      (sectionKey === '/events' && lastSegment && lastSegment !== 'events') ||
+      (sectionKey === '/news' && lastSegment && lastSegment !== 'news') ||
+      (sectionKey === '/career' && lastSegment && lastSegment !== 'career') ||
+      (sectionKey === '/announcement' && lastSegment && lastSegment !== 'announcement');
+
+    setOnlyContentMode(shouldOnlyShowContent);
+  }, [sectionKey, lastSegment, setOnlyContentMode]);
+
   switch (sectionKey) {
     case '/faculty':
       if (lastSegment && lastSegment !== 'faculty') {
-        setOnlyContentMode(true);
         return <FacultyDetail facultyId={lastSegment} />;
       }
-      setOnlyContentMode(false);
       return <FacultyDepartment />;
 
     case '/developer':
       if (alias.endsWith('/developer')) {
         if (lastSegment && lastSegment !== 'developer') {
-          setOnlyContentMode(true);
           return <DeveloperDetail developerId={lastSegment} />;
         }
         return <DeveloperSection />;
@@ -41,64 +53,49 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
 
     case '/research':
       if (lastSegment && lastSegment !== 'research') {
-        setOnlyContentMode(true);
         return <ResearchDetails researchId={lastSegment} />;
       }
-      setOnlyContentMode(false);
       return '';
 
     case '/researchlab':
       if (lastSegment && lastSegment !== 'researchlab') {
-        setOnlyContentMode(true);
         return <ResearchLabDetails researchlabId={lastSegment} />;
       }
-      setOnlyContentMode(false);
       return ''; // Replaced empty string with a sensible default
 
     case '/scholarship':
       if (lastSegment && lastSegment !== 'scholarship') {
-        setOnlyContentMode(true);
         return <ScholarshipDetails scholarshipId={lastSegment} />;
       }
-      setOnlyContentMode(false);
       return <div></div>;
 
     case '/events':
       if (lastSegment && lastSegment !== 'events') {
-        setOnlyContentMode(true);
         return <EventsNewsDetails  />;
       }
-      setOnlyContentMode(false);
       return <div></div>; // Main page content
 
     case '/news':
       if (lastSegment && lastSegment !== 'news') {
-        setOnlyContentMode(true);
         return <NewDetails  newId={lastSegment} />;
       }
-      setOnlyContentMode(false);
       return <div></div>; // Main page content
 
     case '/career':
       if (lastSegment && lastSegment !== 'career') {
-        setOnlyContentMode(true);
         return <CareerDetails careerId={lastSegment} />;
       } else {
-        setOnlyContentMode(false);
         return ''; // Replace <div></div> with your actual banner or list component
       }
 
     case '/announcement':
       if (lastSegment && lastSegment !== 'announcement') {
-        setOnlyContentMode(true);
         return <AnnouncementDetails announcementID={lastSegment}/>;
       }
-        
-      setOnlyContentMode(false);
+
       return <div></div>; // Main page content
 
     default:
-      setOnlyContentMode(false);
       return null;
   }
 };
