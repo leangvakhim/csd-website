@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { API_ENDPOINTS, API } from './Service/APIconfig';
 import axios from 'axios';
 import PageRenderer from './Component/PageRenderer';
 import Faculty from './Component/Faculty/FacultyDepartment';
 
-function App() {
+function AppRoutes() {
+  const location = useLocation();
   const [pages, setPages] = useState([]);
   const [settings, setSettings] = useState(null);
   const [currentLang, setCurrentLang] = useState(1);
@@ -21,7 +22,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const langFromUrl = window.location.pathname.includes('/km') ? 2 : 1;
+    const langFromUrl = location.pathname.includes('/km') ? 2 : 1;
     setCurrentLang(langFromUrl);
 
     axios.get(`${API_ENDPOINTS.getSetting}/lang/${langFromUrl}`)
@@ -50,52 +51,56 @@ function App() {
         }
       })
       .catch(err => console.error("Error fetching settings:", err));
-  }, []);
+  }, [location.pathname]);
+
+  return settings ? (
+    <Routes>
+      <Route path="/" element={<Navigate to={settings.baseUrl} replace />} />
+      {pages.map(page => (
+        <Route
+          key={page.p_id}
+          path={
+            page.p_alias === '/faculty'
+              ? '/faculty/*'
+              : page.p_alias === '/research'
+                ? '/research/*'
+                : page.p_alias === '/scholarship'
+                  ? '/scholarship/*'
+                  : page.p_alias === '/researchlab'
+                    ? '/researchlab/*'
+                    : page.p_alias === '/events'
+                      ? '/events/*'
+                        : page.p_alias === '/news'
+                          ? '/news/*'
+                          : page.p_alias === '/career'
+                            ? '/career/*'
+                            : page.p_alias === '/announcement'
+                              ? '/announcement/*'
+                              : page.p_alias
+          }
+          element={
+            <PageRenderer
+              page={page}
+              currentLang={currentLang}
+              setCurrentLang={setCurrentLang}
+              settings={settings}
+              setSettings={setSettings}
+            />
+          }
+        />
+      ))}
+    </Routes>
+  ) : (
+    <div className="text-center py-8">Loading...</div>
+  );
+}
+
+function App() {
   return (
     <Router>
-      {settings ? (
-        <Routes>
-          <Route path="/" element={<Navigate to={settings.baseUrl} replace />} />
-          {pages.map(page => (
-            <Route
-              key={page.p_id}
-              path={
-                page.p_alias === '/faculty'
-                  ? '/faculty/*'
-                  : page.p_alias === '/research'
-                    ? '/research/*'
-                    : page.p_alias === '/scholarship'
-                      ? '/scholarship/*'
-                      : page.p_alias === '/researchlab'
-                        ? '/researchlab/*'
-                        : page.p_alias === '/events'
-                          ? '/events/*'
-                            : page.p_alias === '/news'
-                              ? '/news/*'
-                              : page.p_alias === '/career'
-                                ? '/career/*'
-                                : page.p_alias === '/announcement'
-                                  ? '/announcement/*'
-                                  : page.p_alias
-              }
-              element={
-                <PageRenderer
-                  page={page}
-                  currentLang={currentLang}
-                  setCurrentLang={setCurrentLang}
-                  settings={settings}
-                  setSettings={setSettings}
-                />
-              }
-            />
-
-          ))}
-        </Routes>
-      ) : (
-        <div className="text-center py-8">Loading...</div>
-      )}
+      <AppRoutes />
     </Router>
   );
 }
 
-export default App
+export default App;

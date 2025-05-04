@@ -27,7 +27,6 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
         // Fetch menus, settings, and pages at the same time
         const [menuRes, pageRes] = await Promise.all([
           axios.get(API_ENDPOINTS.getMenu),
-          // axios.get(API_ENDPOINTS.getSetting),
           axios.get(API_ENDPOINTS.getPage),
         ]);
 
@@ -124,7 +123,7 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center py-2">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to={settings.baseUrl} className="flex items-center space-x-2">
               <img
                 src={settings.logoUrl}
                 alt="Logo"
