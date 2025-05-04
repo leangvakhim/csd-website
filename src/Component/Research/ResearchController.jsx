@@ -63,10 +63,10 @@ const ResearchController = ({ section }) => {
     }
 
     // Render based on page alias
-    if (section.page.p_alias === '/home') {
+    if (section.page.p_alias === '/home' || section.page.p_alias === "/km/home") {
       return <ResearchInnovations section={researchData} />;
     }
-    if (section.page.p_alias === '/research') {
+    if (section.page.p_alias === '/research' || section.page.p_alias === "/km/research") {
       return <ResearchSection section={researchData} />;
     }
 

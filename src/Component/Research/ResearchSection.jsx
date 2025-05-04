@@ -43,7 +43,7 @@ const ResearchSection = () => {
         const researchData = researchResponse.data?.data || [];
 
         const formattedResearchData = researchData
-          .filter((item) => item.display === 1 && item.active === 1 
+          .filter((item) => item.display === 1 && item.active === 1
             && item.lang === currentLang)
           .map((item) => ({
             id: item.rsd_id,
@@ -58,12 +58,20 @@ const ResearchSection = () => {
         setResearchData(formattedResearchData);
 
         const headerResponse = await axios.get(API_ENDPOINTS.getHeaderSection);
-        const header = headerResponse.data?.data || {};
+        const headerList = headerResponse.data?.data || [];
 
-        if (header.display === 1 && header.active === 1) {
+        const matchedHeader = headerList.find(
+          (item) =>
+            item.hsec_sec === section.sec_id &&
+            item.section?.sec_type === "Research" &&
+            item.section?.display === 1 &&
+            item.section?.active === 1
+        );
+
+        if (matchedHeader) {
           setHeaderData({
-            title: header.title || '',
-            subtitle: header.subtitle || '',
+            title: matchedHeader.hsec_title || '',
+            subtitle: matchedHeader.hsec_subtitle || '',
           });
         } else {
           setHeaderData({

@@ -6,24 +6,34 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
-const OverFlowScholarshipSection = () => {
+const OverFlowScholarshipSection = ({sectionData}) => {
   const navigate = useNavigate();
   const scrollContainerRef = useRef(null);
   const [scholarships, setScholarships] = useState([]);
   const [headerData, setHeaderData] = useState({ hsec_title: '', hsec_amount: 4, hsec_btntitle: 'View All' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+  const [resolvedAlias, setResolvedAlias] = useState(null);
+
+  useEffect(() => {
+    const fetchAlias = async () => {
+      if (sectionData?.hsec_routepage) {
+        const alias = await resolvePageAlias(sectionData.hsec_routepage);
+        setResolvedAlias(alias);
+      }
+    };
+    fetchAlias();
+  }, [sectionData?.hsec_routepage]);
 
   // Fetch header data
   useEffect(() => {
     const fetchHeaderData = async () => {
       try {
         const headerRes = await axios.get(API_ENDPOINTS.getHeaderSection);
-        
+
         if (!headerRes?.data) {
           throw new Error('No data received from API');
         }
@@ -33,7 +43,7 @@ const OverFlowScholarshipSection = () => {
         if (hsec_title && typeof hsec_amount === 'number') {
           setHeaderData({
             hsec_title: hsec_title || '',
-            hsec_amount: hsec_amount || 4,
+            hsec_amount: typeof hsec_amount === 'number' ? hsec_amount : 4,
             hsec_btntitle: hsec_btntitle || 'View All',
           });
         } else {
@@ -43,7 +53,7 @@ const OverFlowScholarshipSection = () => {
         console.error('Failed to fetch header data:', error.message, error);
         setHeaderData({
           hsec_title: '',
-          hsec_amount: 4,
+          hsec_amount: typeof hsec_amount === 'number' ? hsec_amount : 4,
           hsec_btntitle: 'View All',
         });
       }
@@ -51,6 +61,19 @@ const OverFlowScholarshipSection = () => {
 
     fetchHeaderData();
   }, []);
+
+  const resolvePageAlias = async (routePage) => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.getPage);
+      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
+
+      const matched = pages.find((page) => page.p_title === routePage);
+      return matched?.p_alias || null;
+    } catch (error) {
+      console.error("Failed to fetch page alias:", error);
+      return null;
+    }
+  }
 
   // Fetch scholarship data
   useEffect(() => {
@@ -172,7 +195,7 @@ const OverFlowScholarshipSection = () => {
             viewport={{ once: true }}
             className="text-2xl md:text-3xl font-semibold text-gray-900 mb-3 md:mb-0"
           >
-            {headerData.hsec_title || 'Check Out Scholarship Opportunities'}
+            {sectionData.hsec_title || 'Check Out Scholarship Opportunities'}
           </motion.h2>
 
           <motion.div
@@ -181,8 +204,8 @@ const OverFlowScholarshipSection = () => {
             transition={{ duration: 0.5, delay: 0.6 }}
             viewport={{ once: true }}
           >
-            <Link to="/scholarship" className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1">
-              <span className="mr-2 text-sm">{headerData.hsec_btntitle}</span>
+            <Link to={resolvedAlias} className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1">
+              <span className="mr-2 text-sm">{sectionData.hsec_btntitle}</span>
               <FaArrowRight className="text-red-800" />
             </Link>
           </motion.div>
@@ -227,14 +250,14 @@ const OverFlowScholarshipSection = () => {
 
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3">
                     <span className="text-sm text-gray-800 mb-3 sm:mb-0">
-                      <span className="font-medium">Deadline:</span> {scholarship.deadline}
+                      <span className="font-medium">{currentLang === 1 ? "Deadline:" : "ថ្ងៃផុតកំណត់ៈ"}</span> {scholarship.deadline}
                     </span>
 
                     <button
                       className="bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl text-sm w-full sm:w-auto text-center transition-colors duration-200"
                       onClick={() => navigate(`/scholarship/${scholarship.id}`)}
                     >
-                      View Detail
+                      {currentLang === 1 ? "View Detail" : "មើលលម្អិត"}
                     </button>
                   </div>
                 </div>

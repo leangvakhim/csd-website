@@ -4,6 +4,7 @@ import { FaArrowRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { useLocation } from "react-router-dom";
 
 // Animation variants
 const sectionVariants = {
@@ -23,7 +24,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const FacultyCarouselSection = () => {
+const FacultyCarouselSection = ({key, section, menuLang}) => {
   const [headerSection, setHeaderSection] = useState({
     title: "",
     subtitle: "",
@@ -32,7 +33,21 @@ const FacultyCarouselSection = () => {
   const [socials, setSocials] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const currentLang = 1;
+  const location = useLocation();
+  const currentLang = location.pathname.includes('/km') ? 2 : 1;
+
+  const resolvePageAlias = async (routePage) => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.getPage);
+      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
+
+      const matched = pages.find((page) => page.p_title === routePage);
+      return matched?.p_alias || null;
+    } catch (error) {
+      console.error("Failed to fetch page alias:", error);
+      return null;
+    }
+  }
 
   const fetchFacultyData = useCallback(async () => {
     try {
@@ -41,15 +56,25 @@ const FacultyCarouselSection = () => {
 
       // Fetch header section
       const headerRes = await axios.get(API_ENDPOINTS.getHeaderSection);
-      const headerData = headerRes.data?.data;
+      const headerData = headerRes.data?.data || [];
+      const matchedHeader = headerData.find(
+        (item) =>
+          item.hsec_sec === section.sec_id &&
+          item.section?.sec_type === "Faculty" &&
+          item.section?.display === 1 &&
+          item.section?.active === 1
+      );
 
-      if (!headerData) {
-        throw new Error("Invalid API response structure for header section");
+      if (!matchedHeader) {
+        throw new Error("No matching header section found");
       }
 
       setHeaderSection({
-        title: headerData.hsec_title || "Our Faculty",
-        subtitle: headerData.hsec_subtitle || "",
+        title: matchedHeader.hsec_title || "Our Faculty",
+        subtitle: matchedHeader.hsec_subtitle || "",
+        btntitle: matchedHeader.hsec_btntitle || "",
+        amount: matchedHeader.hsec_amount || "",
+        routepage: await resolvePageAlias(matchedHeader.hsec_routepage),
       });
 
       // Fetch faculty members
@@ -154,10 +179,10 @@ const FacultyCarouselSection = () => {
             className="w-full md:w-auto mt-4 md:mt-0"
           >
             <Link
-              to="/faculty"
+              to={headerSection.routepage}
               className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1"
             >
-              <span className="mr-2 xl:text-sm text-[12px]">View All</span>
+              <span className="mr-2 xl:text-sm text-[12px]">{headerSection.btntitle}</span>
               <FaArrowRight className="text-red-800" />
             </Link>
           </motion.div>

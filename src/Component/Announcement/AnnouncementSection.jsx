@@ -37,25 +37,26 @@ const AnnouncementSection = ({ section, menuLang }) => {
       try {
         setHeaderLoading(true);
         const response = await axios.get(API_ENDPOINTS.getHeaderSection);
-        if (response.data) {
-          if (isHomePage && response.data.splits) {
-            // Use default values for homepage if splits exist but no specific filtering is needed
-            setHeaderData({
-              hsec_title: response.data.splits[0]?.hsec_title || "Announcements",
-              hsec_amount: response.data.splits[0]?.hsec_amount || 4
-            });
-          } else if (response.data.hsec_title) {
-            setHeaderData({
-              hsec_title: response.data.hsec_title,
-              hsec_amount: response.data.hsec_amount || 4
-            });
-          } else {
-            // Fallback for unexpected response structure
-            setHeaderData({
-              hsec_title: "Announcements",
-              hsec_amount: 4
-            });
-          }
+        const headerList = response.data?.data || [];
+
+        const matchedHeader = headerList.find(
+          (item) =>
+            item.hsec_sec === section.sec_id &&
+            item.section?.sec_type === "Announcement" &&
+            item.section?.display === 1 &&
+            item.section?.active === 1
+        );
+
+        if (matchedHeader) {
+          setHeaderData({
+            hsec_title: matchedHeader.hsec_title || "Announcements",
+            hsec_amount: matchedHeader.hsec_amount || 4
+          });
+        } else {
+          setHeaderData({
+            hsec_title: "Announcements",
+            hsec_amount: 4
+          });
         }
       } catch (error) {
         console.error('Failed to fetch header data:', error);

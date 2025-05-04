@@ -39,25 +39,28 @@ const EventSection = ({ section, menuLang }) => {
             try {
                 setHeaderLoading(true);
                 const response = await axios.get(API_ENDPOINTS.getHeaderSection);
-                if (response.data) {
-                    if (isHomePage && response.data.splits) {
-                        const eventSplit = response.data.splits.find(
-                            split => split.section_type === 'events' || split.hsec_title.toLowerCase().includes('events')
-                        );
-                        if (eventSplit) {
-                            setHeaderData({
-                                hsec_title: eventSplit.hsec_title,
-                                hsec_amount: eventSplit.hsec_amount || 4,
-                                hsec_subtitle: eventSplit.hsec_subtitle || '',
-                            });
-                        }
-                    } else if (response.data.hsec_title) {
-                        setHeaderData({
-                            hsec_title: response.data.hsec_title,
-                            hsec_amount: response.data.hsec_amount || 4,
-                            hsec_subtitle: response.data.hsec_subtitle || '',
-                        });
-                    }
+                const headerList = response.data?.data || [];
+
+                const matchedHeader = headerList.find(
+                  (item) =>
+                    item.hsec_sec === section.sec_id &&
+                    item.section?.sec_type === "Event" &&
+                    item.section?.display === 1 &&
+                    item.section?.active === 1
+                );
+
+                if (matchedHeader) {
+                  setHeaderData({
+                    hsec_title: matchedHeader.hsec_title || "Event",
+                    hsec_amount: matchedHeader.hsec_amount || 4,
+                    hsec_subtitle: matchedHeader.hsec_subtitle || "",
+                  });
+                } else {
+                  setHeaderData({
+                    hsec_title: "Event",
+                    hsec_amount: 4,
+                    hsec_subtitle: "",
+                  });
                 }
             } catch (error) {
                 console.error('Failed to fetch header data:', error);
@@ -69,14 +72,13 @@ const EventSection = ({ section, menuLang }) => {
             try {
                 setLoading(true);
                 const response = await axios.get(API_ENDPOINTS.getEvent);
-                console.log('Events response:', response.data);
 
                 const data = Array.isArray(response.data.data)
                     ? response.data.data
                     : [response.data.data];
 
                 const transformed = data
-                    .filter((item) => 
+                    .filter((item) =>
                         item.img && item.img.img && item.lang === currentLang
                     )
                     .slice(0, 4)
@@ -189,7 +191,7 @@ const EventSection = ({ section, menuLang }) => {
                                         </button>
                                     )}
                                 </div>
-                             
+
                             </div>
                         )}
                         {isHomePage && (

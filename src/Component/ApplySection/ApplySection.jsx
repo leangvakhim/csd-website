@@ -16,6 +16,7 @@ const ApplySection = ({key, section, menuLang}) => {
   const [steps, setSteps] = useState([]);
   const [contactDetails, setContactDetails] = useState({ phone: '', email: '' });
   const [socialLinks, setSocialLinks] = useState([]);
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
     const fetchApplyInfo = async () => {
@@ -114,7 +115,7 @@ const ApplySection = ({key, section, menuLang}) => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center justify-between">
           {/* Left Side: Steps and Text */}
-         
+
           {/* Right Side: New Semester and Contact Info */}
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -130,6 +131,7 @@ const ApplySection = ({key, section, menuLang}) => {
             viewport={{ once: true, amount: 0.5 }} // Trigger when 50% of the element is in view
             className="lg:w-1/2  lg:mb-0"
           >
+            {applyInfo && (
             <motion.h2
               initial={{ opacity: 0, y: -50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -137,8 +139,9 @@ const ApplySection = ({key, section, menuLang}) => {
               viewport={{ once: true, amount: 0.5 }}
               className="text-3xl font-semibold mb-6"
             >
-              Step By Step: How to Apply to Computer Science Department
+              {applyInfo.ha_title}
             </motion.h2>
+            )}
             <ul className="list-none space-y-4">
               {steps.map((step, index) => (
                 <motion.li
@@ -162,7 +165,7 @@ const ApplySection = ({key, section, menuLang}) => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
               viewport={{ once: true, amount: 0.5 }}
-              className="bg-white  rounded-md space-y-4 lg:w-1/2 lg:order-2 order-1"
+              className="bg-white  rounded-md space-y-4 lg:w-1/4 lg:order-2 order-1"
             >
               {applyInfo && (
                 <div className="bg-white p-6 rounded-md shadow-md">
@@ -177,7 +180,7 @@ const ApplySection = ({key, section, menuLang}) => {
 
               <div className="py-6 w-full px-4 bg-red-900 text-white shadow-lg rounded-2xl flex justify-center">
                 <div className="space-y-5">
-                  <h3 className="text-lg font-semibold">Contact Info</h3>
+                  <h3 className="text-lg font-semibold">{currentLang === 1 ? "Contact Info" : "ទំនាកទំនងបន្ថែម"}</h3>
                   <p className="flex items-center">
                     <FaPhoneAlt className="mr-2" />
                     {contactDetails.phone}
