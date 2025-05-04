@@ -8,6 +8,8 @@ const PageNavbar = ({ menus }) => {
   const location = useLocation();
   const navbarRef = useRef(null); // Renamed for clarity
 
+  console.log("menus is: ",menus);
+
   // Close dropdown if the user clicks outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -64,21 +66,24 @@ const PageNavbar = ({ menus }) => {
                   >
                     {menu.children
                       .filter((child) => child.display === 1)
-                      .map((child) => (
-                        <Link
-                          key={child.menu_id}
-                          to={child.p_alias || `/${child.title.toLowerCase()}`}
-                          className={`block px-4 py-2 hover:text-red-900 ${
-                            location.pathname ===
-                            `/${child.title.toLowerCase()}`
-                              ? "text-red-900 font-bold"
-                              : ""
-                          }`}
-                          onClick={() => setDropdown(null)}
-                        >
-                          {child.title}
-                        </Link>
-                      ))}
+                      .map((child) => {
+                        const childAlias =
+                          menus.find((item) => item.menu_id === child.menu_id)?.p_alias || "#";
+                        return (
+                          <Link
+                            key={child.menu_id}
+                            to={childAlias}
+                            className={`block px-4 py-2 hover:text-red-900 ${
+                              location.pathname === childAlias
+                                ? "text-red-900 font-bold"
+                                : ""
+                            }`}
+                            onClick={() => setDropdown(null)}
+                          >
+                            {child.title}
+                          </Link>
+                        );
+                      })}
                   </motion.div>
                 )}
               </div>
