@@ -30,9 +30,15 @@ const FeeSection = ({ section }) => {
   useEffect(() => {
     if (section?.sec_id) {
       axios
-        .get(`${API_ENDPOINTS.getFee}?section_id=${section.sec_id}`)
+        .get(API_ENDPOINTS.getFee)
         .then((res) => {
-          const data = res.data?.data[0] || null;
+          const data = res.data?.data?.find(
+            (item) =>
+              item.fe_sec === section.sec_id &&
+              section.sec_type === "Fee" &&
+              section.display === 1 &&
+              section.active === 1
+          );
           if (data) {
             setTuition({
               title: data.fe_title,
@@ -118,14 +124,18 @@ const FeeSection = ({ section }) => {
                     className="text-white sm:w-10 sm:h-10"
                   />
                 </div>
-                <p>
-                  <span className="text-2xl sm:text-3xl lg:text-4xl">
-                    {tuition.price.split(" /")[0]}{" "}
-                  </span>
-                  <span className="text-[10px] sm:text-xs text-gray-500">
-                    /{tuition.price.split(" /")[1]}
-                  </span>
-                </p>
+                {tuition.price ? (
+                  <>
+                    <span className="text-2xl sm:text-3xl lg:text-4xl">
+                      {tuition.price.split(" /")[0]}{" "}
+                    </span>
+                    <span className="text-[10px] sm:text-xs text-gray-500">
+                      /{tuition.price.split(" /")[1]}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xl text-gray-500">No fee info</span>
+                )}
               </motion.div>
             </div>
           </motion.div>

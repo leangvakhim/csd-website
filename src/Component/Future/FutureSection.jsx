@@ -33,7 +33,6 @@ const FutureSection = ({key, section, menuLang}) => {
             img: filtered.image?.img,
           });
         }
-        console.log("filtered is: ",filtered);
       } catch (error) {
         console.error("Failed to fetch UF data:", error);
       }
