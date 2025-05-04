@@ -10,14 +10,19 @@ const ScholarshipSection = ({ section }) => {
   useEffect(() => {
     const fetchHeaderSection = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.getHeaderSection);  
-        const data = response.data.data;
+        const response = await axios.get(API_ENDPOINTS.getHeaderSection);
+        const data = response.data.data || [];
 
-        // Filter data by sec_page
-        const filteredData = data.find(item => item.section?.sec_page === section.sec_page);
+        const matched = data.find(
+          (item) =>
+            item.hsec_sec === section.sec_id &&
+            item.section?.sec_type === "Scholarship" &&
+            item.section?.display === 1 &&
+            item.section?.active === 1
+        );
 
-        if (filteredData) {
-          setSectionData(filteredData);
+        if (matched) {
+          setSectionData(matched);
         }
       } catch (err) {
         console.error("Error fetching header section:", err);
@@ -35,9 +40,9 @@ const ScholarshipSection = ({ section }) => {
 
   return (
     <div>
-      {hsec_amount === 4 && <FourColScholarshipSection />}
+      {hsec_amount === 4 && <FourColScholarshipSection sectionData={sectionData} />}
       {( hsec_amount === 5) && (
-        <OverFlowScholarshipSection  />
+        <OverFlowScholarshipSection sectionData={sectionData} />
       )}
     </div>
   );

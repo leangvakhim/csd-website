@@ -38,17 +38,27 @@ const NewsSection = ({ section, menuLang }) => {
       try {
         setHeaderLoading(true);
         const response = await axios.get(API_ENDPOINTS.getHeaderSection);
-        
-        if (!response.data?.data) {
-          throw new Error('No data received from API');
+        const headerList = response.data?.data || [];
+
+        const matchedHeader = headerList.find(
+          (item) =>
+            item.hsec_sec === section.sec_id &&
+            item.section?.sec_type === "New" &&
+            item.section?.display === 1 &&
+            item.section?.active === 1
+        );
+
+        if (matchedHeader) {
+          setHeaderData({
+            hsec_title: matchedHeader.hsec_title || 'New',
+            hsec_amount: typeof matchedHeader.hsec_amount === 'number' && matchedHeader.hsec_amount !== null ? matchedHeader.hsec_amount : 4,
+          });
+        } else {
+          setHeaderData({
+            hsec_title: 'New',
+            hsec_amount: 4,
+          });
         }
-
-        const { hsec_title, hsec_amount } = response.data?.data || [];
-
-        setHeaderData({
-          hsec_title: hsec_title || 'News',
-          hsec_amount: typeof hsec_amount === 'number' && hsec_amount !== null ? hsec_amount : 4,
-        });
       } catch (error) {
         console.error('Failed to fetch header data:', error.message, error);
         setHeaderError('Failed to load section header.');
@@ -73,7 +83,10 @@ const NewsSection = ({ section, menuLang }) => {
         const newsList = Array.isArray(response.data?.data) ? response.data.data : [];
 
         const filteredList = newsList.filter(
-          item => item.img && item.img.img && item.lang === currentLang
+          item => item.img &&
+          item.img.img &&
+          item.lang === currentLang &&
+          item.display === 1
         );
         const transformed = filteredList.map(announcement => ({
           id: announcement.n_id,

@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { MdComputer, MdExplore } from "react-icons/md";
 import { AiOutlineRobot } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
 
-const ResearchInnovations = () => {
+const ResearchInnovations = ({section}) => {
   const navigate = useNavigate();
   const [researchData, setResearchData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
-
+  const location = useLocation();
+  const currentLang = location.pathname.includes('/km') ? 2 : 1;
 
   useEffect(() => {
     const fetchResearch = async () => {
@@ -21,7 +21,10 @@ const ResearchInnovations = () => {
         const data = res.data?.data || [];
 
         const filtered = data
-          .filter((item) => item.display === 1 && item.active === 1 && item.lang === currentLang)
+          .filter((item) => item.display === 1 &&
+                            item.active === 1 &&
+                            item.lang === currentLang
+                          )
           .map((item) => ({
             id: item.rsd_id,
             title: item.rsd_title,
@@ -55,7 +58,7 @@ const ResearchInnovations = () => {
     <div className="my-6 sm:my-8 lg:my-12">
       <div className="container mx-auto px-2 sm:px-4 lg:px-6">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-4 sm:mb-6 lg:mb-8 text-center sm:text-left">
-          Research & Innovations
+          {currentLang === 1 ? "Research & Innovations" : "កិច្ចការស្រាវជ្រាវ & នវានុវត្តន៍"}
         </h1>
 
         {/* Featured Research Section */}
