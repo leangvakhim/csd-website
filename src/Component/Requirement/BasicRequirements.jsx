@@ -7,8 +7,6 @@ const BasicRequirements = ({ key, section, menuLang}) => {
   const [gcAddon, setGcAddon] = useState(null);
   const [gcData, setGcData] = useState(null);
 
-  console.log("gcData is: ",gcData);
-
   useEffect(() => {
     const fetchGcAddon = async () => {
       try {

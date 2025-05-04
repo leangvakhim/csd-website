@@ -56,6 +56,7 @@ function AppRoutes() {
   return settings ? (
     <Routes>
       <Route path="/" element={<Navigate to={settings.baseUrl} replace />} />
+      <Route path="/km" element={<Navigate to={`${settings.baseUrl}`} replace />} />
       {pages.map(page => (
         <Route
           key={page.p_id}
