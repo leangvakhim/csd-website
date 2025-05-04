@@ -33,6 +33,7 @@ const FutureSection = ({key, section, menuLang}) => {
             img: filtered.image?.img,
           });
         }
+        console.log("filtered is: ",filtered);
       } catch (error) {
         console.error("Failed to fetch UF data:", error);
       }
@@ -117,6 +118,8 @@ const FutureSection = ({key, section, menuLang}) => {
                         alt="Computer Science"
                         className="w-full h-full mx-auto object-contain"
                         variants={itemVariants}
+                        initial="hidden"
+                        animate="visible"
                       />
                     )}
                   </motion.div>
@@ -132,13 +135,16 @@ const FutureSection = ({key, section, menuLang}) => {
                       {benefitsData.map((benefit, index) => (
                           <motion.div
                               key={index}
+                              onClick={() => setSelectedBenefitIndex(index)}
                               className={`text-left mb-4 p-5 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col xl:flex-row items-center gap-6 ${
                                   selectedBenefitIndex === index
                                       ? "bg-red-900 text-white"
                                       : "bg-gray-100 hover:bg-gray-200"
                               }`}
                               variants={itemVariants}
-                              whileHover={{ scale: 1.02 }} // Add hover effect
+                              initial="hidden"
+                              animate="visible"
+                              whileHover={{ scale: 1.02 }}
                           >
                               <div
                                   className={`p-4 rounded-full flex items-center justify-center border ${

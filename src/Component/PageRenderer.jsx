@@ -57,6 +57,12 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
     const menuLang = isKhmer ? 2 : 1;
 
     useEffect(() => {
+        if (page?.menu?.title) {
+            document.title = `${page.menu.title} - Department of Computer Science`;
+        }
+    }, [page]);
+
+    useEffect(() => {
       const timer = setTimeout(() => setShouldRender(true), 0);
       return () => clearTimeout(timer);
     }, []);
