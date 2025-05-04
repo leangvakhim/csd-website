@@ -34,6 +34,12 @@ function App() {
               ? `${API}/storage/uploads/${langSetting.logo.img}`
               : "/placeholder-icon.png"
           });
+          if (langSetting.logo?.img) {
+            const favicon = document.querySelector("link[rel='icon']");
+            if (favicon) {
+              favicon.href = `${API}/storage/uploads/${langSetting.logo.img}`;
+            }
+          }
         }
       })
       .catch(err => console.error("Error fetching settings:", err));
@@ -46,7 +52,6 @@ function App() {
           {pages.map(page => (
             <Route
               key={page.p_id}
-              // path={page.p_alias}
               path={
                 page.p_alias === '/faculty'
                   ? '/faculty/*'
@@ -80,7 +85,7 @@ function App() {
           ))}
         </Routes>
       ) : (
-        <div className="text-center py-8">Loading...</div> // ✅ Show a loading message
+        <div className="text-center py-8">Loading...</div>
       )}
     </Router>
   );
