@@ -21,10 +21,16 @@ function App() {
   }, []);
 
   useEffect(() => {
-    axios.get(API_ENDPOINTS.getSetting)
+    const langFromUrl = window.location.pathname.includes('/km') ? 2 : 1;
+    setCurrentLang(langFromUrl);
+
+    axios.get(`${API_ENDPOINTS.getSetting}/lang/${langFromUrl}`)
       .then(res => {
         const settingData = res.data?.data || [];
-        const langSetting = settingData.find(item => item.lang === currentLang);
+        const langSetting = Array.isArray(settingData)
+          ? settingData.find(item => item.lang === langFromUrl)
+          : settingData;
+
         if (langSetting) {
           setSettings({
             facultyTitle: langSetting.set_facultytitle || "",
@@ -34,6 +40,7 @@ function App() {
               ? `${API}/storage/uploads/${langSetting.logo.img}`
               : "/placeholder-icon.png"
           });
+
           if (langSetting.logo?.img) {
             const favicon = document.querySelector("link[rel='icon']");
             if (favicon) {
@@ -43,7 +50,7 @@ function App() {
         }
       })
       .catch(err => console.error("Error fetching settings:", err));
-  }, [currentLang]);
+  }, []);
   return (
     <Router>
       {settings ? (
