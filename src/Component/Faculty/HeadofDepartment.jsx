@@ -58,7 +58,7 @@ const HeadofDepartment = () => {
             <div className='container mx-auto px-4'>
                 <div className='space-y-10'>
                     <div id="head-department-header">
-                        <h1 className="text-2xl font-normal mb-4">{currentLang === 1 ? "Head of Department:" : "ប្រធានដេប៉ាតឺម៉ង់"}</h1>
+                        <h1 className={`text-2xl font-normal mb-4 ${currentLang === 2 ? "font-khmer" : "font-semibold"}`}>{currentLang === 1 ? "Head of Department:" : "ប្រធានដេប៉ាតឺម៉ង់"}</h1>
                     </div>
                     {head && (
                         <div key={head.id} className='max-w-5xl mx-auto shadow-lg rounded-2xl items-center p-4' id="head-department-profile">
@@ -141,14 +141,14 @@ const HeadofDepartment = () => {
                                 </div>
                                 <div className='space-y-6 max-w-xl relative' id="profile-info">
                                     <div className='flex justify-between items-center'>
-                                        <h1 className='text-2xl font-semibold' id="professor-name">{head.name}</h1>
+                                        <h1 className={`text-2xl font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} id="professor-name">{head.name}</h1>
                                         <div className='text-right'>
                                             <RiDoubleQuotesR className='text-7xl text-red-900' />
                                         </div>
                                     </div>
-                                    <p>{head.bio}</p>
+                                    <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{head.bio}</p>
                                     <Link to={`/faculty/${head.id}`}>
-                                        <button className='bg-red-900 px-6 py-2 text-gray-50 rounded-2xl' id="view-button">
+                                        <button className={`bg-red-900 px-6 py-2 text-gray-50 rounded-2xl ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} id="view-button">
                                             {currentLang === 1 ? "View" : "មើលបន្ថែម"}
                                         </button>
                                     </Link>

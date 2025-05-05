@@ -58,7 +58,7 @@ const FacultyMemeber = () => {
         <div className='my-16'>
             <div className='container mx-auto px-4'>
                 <div className='space-y-10'>
-                    <h1 className="text-2xl font-normal mb-4">{currentLang === 1 ? "Faculty Members" : "បុគ្គលិកដេប៉ាតឺម៉ង់"}</h1>
+                    <h1 className={`text-2xl font-normal mb-4 ${currentLang === 2 ? "font-khmer" : "font-semibold"}`}>{currentLang === 1 ? "Faculty Members" : "បុគ្គលិកដេប៉ាតឺម៉ង់"}</h1>
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
                         {facultyMembers.map((member) => (
                             <div key={member.id} className='shadow-lg rounded-2xl p-4'>
@@ -138,8 +138,8 @@ const FacultyMemeber = () => {
                                     </div>
                                     <div className='space-y-6 max-w-md relative text-center'>
                                         <div className='space-y-2'>
-                                            <h1 className='text-2xl font-semibold'>{member.name}</h1>
-                                            <p>{member.position}</p>
+                                            <h1 className={`text-2xl font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{member.name}</h1>
+                                            <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{member.position}</p>
                                         </div>
                                         <Link
                                             to={`/faculty/${member.id}`}
