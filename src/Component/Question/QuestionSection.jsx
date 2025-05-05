@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import contactImage from "../../assets/web-sample-1(3).jpg";
 
 const QuestionSection = () => {
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
   return (
     <div className="my-16">
       <motion.div
@@ -36,9 +37,9 @@ const QuestionSection = () => {
                   initial={{ opacity: 0, y: -20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="text-3xl text-center font-normal mb-4 font-semibold"
+                  className="text-3xl text-center mb-4 font-semibold"
                 >
-                  Contact Us If You Have Any Questions
+                  {currentLang === 1 ? "Contact Us If You Have Any Questions" : "សូមទាក់ទងមកយើង ប្រសិនបើអ្នកមានចម្ងល់"}
                 </motion.h1>
                 <form className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -49,7 +50,7 @@ const QuestionSection = () => {
                       viewport={{ once: true }}
                     >
                       <label className="block text-sm font-medium text-gray-700">
-                        First Name*
+                        {currentLang === 1 ? "First Name*" : "នាមខ្លួន*"}
                       </label>
                       <input
                         type="text"
@@ -64,7 +65,7 @@ const QuestionSection = () => {
                       viewport={{ once: true }}
                     >
                       <label className="block text-sm font-medium text-gray-700">
-                        Last Name*
+                        {currentLang === 1 ? "Last Name*" : "នាមត្រកូល*"}
                       </label>
                       <input
                         type="text"
@@ -80,7 +81,7 @@ const QuestionSection = () => {
                     viewport={{ once: true }}
                   >
                     <label className="block text-sm font-medium text-gray-700">
-                      Email*
+                      {currentLang === 1 ? "Email*" : "អ៊ីមែល*"}
                     </label>
                     <input
                       type="email"
@@ -95,7 +96,7 @@ const QuestionSection = () => {
                     viewport={{ once: true }}
                   >
                     <label className="block text-sm font-medium text-gray-700">
-                      Description
+                      {currentLang === 1 ? "Description" : "ពិពណ៌នា"}
                     </label>
                     <textarea
                       rows="4"
@@ -113,7 +114,7 @@ const QuestionSection = () => {
                       type="submit"
                       className="py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     >
-                      Submit
+                      {currentLang === 1 ? "Submit" : "បញ្ជូន"}
                     </button>
                   </motion.div>
                 </form>

@@ -33,7 +33,7 @@ const ResearchInnovations = ({section}) => {
             image: item.image?.img
               ? `${API}/storage/uploads/${item.image.img}`
               : "/placeholder-image.jpg",
-            exploreText: "Explore",
+            exploreText: `${currentLang === 1 ? "Explore" : "មើលបន្ថែម"}`,
             buttons: [
               { icon: <MdComputer className="mr-1" />, text: "Computational Advancements" },
               { icon: <AiOutlineRobot className="mr-1" />, text: "AI & Systems Optimization" },

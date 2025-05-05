@@ -38,6 +38,7 @@ const AboutSection = ({ section }) => {
     const [stats, setStats] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
         setIsLoading(true);
@@ -49,9 +50,9 @@ const AboutSection = ({ section }) => {
                 // const data = res.data?.data; // single object, no map needed
                 if (!data) throw new Error("Invalid API response");
                 const formattedStats = [
-                    { value: data.set_amstu.toLocaleString(), rank: "Students" },
-                    { value: data.set_enroll.toLocaleString(), rank: "Increase Enrollment" },
-                    { value: "1<sup class='text-md'>st</sup>", rank: "CS Program in Cambodia" },
+                    { value: data.set_amstu.toLocaleString(), rank: `${currentLang === 1 ? "Students" : "និស្សិត"}`},
+                    { value: data.set_enroll.toLocaleString(), rank: `${currentLang === 1 ? "Increase Enrollment" : "ចំនួននិស្សិតចុះឈ្មោះ"}` },
+                    { value: "1<sup class='text-md'>st</sup>", rank: `${currentLang === 1 ? "CS Program in Cambodia" : "កម្មវិធីសិក្សាព័ត៌មានវិទ្យាដំបូងគេនៅកម្ពុជា"}` },
                 ];
                 setStats(formattedStats);
                 setIsLoading(false);

@@ -210,7 +210,7 @@ const ResearchSection = ({section}) => {
                       className="bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center"
                     >
                       <MdExplore className="mr-1 text-xs sm:text-base" />
-                      {currentLang === 1 ? "Explore123" : "មើលបន្ថែម"}
+                      {currentLang === 1 ? "Explore" : "មើលបន្ថែម"}
                     </button>
                   </div>
                 </div>
