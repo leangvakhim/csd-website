@@ -90,6 +90,7 @@ const FourColScholarshipSection = ({sectionData}) => {
 
             return {
               id: item.sc_id ?? null,
+              ref_id: item.ref_id,
               tag: item.sc_sponsor ?? '',
               title: item.sc_title ?? '',
               description: item.sc_shortdesc ?? '',
@@ -231,7 +232,10 @@ const FourColScholarshipSection = ({sectionData}) => {
                   </p>
                   <button
                     className="bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl cursor-pointer"
-                    onClick={() => navigate(`/scholarship/${scholarship.id}`)}
+                    onClick={() => {
+                      const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+                      navigate(`${prefix}/scholarship/${scholarship.ref_id}`);
+                    }}
                     aria-label={`View details for ${scholarship.title}`}
                   >
                     {currentLang === 1 ? "View Detail" : "មើលលម្អិត"}

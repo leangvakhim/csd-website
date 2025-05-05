@@ -48,6 +48,7 @@ const ScholarshipApplication = ({ scholarshipId }) => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const currentLang = window.location.pathname.startsWith("/km") ? 2 : 1;
 
   const fetchApplicationDetails = useCallback(async () => {
     if (!scholarshipId) {
@@ -60,8 +61,12 @@ const ScholarshipApplication = ({ scholarshipId }) => {
       setIsLoading(true);
       setError(null);
 
-      const response = await axios.get(`${API_ENDPOINTS.getScholarship}/${scholarshipId}`);
-      const data = response.data?.data;
+      const response = await axios.get(`${API_ENDPOINTS.getScholarship}`);
+      const allScholarships = response.data?.data || [];
+
+      const data = allScholarships.find(
+        item => item.ref_id === Number(scholarshipId) && item.lang === currentLang
+      );
 
       if (!data) {
         setError("No scholarship data found.");
@@ -79,8 +84,8 @@ const ScholarshipApplication = ({ scholarshipId }) => {
 
         return {
           id: index,
-          title: div.querySelector("h3")?.textContent?.trim() || `Detail ${index + 1}`,
-          description: div.querySelector("p")?.textContent?.trim() || "No description available",
+          title: div.querySelector("h3")?.textContent?.trim() || ``,
+          description: div.querySelector("p")?.textContent?.trim() || "",
           svgIcon: svgElement ? svgElement.outerHTML : "",
           link: {
             url: linkElement?.href || "",
@@ -101,57 +106,61 @@ const ScholarshipApplication = ({ scholarshipId }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [scholarshipId]);
+  }, [scholarshipId, currentLang]);
 
   useEffect(() => {
     fetchApplicationDetails();
-  }, [fetchApplicationDetails]);
+  }, [fetchApplicationDetails, currentLang]);
 
   const viewPdfFromAPI = async () => {
     try {
-      const response = await axios.get(`${API_ENDPOINTS.getScholarship}/${scholarshipId}`);
-      const data = response.data?.data;
-  
+      const response = await axios.get(`${API_ENDPOINTS.getScholarship}`);
+      const allScholarships = response.data?.data || [];
+
+      const data = allScholarships.find(
+        item => item.ref_id === Number(scholarshipId) && item.lang === currentLang
+      );
+
       if (!data || !data.letter?.img) {
         alert("PDF not available");
         return;
       }
-  
+
       // If the img is a real PDF file (not an image pretending to be one)
       const fileUrl = `${API}/storage/uploads/${data.letter.img}`;
       const extension = fileUrl.split('.').pop().toLowerCase();
-  
+
       if (extension === 'pdf') {
         window.open(fileUrl, "_blank");
       } else {
         // If it's an image (like .jpg/.png), convert to PDF
         const img = new Image();
         img.crossOrigin = "Anonymous";
-  
+
         img.onload = () => {
           const canvas = document.createElement("canvas");
           canvas.width = img.width;
           canvas.height = img.height;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0);
-  
+
           const dataURL = canvas.toDataURL("image/png");
           const doc = new jsPDF({
             orientation: img.width > img.height ? "landscape" : "portrait",
             unit: "px",
             format: [img.width, img.height],
           });
-  
+
           doc.addImage(dataURL, "PNG", 0, 0, img.width, img.height);
           const pdfBlob = doc.output("blob");
           const pdfUrl = URL.createObjectURL(pdfBlob);
           window.open(pdfUrl, "_blank");
         };
-  
+
         img.onerror = () => {
           alert("Failed to load image for PDF.");
         };
-  
+
         img.src = fileUrl;
       }
     } catch (error) {
@@ -159,8 +168,8 @@ const ScholarshipApplication = ({ scholarshipId }) => {
       console.error("PDF Load Error:", error);
     }
   };
-  
-  
+
+
 
   if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
@@ -204,7 +213,7 @@ const ScholarshipApplication = ({ scholarshipId }) => {
             className="w-full"
           >
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-              Application Details
+              {currentLang === 1 ? "Application Details" : "ព័ត៌មានលម្អិតអំពីការដាក់ពាក្យ"}
             </h2>
             {applicationData.details.length > 0 ? (
               <div role="list" className="space-y-6">

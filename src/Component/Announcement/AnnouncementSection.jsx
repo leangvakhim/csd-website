@@ -186,13 +186,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
               viewport={{ once: true }}
               className="w-full md:w-auto mt-4 md:mt-0"
             >
-              {/* <button
-                onClick={() => navigate(headerData.hsec_routepage)}
-                className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1"
-              >
-                <span className="mr-2 xl:text-sm text-[12px]">{headerData.hsec_btntitle}</span>
-                <FaArrowRight className="text-red-800" />
-              </button> */}
               {headerData.hsec_routepage ? (
                   <button
                       onClick={() => navigate(headerData.hsec_routepage)}
