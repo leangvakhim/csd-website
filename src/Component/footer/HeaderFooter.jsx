@@ -79,7 +79,7 @@ const HeaderFooter = () => {
                 />
                 <motion.h2
                   className={`text-lg font-normal uppercase text-white ${
-                    currentLang === "2" ? "font-khmer" : "font-bold"
+                    currentLang === 2 ? "font-khmer" : "font-bold"
                   }`}
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}

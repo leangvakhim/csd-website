@@ -21,7 +21,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const FacilitiesSection = ({ section }) => {
+const FacilitiesSection = ({ section, menuLang }) => {
   const [facilityData, setFacilityData] = useState({
     title: "",
     description: "",
@@ -172,10 +172,10 @@ const FacilitiesSection = ({ section }) => {
             transition={{ duration: 0.6 }}
             className="w-full xl:w-[878px] h-full xl:h-[432px]"
           >
-            <h2 className="text-3xl xl:text-4xl font-extrabold text-gray-900 text-center xl:text-left">
+            <h2 className={`text-3xl  font-extrabold text-gray-900 text-center lg:text-left ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
               {facilityData.title}
             </h2>
-            <p className="text-gray-600 text-center xl:text-left mt-4 mb-8 text-lg">
+            <p className={`text-gray-600 text-center xl:text-left mt-4 mb-8 text-lg ${menuLang === 2 ? 'fonts-khmer' : 'font-sans' }`}>
               {facilityData.description}
             </p>
 
@@ -208,10 +208,10 @@ const FacilitiesSection = ({ section }) => {
 
                     {/* Text Section */}
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-800">
+                      <h3 className={`text-xl font-semibold text-gray-800 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                         {subservice.title}
                       </h3>
-                      <p className="text-gray-600">{subservice.description}</p>
+                      <p className={`text-gray-600 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{subservice.description}</p>
                     </div>
                   </motion.div>
                 ))

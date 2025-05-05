@@ -88,7 +88,7 @@ const RelatedNews = ({ sectionId, menuLang }) => {
                         {events.map((event) => (
                             <Link
                                 key={event.id}
-                                to={`/news&events/${event.id}`}
+                                to={`/news/${event.id}`}
                                 className="text-start"
                             >
                                 <motion.div
@@ -105,17 +105,17 @@ const RelatedNews = ({ sectionId, menuLang }) => {
 
                                     <div className="p-6 w-full lg:w-1/2">
                                         {event.category && (
-                                            <span className="text-xs font-semibold text-red-600 uppercase bg-indigo-100 px-2 py-1 rounded-full">
+                                            <span className={`text-xs font-semibold text-red-600 uppercase bg-indigo-100 px-2 py-1 rounded-full ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                                                 {event.category}
                                             </span>
                                         )}
-                                        <h3 className="mt-2 text-lg font-semibold text-gray-900">
+                                        <h3 className={`mt-2 text-lg font-semibold text-gray-900 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>
                                             {event.title}
                                         </h3>
-                                        <p className="mt-2 text-sm text-gray-800">
+                                        <p className={`mt-2 text-sm text-gray-800 ${menuLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>
                                             {event.description}
                                         </p>
-                                        <span className="text-sm text-gray-800 flex items-center gap-4 mt-4">
+                                        <span className={`text-sm text-gray-800 flex items-center gap-4 mt-4 ${menuLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>
                                             <FaCalendarAlt />
                                             {event.date}
                                         </span>

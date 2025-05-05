@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { API_ENDPOINTS } from "../../Service/APIconfig";
 import { RiDoubleQuotesR } from "react-icons/ri";
 
-const TypeSection = ({ section }) => {
+const TypeSection = ({ section, menuLang }) => {
   const [scholarships, setScholarships] = useState([]);
   const [mainTitle, setMainTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -53,10 +53,10 @@ const TypeSection = ({ section }) => {
         initial="hidden"
         whileInView="visible"
       >
-        <div className="mb-8 flex flex-col xl:flex-row xl:justify-between xl:items-start gap-6">
-          <h2 className="text-3xl font-bold">{mainTitle}</h2>
+        <div className="mb-8 flex flex-col lg:flex-row xl:justify-between xl:items-start gap-6">
+          <h2 className={`text-3xl font-bold ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{mainTitle}</h2>
 
-          <p className="text-gray-800 max-w-2xl">{description}</p>
+          <p className={`text-gray-800 max-w-2xl ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{description}</p>
         </div>
       </motion.div>
       <motion.div
@@ -72,9 +72,9 @@ const TypeSection = ({ section }) => {
                 className={`rounded-lg p-6 shadow-lg border !border-gray-300 ${index % 2 === 1 ? 'mr-4 bg-red-800 text-white' : 'ml-4 bg-white text-gray-800'}`}
                 variants={itemVariants}
               >
-                <h3 className="text-xl font-semibold mb-4">{scholarship.stse_title}</h3>
+                <h3 className={`text-xl font-semibold mb-4 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{scholarship.stse_title}</h3>
                 <div className="space-y-4">
-                  <div className="flex items-start gap-2 mb-4">
+                  <div className={`flex items-start gap-2 mb-4 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                     <p className="text-lg" dangerouslySetInnerHTML={{ __html: scholarship.stse_detail }} />
                   </div>
                 </div>

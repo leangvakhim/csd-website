@@ -4,7 +4,7 @@ import { FaCalendarAlt } from 'react-icons/fa';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
-const NewsBanner = () => {
+const NewsBanner = ({menuLang}) => {
   const [bannerSection, setBannerSection] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -87,7 +87,7 @@ const NewsBanner = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             viewport={{ once: true, amount: 0.5 }}
-            className="text-3xl sm:text-4xl font-bold drop-shadow-md"
+            className={`text-3xl sm:text-4xl font-bold drop-shadow-md ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}
           >
             {bannerSection.title}
           </motion.h1>
@@ -96,7 +96,7 @@ const NewsBanner = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
             viewport={{ once: true, amount: 0.5 }}
-            className="mt-2 text-md flex items-center text-gray-50 drop-shadow-md"
+            className={`mt-2 text-md flex items-center text-gray-50 drop-shadow-md ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}
           >
             <FaCalendarAlt className="mr-2 text-lg" />
             Post on: {bannerSection.postDate}

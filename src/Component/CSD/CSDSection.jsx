@@ -121,8 +121,8 @@ const CSDSection = ({key, section, menuLang}) => {
                   transition={{ duration: 0.8, delay: 0.2 }}
                   className="xl:w-1/2 w-full order-2 xl:order-1"
               >
-                  <h2 className="text-3xl font-bold mb-4">{programTitle}</h2>
-                  <p className="text-base sm:text-lg mb-6">{description}</p>
+                  <h2 className={`text-3xl font-bold mb-4 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{programTitle}</h2>
+                  <p className={`text-base sm:text-lg mb-6 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{description}</p>
                   <div className="space-y-6">
                       {objectives.map((objective, index) => (
                           <div key={index} className="flex items-start gap-3">
@@ -130,8 +130,8 @@ const CSDSection = ({key, section, menuLang}) => {
                                   <objective.icon />
                               </div>
                               <div>
-                                  <h3 className="text-lg sm:text-xl font-semibold mb-2">{objective.title}</h3>
-                                  <p className="text-sm sm:text-base">{objective.description}</p>
+                                  <h3 className={`text-lg sm:text-xl font-semibold mb-2 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{objective.title}</h3>
+                                  <p className={`text-sm sm:text-base ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{objective.description}</p>
                               </div>
                           </div>
                       ))}

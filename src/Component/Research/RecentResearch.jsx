@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
-const RecentResearch = () => {
+const RecentResearch = ({menuLang}) => {
   const navigate = useNavigate();
   const [researchData, setResearchData] = useState([]);
   const [headerData, setHeaderData] = useState(null);
@@ -131,7 +131,7 @@ const RecentResearch = () => {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
           <div className="mb-4 sm:mb-6 sm:mb-0">
-            <h2 className="text-2xl sm:text-3xl font-semibold mb-2">{headerData?.title}</h2>
+            <h2 className={`text-2xl sm:text-3xl font-semibold mb-2 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{headerData?.title}</h2>
           
           </div>
           <div className="flex gap-3 sm:gap-4 items-center">
@@ -175,7 +175,7 @@ const RecentResearch = () => {
                     {buttons.map((button, buttonIndex) => (
                       <button
                         key={buttonIndex}
-                        className="text-black xl:text-[12px] text-[10px] bg-gray-300/50 py-2 px-4 shadow-md rounded-4xl flex items-center mb-2"
+                        className={`text-black xl:text-[12px] text-[10px] bg-gray-300/50 py-2 px-4 shadow-md rounded-4xl flex items-center mb-2 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}
                       >
                         {button.icon}
                         {button.label}
@@ -183,15 +183,15 @@ const RecentResearch = () => {
                     ))}
                   </div>
                   <div>
-                    <h3 className="xl:text-xl text-lg font-semibold mb-2 line-clamp-2">
+                    <h3 className={`lg:text-xl text-lg font-semibold mb-2 line-clamp-2 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-semibold'}`}>
                       {section.title}
                     </h3>
-                    <p className="mb-4 xl:text-[16px] text-[12px] line-clamp-3">
+                    <p className={`mb-4 xl:text-[16px] text-[12px] line-clamp-3 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                       {section.description}
                     </p>
                     <button
                       onClick={() => navigate(`/researchlab/${section.id}`)}
-                      className="bg-red-900 hover:bg-red-800 xl:text-[14px] text-[12px] text-white py-2 px-6 rounded-4xl flex items-center"
+                      className="bg-red-900 hover:bg-red-800 lg:text-[14px] text-[12px] text-white py-2 px-6 rounded-4xl flex items-center"
                     >
                       <MdExplore className="mr-2" />
                       Explore

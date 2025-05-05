@@ -152,7 +152,7 @@ const FourColScholarshipSection = ({sectionData}) => {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex flex-col xl:flex-row xl:justify-between items-center gap-8 mb-6">
-          <h2 className="text-2xl font-semibold">{sectionData.hsec_title}</h2>
+          <h2 className={`text-2xl font-semibold ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{sectionData.hsec_title}</h2>
           <div className='flex flex-col sm:flex-row gap-6 sm:gap-4'>
             {/* Search Field */}
             <div className="relative w-full">
@@ -222,10 +222,10 @@ const FourColScholarshipSection = ({sectionData}) => {
                   />
                 </div>
                 <div className="p-4 w-full">
-                  <p className='text-red-800 mb-4'>{scholarship.tag}</p>
-                  <h3 className="text-lg font-semibold mb-2">{scholarship.title}</h3>
-                  <p className="text-gray-800 mb-2">{scholarship.description}</p>
-                  <p className="text-md py-4 text-gray-800 mb-2 flex items-center">
+                  <p className={`text-red-800 mb-4 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{scholarship.tag}</p>
+                  <h3 className={`text-lg font-semibold mb-2 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{scholarship.title}</h3>
+                  <p className={`text-gray-800 mb-2 ${currentLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>{scholarship.description}</p>
+                  <p className={`text-md py-4 text-gray-800 mb-2 flex items-center ${currentLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>
                     <FaCalendarAlt className="mr-2" />
                     {currentLang === 1 ? "Deadline" : "ថ្ងៃផុតកំណត់"}: {scholarship.deadline}
                   </p>

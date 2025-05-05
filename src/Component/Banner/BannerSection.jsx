@@ -22,7 +22,7 @@ const childVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const BannerSection = ({ section }) => {
+const BannerSection = ({ section, menuLang }) => {
   const [bannerData, setBannerData] = useState({
     title: "",
     subtitle: "",
@@ -42,12 +42,9 @@ const BannerSection = ({ section }) => {
 
     setIsLoading(true);
     axios
-      .get(`${API_ENDPOINTS.getBanner}?section_id=${section.sec_id}`)
+      .get(`${API_ENDPOINTS.getBanner}?section_id=${section.sec_id}&lang=${menuLang}`)
       .then((res) => {
-        // console.log("BannerSection API Response:", res.data);
         const banners = res.data?.data || [];
-
-        // Find the banner that matches the current section
         const currentBanner = banners.find(
           (banner) => banner.ban_sec === section.sec_id
         );
@@ -74,24 +71,36 @@ const BannerSection = ({ section }) => {
         setError("Failed to load banner data");
         setIsLoading(false);
       });
-  }, [section]);
+  }, [section, menuLang]);
 
   if (isLoading) {
-    return <div className="text-center py-8 text-gray-600">Loading banner...</div>;
+    return (
+      <div
+        className={`text-center py-8 text-gray-600 ${
+          menuLang === 2 ? "font-khmer" : "font-sans"
+        }`}
+      >
+        {menuLang === 2 ? "កំពុងផ្ទុក..." : "Loading banner..."}
+      </div>
+    );
   }
 
   if (error || !bannerData.image) {
-    console.log("BannerSection: Render error or no image", { error, bannerData });
     return (
       <motion.div
-        className="relative w-full h-[600px] flex items-center justify-center text-center text-white object-contain sm:object-cover bg-cover bg-center z-0"
+        lang={menuLang === 2 ? "km" : "en"}
+        className={`relative w-full h-[600px] flex items-center justify-center text-center text-white object-contain sm:object-cover bg-cover bg-center z-0 ${
+          menuLang === 2 ? "lang-khmer" : "lang-english"
+        }`}
         style={{
-          backgroundImage: `url(/path/to/fallback-image.jpg)`, // Replace with actual fallback image path
+          backgroundImage: `url(/images/fallback-banner.jpg)`, // Replace with actual fallback image
         }}
         variants={bannerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
+        role="banner"
+        aria-label="Hero section"
       >
         <div
           className="absolute inset-0"
@@ -103,16 +112,21 @@ const BannerSection = ({ section }) => {
           transition={{ duration: 0.6 }}
         >
           <motion.h1
-            className="text-3xl sm:text-4xl font-bold drop-shadow-md"
+            className={`text-3xl sm:text-4xl font-bold drop-shadow-md ${
+              menuLang === 2 ? "font-khmer" : "font-sans"
+            }`}
             variants={childVariants}
           >
-            {bannerData.title || "Welcome"}
+            {bannerData.title || (menuLang === 2 ? "សូមស្វាគមន៍" : "Welcome")}
           </motion.h1>
           <motion.p
-            className="mt-4 text-[12px] sm:text-xl text-gray-50 drop-shadow-md"
+            className={`mt-4  text-gray-50 drop-shadow-md ${
+              menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+            }`}
             variants={childVariants}
           >
-            {bannerData.subtitle || "Explore our offerings"}
+            {bannerData.subtitle ||
+              (menuLang === 2 ? "ស្វែងរកសេវាកម្មរបស់យើង" : "Explore our offerings")}
           </motion.p>
         </motion.div>
       </motion.div>
@@ -121,7 +135,8 @@ const BannerSection = ({ section }) => {
 
   return (
     <motion.div
-      className="relative w-full h-[600px] flex items-center justify-center text-center text-white bg-cover bg-center z-0"
+    
+      className={`relative w-full h-[600px] flex items-center justify-center text-center text-white bg-cover bg-center z-0 `}
       style={{
         backgroundImage: `url(${bannerData.image})`,
       }}
@@ -129,6 +144,8 @@ const BannerSection = ({ section }) => {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.5 }}
+      role="banner"
+      aria-label="Hero section"
     >
       <div
         className="absolute inset-0"
@@ -140,13 +157,17 @@ const BannerSection = ({ section }) => {
         transition={{ duration: 0.6 }}
       >
         <motion.h1
-          className="text-3xl sm:text-4xl font-bold drop-shadow-md"
+          className={`text-4xl font-bold drop-shadow-md ${
+            menuLang === 2 ? "font-khmer" : "font-semibold"
+          }`}
           variants={childVariants}
         >
           {bannerData.title}
         </motion.h1>
         <motion.p
-          className="mt-4 text-[12px] sm:text-xl text-gray-50 drop-shadow-md"
+          className={`mt-4  text-gray-50 drop-shadow-md ${
+            menuLang === 2 ? "font-khmer text-[20px]" : "font-sans"
+          }`}
           variants={childVariants}
         >
           {bannerData.subtitle}

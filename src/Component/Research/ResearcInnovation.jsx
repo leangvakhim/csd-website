@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
 
-const ResearchInnovations = ({section}) => {
+const ResearchInnovations = ({section, menuLang}) => {
   const navigate = useNavigate();
   const [researchData, setResearchData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +57,7 @@ const ResearchInnovations = ({section}) => {
   return (
     <div className="my-6 sm:my-8 lg:my-12">
       <div className="container mx-auto px-2 sm:px-4 lg:px-6">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-4 sm:mb-6 lg:mb-8 text-center sm:text-left">
+        <h1 className={`text-xl sm:text-2xl lg:text-3xl font-semibold mb-4 sm:mb-6 lg:mb-8 text-center sm:text-left ${currentLang === 2 ? "font-khmer" : "font-semibold"}`}>
           {currentLang === 1 ? "Research & Innovations" : "កិច្ចការស្រាវជ្រាវ & នវានុវត្តន៍"}
         </h1>
 
@@ -86,7 +86,7 @@ const ResearchInnovations = ({section}) => {
 
               <div className="w-full sm:w-1/2 text-left text-white">
                 <motion.h1
-                  className="text-xl font-semibold mb-2 sm:mb-3 uppercase"
+                  className={`text-xl font-semibold mb-2 sm:mb-3 uppercase ${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans-serif"}`}
                   initial={{ opacity: 0, x: -50 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
@@ -95,7 +95,7 @@ const ResearchInnovations = ({section}) => {
                   {item.title}
                 </motion.h1>
                 <motion.h3
-                  className="text-lg font-semibold mb-2 sm:mb-3"
+                  className={`text-lg font-semibold mb-2 sm:mb-3 ${currentLang === 2 ? "fonts-khmer" : "font-sans-serif"}`}
                   initial={{ opacity: 0, x: -50 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8, delay: 0.4 }}
@@ -103,15 +103,7 @@ const ResearchInnovations = ({section}) => {
                 >
                   {item.subtitle}
                 </motion.h3>
-                <motion.p
-                  className="text-xs sm:text-sm lg:text-base font-normal mb-3 sm:mb-4 text-justify line-clamp-4"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.8, delay: 0.6 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                >
-                  {item.description}
-                </motion.p>
+               
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   {item.buttons.map((btn, btnIndex) => (
@@ -188,7 +180,7 @@ const ResearchInnovations = ({section}) => {
                 </div>
                 <div>
                   <motion.h3
-                    className="text-xl font-normal mb-2 sm:mb-3"
+                    className={`text-xl font-normal mb-2 sm:mb-3 ${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans-serif"}`}
                     initial={{ opacity: 0, x: -50 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
@@ -197,7 +189,7 @@ const ResearchInnovations = ({section}) => {
                     {section.title}
                   </motion.h3>
                   <motion.p
-                    className="text-sm mb-3 sm:mb-4 line-clamp-2"
+                    className={`text-sm mb-3 sm:mb-4 line-clamp-2 ${currentLang === 2 ? "fonts-khmer" : "font-sans-serif"}`}
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, delay: 0.6 }}

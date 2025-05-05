@@ -21,7 +21,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const InnovationSection = ({ section }) => {
+const InnovationSection = ({ section, menuLang }) => {
   const [innovation, setInnovation] = useState(null);
   const [subservices, setSubservices] = useState([]);
 
@@ -122,7 +122,7 @@ const InnovationSection = ({ section }) => {
             variants={cardVariants}
           >
             <motion.h1
-              className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-gray-800"
+              className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-gray-800 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}
               variants={cardVariants}
               transition={{ delay: 0.2 }}
             >
@@ -131,7 +131,7 @@ const InnovationSection = ({ section }) => {
 
 
             <p
-              className="text-gray-800 text-[12px] sm:text-[14px] lg:text-[16px] mb-4 leading-relaxed"
+              className={`text-gray-800 text-[12px] sm:text-[14px] lg:text-[16px] mb-4 leading-relaxed ${menuLang === 2 ? "fonts-khmer" : "font-sans-serif"}`}
               dangerouslySetInnerHTML={{ __html: innovation.description }}
             />
 
@@ -176,7 +176,7 @@ const InnovationSection = ({ section }) => {
                       <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-200 rounded-full" />
                     )}
                   </div>
-                  <p className="text-gray-800">{s.description}</p>
+                  <p className={`text-gray-800 ${menuLang === 2 ? "fonts-khmer" : "font-sans"}`}>{s.description}</p>
                 </motion.div>
               ))}
             </div>

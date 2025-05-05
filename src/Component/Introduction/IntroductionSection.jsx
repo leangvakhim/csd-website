@@ -22,7 +22,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const Introduction = ({ section }) => {
+const Introduction = ({ section, menuLang}) => {
   const [introduction, setIntroduction] = useState(null);
 
   // Fetch introduction data based on section.sec_id
@@ -101,10 +101,10 @@ const Introduction = ({ section }) => {
               variants={cardVariants}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <h1 className="text-[13px] sm:text-[16px] lg:text-[18px] mb-2 sm:mb-4 text-black font-semibold">
+              <h1 className={`text-[13px] sm:text-[16px] lg:text-[18px] mb-2 sm:mb-4 text-black font-semibold ${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans-serif"}`}>
                 {introduction.established}
               </h1>
-              <p className="text-[11px] sm:text-[13px] lg:text-[14px] text-black">
+              <p className={`text-[11px] sm:text-[13px] lg:text-[14px] text-black ${menuLang === 2 ? "fonts-khmer" : "font-sans-serif"}`}>
                 {introduction.subtitle}
               </p>
             </motion.div>
@@ -117,7 +117,7 @@ const Introduction = ({ section }) => {
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <motion.h1
-              className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-gray-800"
+              className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-gray-800 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}
               variants={cardVariants}
               transition={{ duration: 0.6, delay: 0.6 }}
             >
@@ -127,7 +127,7 @@ const Introduction = ({ section }) => {
               {introduction.detail.split("\n\n").map((paragraph, index) => (
                 <motion.p
                   key={index}
-                  className="text-gray-700 sm:text-justify"
+                  className={`text-gray-700 sm:text-justify ${menuLang === 2 ? "fonts-khmer" : "font-sans-serif"}`}
                   variants={cardVariants}
                   transition={{ duration: 0.6, delay: 0.8 + index * 0.2 }}
                 >

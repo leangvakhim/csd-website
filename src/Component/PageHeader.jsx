@@ -1,21 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation,useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoMdSearch } from "react-icons/io";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { FiChevronDown } from "react-icons/fi";
 import PageSearch from "./PageSearch";
-import { API_ENDPOINTS, API } from "../Service/APIconfig";
+import { API_ENDPOINTS } from "../Service/APIconfig";
 import PageNavbar from "./PageNavbar";
 import axios from "axios";
 import Flag from "react-world-flags";
 
-const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
+const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [menus, setMenus] = useState([]);
   const [activeMenu, setActiveMenu] = useState(null);
   const [mobileDropdowns, setMobileDropdowns] = useState({});
   const [menusWithAlias, setMenusWithAlias] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const searchContainerRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const location = useLocation();
@@ -23,50 +25,50 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
       try {
-        // Fetch menus, settings, and pages at the same time
         const [menuRes, pageRes] = await Promise.all([
           axios.get(API_ENDPOINTS.getMenu),
           axios.get(API_ENDPOINTS.getPage),
         ]);
 
-        // Handle menus
         const menuData = menuRes.data?.data || [];
         const filteredMenus = menuData
-          .filter((menu) => menu.lang === currentLang)
-          .filter((menu) => menu.display === 1)
+          .filter((menu) => menu.lang === currentLang && menu.display === 1)
           .sort((a, b) => b.menu_order - a.menu_order);
         setMenus(filteredMenus);
 
-        // Handle pages and combine alias with menu
         const pageData = pageRes.data?.data || [];
-        const combinedMenus = filteredMenus.map(menu => {
-          const matchedPage = pageData.find(page => page.p_menu === menu.menu_id);
+        const combinedMenus = filteredMenus.map((menu) => {
+          const matchedPage = pageData.find((page) => page.p_menu === menu.menu_id);
           return {
             ...menu,
             p_alias: matchedPage ? matchedPage.p_alias : null,
           };
         });
-        setMenusWithAlias(combinedMenus)
-
+        setMenusWithAlias(combinedMenus);
       } catch (err) {
-        console.error("Error fetching menus, settings, or pages:", err);
+        console.error("Error fetching menus or pages:", err);
+        setError("Failed to load navigation. Please try again.");
         setSettings((prev) => ({
           ...prev,
           logoUrl: "/placeholder-icon.png",
         }));
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [currentLang]);
+  }, [currentLang, setSettings]);
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+    setIsMobileMenuOpen((prev) => !prev);
   };
 
   const toggleSearchBar = () => {
-    setIsSearchOpen(!isSearchOpen);
+    setIsSearchOpen((prev) => !prev);
   };
 
   const handleClickOutside = (e) => {
@@ -81,17 +83,14 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
   const toggleLanguage = () => {
     const newLang = currentLang === 1 ? 2 : 1;
     let currentPath = location.pathname;
+    const query = location.search;
 
     if (currentPath.startsWith("/km")) {
       currentPath = currentPath.replace(/^\/km/, "") || "/";
     }
 
-    if (newLang === 2) {
-      navigate(`/km${currentPath === "/" ? "" : currentPath}`);
-    } else {
-      navigate(currentPath || "/");
-    }
-
+    const newPath = newLang === 2 ? `/km${currentPath === "/" ? "" : currentPath}` : currentPath || "/";
+    navigate(`${newPath}${query}`);
     setCurrentLang(newLang);
   };
 
@@ -107,13 +106,35 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
     }));
   };
 
+  const getMenuUrl = (menu) => {
+    const basePath = currentLang === 2 ? "/km" : "";
+    return menu.p_alias ? `${basePath}/${menu.p_alias}` : `${basePath}/${menu.title.toLowerCase().replace(/\s+/g, "-")}`;
+  };
+
   return (
-    <div className="bg-white shadow-md sticky top-0 z-50">
+    <div
+      lang={currentLang === 2 ? "km" : "en"}
+      className={`bg-white shadow-md sticky top-0 z-50 ${currentLang === 2 ? "lang-khmer" : "lang-english"}`}
+    >
+      {/* Loading State */}
+      {isLoading && (
+        <div className={`text-center py-2 text-gray-600 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+          {currentLang === 2 ? "កំពុងផ្ទុក..." : "Loading navigation..."}
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className={`text-center py-2 text-red-600 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+          {error}
+        </div>
+      )}
+
       {/* Search Bar */}
       {isSearchOpen && (
         <div className="absolute top-0 left-0 w-full bg-red-800 py-4 z-50">
           <div className="max-w-7xl mx-auto px-4" ref={searchContainerRef}>
-            <PageSearch onToggle={toggleSearchBar} />
+            <PageSearch onToggle={toggleSearchBar} currentLang={currentLang} />
           </div>
         </div>
       )}
@@ -123,17 +144,22 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center py-2">
             {/* Logo */}
-            <Link to={settings.baseUrl} className="flex items-center space-x-2">
+            <Link to={settings.baseUrl || "/"} className="flex items-center space-x-2">
               <img
                 src={settings.logoUrl}
                 alt="Logo"
                 className="w-14 h-14 object-contain"
                 onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/placeholder-icon.png";
+                  if (e.target.src !== "/placeholder-icon.png") {
+                    e.target.src = "/placeholder-icon.png";
+                  }
                 }}
               />
-              <h2 className="lg:text-lg font-normal text-sm uppercase hidden sm:block">
+              <h2
+                className={`lg:text-lg  text-sm uppercase hidden sm:block ${
+                  currentLang === 2 ? "font-khmer" : "font-bold"
+                }`}
+              >
                 {settings.facultyTitle} <br /> {settings.departmentTitle}
               </h2>
             </Link>
@@ -142,11 +168,11 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
             <div className="flex items-center space-x-4">
               <div className="hidden lg:block">
                 <PageNavbar
-                  // menus={menus}
                   menus={menusWithAlias}
                   activeMenu={activeMenu}
                   onMenuClick={setActiveMenu}
                   isMobileMenuOpen={isMobileMenuOpen}
+                  currentLang={currentLang}
                 />
               </div>
 
@@ -154,6 +180,7 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={toggleLanguage}
+                  aria-label={`Switch to ${currentLang === 1 ? "Khmer" : "English"}`}
                   className="p-2 text-sm bg-gray-100 rounded hover:bg-gray-200 flex items-center space-x-2"
                 >
                   <Flag
@@ -161,15 +188,22 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
                     alt={currentLang === 1 ? "Khmer" : "English"}
                     className="w-6 h-4"
                   />
-                  <span>{currentLang === 1 ? "KH" : "EN"}</span>
+                  <span className={currentLang === 2 ? "font-khmer" : "font-sans"}>
+                    {currentLang === 1 ? "KH" : "EN"}
+                  </span>
                 </button>
                 {!isSearchOpen && (
-                  <button onClick={toggleSearchBar} className="p-2 text-gray-600 hover:text-red-800">
+                  <button
+                    onClick={toggleSearchBar}
+                    aria-label="Toggle search"
+                    className="p-2 text-gray-600 hover:text-red-800"
+                  >
                     <IoMdSearch className="text-3xl" />
                   </button>
                 )}
                 <button
                   onClick={toggleMobileMenu}
+                  aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                   className="lg:hidden text-gray-600 hover:text-red-800 p-2"
                 >
                   {isMobileMenuOpen ? <FaTimes className="text-3xl" /> : <FaBars className="text-3xl" />}
@@ -185,27 +219,31 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
         <div
           ref={mobileMenuRef}
           className="lg:hidden fixed top-0 left-0 w-full h-full bg-white shadow-md z-40 overflow-y-auto"
+          role="navigation"
+          aria-label="Mobile navigation"
         >
           <div className="p-6">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to={settings.baseUrl || "/"} className="flex items-center space-x-2">
               <img
                 src={settings.logoUrl}
                 alt="Logo"
                 className="w-14 h-14 object-contain"
                 onError={(e) => {
-                  e.target.onerror = null;
-                  if (!e.target.src.includes('placeholder-icon.png')) {
+                  if (e.target.src !== "/placeholder-icon.png") {
                     e.target.src = "/placeholder-icon.png";
                   }
                 }}
               />
-              <h2 className="text-sm font-normal uppercase">
+              <h2
+                className={`text-sm font-normal uppercase ${currentLang === 2 ? "font-khmer" : "font-sans"}`}
+              >
                 {settings.facultyTitle} <br /> {settings.departmentTitle}
               </h2>
             </Link>
 
             <button
               onClick={toggleMobileMenu}
+              aria-label="Close mobile menu"
               className="absolute right-6 top-4 text-gray-600 hover:text-red-800"
             >
               <FaTimes className="text-3xl" />
@@ -215,27 +253,27 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
               {menus
                 .filter((menu) => menu.menup_id === null)
                 .map((menu) => {
-                  const isActive = location.pathname === `/${menu.title.toLowerCase()}`;
+                  const isActive = location.pathname === getMenuUrl(menu);
                   const children = (menu.children || []).filter((child) => child.display === 1);
                   const hasChildren = children.length > 0;
 
                   return (
                     <div key={menu.menu_id}>
                       <div
-                        onClick={() => toggleMobileDropdown(menu.menu_id)}
+                        onClick={() => hasChildren && toggleMobileDropdown(menu.menu_id)}
                         className="flex items-center justify-between"
                       >
                         <Link
-                          to={`/${menu.title.toLowerCase()}`}
+                          
                           className={`uppercase hover:text-red-800 ${
-                            isActive ? "text-red-900 font-bold" : ""
-                          }`}
+                            currentLang === 2 ? "fonts-khmer" : "font-sans"
+                          } ${isActive ? "text-red-900 font-bold" : ""}`}
                           onClick={toggleMobileMenu}
                         >
                           {menu.title}
                         </Link>
                         {hasChildren && (
-                          <button>
+                          <button aria-label={`Toggle ${menu.title} submenu`}>
                             <FiChevronDown
                               className={`transition-transform ${
                                 mobileDropdowns[menu.menu_id] ? "rotate-180" : ""
@@ -250,9 +288,11 @@ const PageHeader = ({currentLang, setCurrentLang, settings, setSettings}) => {
                           {children.map((child) => (
                             <Link
                               key={child.menu_id}
-                              to={`/${child.title.toLowerCase()}`}
+                              to={getMenuUrl(child)}
                               className={`block hover:text-red-800 ${
-                                location.pathname === `/${child.title.toLowerCase()}`
+                                currentLang === 2 ? "fonts-khmer" : "font-sans"
+                              } ${
+                                location.pathname === getMenuUrl(child)
                                   ? "text-red-900 font-bold"
                                   : ""
                               }`}

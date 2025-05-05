@@ -22,7 +22,7 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-const ResearchSection = ({section}) => {
+const ResearchSection = ({section, menuLang}) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('');
@@ -129,10 +129,10 @@ const ResearchSection = ({section}) => {
         {/* Header Section */}
         <div className="flex flex-col xl:flex-row justify-between items-center mb-6 sm:mb-8">
           <div className="mb-4 sm:mb-6 xl:mb-0">
-            <h2 className="text-2xl sm:text-3xl font-semibold mb-2">
+            <h2 className={`text-2xl sm:text-3xl font-semibold mb-2 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
               {headerData?.title || 'Students Research'}
             </h2>
-            <p className="text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base max-w-2xl">
+            <p className={`text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base max-w-2xl ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
               {headerData?.subtitle ||
                 'A Deep Dive into Computer Science Research: From Fundamentals to Future Innovations'}
             </p>
@@ -191,23 +191,25 @@ const ResearchSection = ({section}) => {
                   <div className="flex flex-col justify-center items-end py-2 sm:py-3">
                     <button className="text-black text-[9px] sm:text-[10px] lg:text-xs bg-gray-300 py-1 sm:py-1.5 px-2 sm:px-3 lg:px-4 shadow-md rounded-full flex items-center mb-2">
                       <MdComputer className="mr-1 text-xs sm:text-sm" />
-                      <span className="truncate w-full">
+                      <span className={`truncate w-full ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
                         {section.lead}
                       </span>
                     </button>
                   </div>
                   <div>
-                    <h3 className="text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 line-clamp-2">
+                    <h3 className={`text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 line-clamp-2 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans-serif'}`}>
                       {section.title}
                     </h3>
-                    <p className="mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base line-clamp-2 sm:line-clamp-3">
+                    <p className={`mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base line-clamp-2 sm:line-clamp-3 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
                       {section.description}
                     </p>
                     <button
-                      onClick={() =>
-                        navigate(`/research/${section.id}`, { replace: true })
-                      }
-                      className="bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center"
+                      onClick={() => {
+                        navigate(`/research/${section.id}`);
+                      }}
+                      className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
+                        }`}
+
                     >
                       <MdExplore className="mr-1 text-xs sm:text-base" />
                       {currentLang === 1 ? "Explore" : "មើលបន្ថែម"}

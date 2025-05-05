@@ -31,7 +31,7 @@ const EventSection = ({ section, menuLang }) => {
 
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
     const DEFAULT_IMAGE = '/placeholder-image.jpg';
-  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
 
     useEffect(() => {
@@ -42,25 +42,25 @@ const EventSection = ({ section, menuLang }) => {
                 const headerList = response.data?.data || [];
 
                 const matchedHeader = headerList.find(
-                  (item) =>
-                    item.hsec_sec === section.sec_id &&
-                    item.section?.sec_type === "Event" &&
-                    item.section?.display === 1 &&
-                    item.section?.active === 1
+                    (item) =>
+                        item.hsec_sec === section.sec_id &&
+                        item.section?.sec_type === "Event" &&
+                        item.section?.display === 1 &&
+                        item.section?.active === 1
                 );
 
                 if (matchedHeader) {
-                  setHeaderData({
-                    hsec_title: matchedHeader.hsec_title || "Event",
-                    hsec_amount: matchedHeader.hsec_amount || 4,
-                    hsec_subtitle: matchedHeader.hsec_subtitle || "",
-                  });
+                    setHeaderData({
+                        hsec_title: matchedHeader.hsec_title || "Event",
+                        hsec_amount: matchedHeader.hsec_amount || 4,
+                        hsec_subtitle: matchedHeader.hsec_subtitle || "",
+                    });
                 } else {
-                  setHeaderData({
-                    hsec_title: "Event",
-                    hsec_amount: 4,
-                    hsec_subtitle: "",
-                  });
+                    setHeaderData({
+                        hsec_title: "Event",
+                        hsec_amount: 4,
+                        hsec_subtitle: "",
+                    });
                 }
             } catch (error) {
                 console.error('Failed to fetch header data:', error);
@@ -89,10 +89,10 @@ const EventSection = ({ section, menuLang }) => {
                         description: item.e_shorttitle || 'No description available',
                         date: item.e_date
                             ? new Date(item.e_date).toLocaleDateString('en-US', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                              })
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                            })
                             : 'TBD',
                         imageUrl: item.img.img ? `${BASE_IMAGE_URL}/${item.img.img}` : DEFAULT_IMAGE,
                     }))
@@ -157,7 +157,8 @@ const EventSection = ({ section, menuLang }) => {
                     className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8"
                 >
                     <div>
-                        <h1 className="text-3xl  font-semibold mb-3 sm:mb-4">
+                        <h1 className={`text-3xl  font-semibold mb-3 sm:mb-4 ${menuLang === 2 ? "font-khmer" : "font-sans"
+                            }`}>
                             {headerData.hsec_title || 'Events'}
                         </h1>
                         {headerData.hsec_subtitle && (
@@ -247,13 +248,16 @@ const EventSection = ({ section, menuLang }) => {
                                                         {event.tags}
                                                     </span>
                                                 )}
-                                                <h5 className="text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4">
+                                                <h3 className={`${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                                                    } text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4`}>
                                                     {event.title}
-                                                </h5>
-                                                <p className="text-xs sm:text-sm text-gray-700 line-clamp-3">
+                                                </h3>
+                                                <p className={`${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                                                    } text-xs sm:text-sm text-gray-700 line-clamp-3`}>
                                                     {event.description}
                                                 </p>
-                                                <span className="text-xs sm:text-sm text-gray-700 flex items-center gap-2 mt-3 sm:mt-4">
+                                                <span className={`${menuLang === 2 ? "fonts-khmer text-[16px]" : "font-sans"
+                                                    } text-xs sm:text-sm text-gray-700 flex items-center gap-2 mt-3 sm:mt-4`}>
                                                     <PiCalendarDots className="text-red-600" />
                                                     {event.date}
                                                 </span>

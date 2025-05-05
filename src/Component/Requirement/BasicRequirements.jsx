@@ -54,7 +54,7 @@ const BasicRequirements = ({ key, section, menuLang}) => {
           viewport={{ once: true, amount: 0.5 }}
           className="container mx-auto px-4 "
         >
-          <div className="xl:h-[479px] h-full flex flex-col xl:flex-row items-center gap-8 py-8 xl:py-0">
+          <div className="lg:h-[479px] h-full flex flex-col lg:flex-row items-center gap-8 py-8 xl:py-0">
             {/* Left Column - Image Content */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
@@ -120,20 +120,20 @@ const BasicRequirements = ({ key, section, menuLang}) => {
             >
               {gcAddon && (
                 <>
-                  <p className="mb-2 text-sm xl:text-lg">{gcAddon.gca_tag}</p>
+                  <p className={`mb-2 text-sm lg:text-lg ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{gcAddon.gca_tag}</p>
                 </>
               )}
-              <h2 className="text-3xl font-normal mb-4 py-2">
+              <h2 className={`text-3xl font-normal mb-4 py-2 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                 {gcData.gc_title}
               </h2>
               <div
-                className="grid grid-cols-1 text-sm xl:text-lg space-y-3"
+                className={`grid grid-cols-1 text-sm lg:text-lg space-y-3 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}
                 dangerouslySetInnerHTML={{ __html: gcData.gc_detail }}
               />
               {gcAddon?.gca_btntitle && gcAddon?.gca_btnlink && (
                 <div className="">
                   <a href={gcAddon.gca_btnlink} target="_blank" rel="noopener noreferrer">
-                    <button className="bg-red-800 p-2 rounded-3xl px-6 text-white">
+                    <button className={`bg-red-800 p-2 rounded-3xl px-6 text-white ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                       {gcAddon.gca_btntitle}
                     </button>
                   </a>

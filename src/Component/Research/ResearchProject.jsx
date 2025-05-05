@@ -45,7 +45,7 @@ const ResearchProject = ({rsdtId}) => {
                                 {projectRequirement.rsdp_title}
                             </h2>
                             <div
-                                className="text-sm xl:text-lg text-gray-800"
+                                className="text-sm lg:text-lg text-gray-800"
                                 dangerouslySetInnerHTML={{ __html: projectRequirement.rsdp_detail }}
                             />
                         </motion.div>

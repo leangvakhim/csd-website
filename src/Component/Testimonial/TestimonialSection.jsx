@@ -16,7 +16,7 @@ const quoteVariants = {
   },
 };
 
-const TestimonialSection = ({ section }) => {
+const TestimonialSection = ({ section, menuLang }) => {
   const [quote, setQuote] = useState(null);
 
   useEffect(() => {
@@ -72,7 +72,9 @@ const TestimonialSection = ({ section }) => {
 
           {/* Quote Text */}
           <motion.h1
-            className="text-lg sm:text-2xl md:text-3xl font-semibold leading-relaxed text-gray-800 px-20"
+            className={`text-lg sm:text-2xl md:text-3xl font-semibold leading-relaxed text-gray-800 px-20 ${
+              menuLang === 2 ? "font-khmer" : "font-semibold"
+            }`}
             variants={quoteVariants}
             transition={{ delay: 0.4 }}
           >

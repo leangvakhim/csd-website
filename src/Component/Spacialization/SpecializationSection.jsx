@@ -21,7 +21,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const SpecializationSection = ({ section }) => {
+const SpecializationSection = ({ section, menuLang }) => {
   const [innovation, setInnovation] = useState(null);
   const [subservices, setSubservices] = useState([]);
 
@@ -114,14 +114,16 @@ const SpecializationSection = ({ section }) => {
           {/* Left: Text */}
           <motion.div className="w-full lg:max-w-[600px] order-2 lg:order-1" variants={cardVariants}>
             <motion.h1
-              className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-gray-800"
+              className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-gray-800 ${
+                menuLang === 2 ? "font-khmer" : "font-semibold"
+              }`}
               variants={cardVariants}
               transition={{ delay: 0.2 }}
             >
               {innovation.title}
             </motion.h1>
 
-            <p className="text-gray-800 text-[12px] sm:text-[14px] lg:text-[16px] mb-4 leading-relaxed">
+            <p className={`text-gray-800 text-[12px] sm:text-[14px] lg:text-[16px] mb-4 leading-relaxed ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>
               {innovation.description}
             </p>
 
@@ -155,8 +157,8 @@ const SpecializationSection = ({ section }) => {
                     </div>
                   </div>
                   <div>
-                    <h6 className="text-lg font-bold">{s.title}</h6>
-                    <p className="text-sm xl:text-lg">{s.description}</p>
+                    <h6 className={`text-lg font-bold ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{s.title}</h6>
+                    <p className={`text-sm lg:text-lg ${menuLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>{s.description}</p>
                   </div>
                 </motion.div>
               ))}
