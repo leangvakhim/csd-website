@@ -228,7 +228,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
                     }}
                   />
                 </div>
-                {/* Text Content */}
                 <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
                   <h3 className="text-lg font-semibold mb-4">{item.title}</h3>
                   <p className="text-gray-600">{item.description}</p>
