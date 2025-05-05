@@ -20,7 +20,7 @@ const ScholarshipDetails = ({ scholarshipId }) => {
                         (item) =>
                             item.display === 1 &&
                             item.active === 1 &&
-                            item.sc_id === parseInt(scholarshipId)
+                            item.ref_id === parseInt(scholarshipId)
                     )
 
                     .sort((a, b) => a.sc_orders - b.sc_orders);

@@ -8,24 +8,30 @@ const ScholarshipBanner = ({ scholarshipId }) => {
   const [bannerSection, setBannerSection] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
     if (scholarshipId) {
       const fetchBanner = async () => {
         try {
-          const response = await axios.get(`${API_ENDPOINTS.getScholarship}/${scholarshipId}`);
-          const data = response.data?.data;
-          setBannerSection({
-            title: data.sc_title,
-            postDate: new Date(data.sc_postdate).toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            }), // Format: "22 Aug 2025"
-            image: data.image?.img
-              ? `${API}/storage/uploads/${data.image.img}`
-              : '/placeholder-image.jpg',
-          });
+          const response = await axios.get(`${API_ENDPOINTS.getScholarship}`);
+          const allScholarships = response.data?.data || [];
+          const selectedItem = allScholarships.find(item =>
+            item.ref_id === Number(scholarshipId) && item.lang === currentLang
+          );
+          if (selectedItem) {
+            setBannerSection({
+              title: selectedItem.sc_title,
+              postDate: new Date(selectedItem.sc_postdate).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+              }),
+              image: selectedItem.image?.img
+                ? `${API}/storage/uploads/${selectedItem.image.img}`
+                : '/placeholder-image.jpg',
+            });
+          }
           setLoading(false);
         } catch (err) {
           setError('Failed to load scholarship banner.');
@@ -35,7 +41,7 @@ const ScholarshipBanner = ({ scholarshipId }) => {
       };
       fetchBanner();
     }
-  }, [scholarshipId]);
+  }, [scholarshipId, currentLang]);
 
   if (loading) {
     return (
@@ -82,7 +88,7 @@ const ScholarshipBanner = ({ scholarshipId }) => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             viewport={{ once: true, amount: 0.5 }}
-            className="text-3xl sm:text-4xl font-bold drop-shadow-md"
+            className={`text-3xl sm:text-4xl font-bold drop-shadow-md ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}
           >
             {bannerSection.title}
           </motion.h1>
@@ -94,7 +100,7 @@ const ScholarshipBanner = ({ scholarshipId }) => {
             className="text-md flex items-center text-gray-50 drop-shadow-md"
           >
             <FaCalendarAlt className="mr-2 text-lg" />
-            Post on: {bannerSection.postDate}
+            {currentLang === 1 ? "Post on" : "បង្ហោះនៅថ្ងៃ"}: {bannerSection.postDate}
           </motion.p>
         </motion.div>
       </div>

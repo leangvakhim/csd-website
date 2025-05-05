@@ -13,24 +13,30 @@ const ScholarshipOverview = ({ scholarshipId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Determine currentLang based on pathname
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
   useEffect(() => {
     if (scholarshipId) {
       const fetchScholarshipDetails = async () => {
         try {
-          const response = await axios.get(`${API_ENDPOINTS.getScholarship}/${scholarshipId}`);
-          const data = response.data?.data;
+          const response = await axios.get(`${API_ENDPOINTS.getScholarship}`);
+          const allScholarships = response.data?.data || [];
+          const data = allScholarships.find(item =>
+            item.sc_id === Number(scholarshipId) && item.lang === currentLang
+          );
 
           setScholarshipDetails({
-            title: data.sc_title || 'About Our Scholarship',
-            deadline: data.sc_deadline
+            title: data?.sc_title || '',
+            deadline: data?.sc_deadline
               ? new Date(data.sc_deadline).toLocaleDateString('en-GB', {
                   day: '2-digit',
                   month: 'long',
                   year: 'numeric',
                 }) // Format: "31 March 2025"
               : 'N/A',
-            subjects: data.sc_subjects || 'All',
-            description: data.sc_shortdesc || 'No description available.',
+            subjects: data?.sc_subjects || '',
+            description: data?.sc_shortdesc || '',
           });
           setLoading(false);
         } catch (err) {
@@ -41,7 +47,7 @@ const ScholarshipOverview = ({ scholarshipId }) => {
       };
       fetchScholarshipDetails();
     }
-  }, [scholarshipId]);
+  }, [scholarshipId, currentLang]);
 
   if (loading) {
     return (
@@ -73,13 +79,13 @@ const ScholarshipOverview = ({ scholarshipId }) => {
             <div className="flex items-center bg-gray-100 p-4 rounded-lg">
               <FaCalendarAlt className="text-xl mr-3" />
               <div>
-                <p className="font-semibold">Deadline: {scholarshipDetails.deadline}</p>
+                <p className="font-semibold">{currentLang === 1 ? "Deadline" : "ថ្ងៃផុតកំណត់"}: {scholarshipDetails.deadline}</p>
               </div>
             </div>
             <div className="flex items-center bg-gray-100 p-4 rounded-lg">
               <FaListUl className="text-xl mr-3" />
               <div>
-                <p className="font-semibold">Given Subjects: {scholarshipDetails.subjects}</p>
+                <p className="font-semibold">{currentLang === 1 ? "Given Subjects" : "មុខវិជ្ចាដែលផ្ដល់ជូន"}: {scholarshipDetails.subjects}</p>
               </div>
             </div>
           </div>
