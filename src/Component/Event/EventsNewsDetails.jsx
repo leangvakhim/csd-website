@@ -6,33 +6,29 @@ import DOMPurify from 'dompurify';
 import EventBanner from './EventBanner';
 import SocialSection from '../Social/SocialSection';
 import RelatedEvent from './RelatedEvent';
+import { useLocation } from 'react-router-dom';
 
-const EventsNewsDetails = ({ sectionId, menuLang }) => {
+const EventsNewsDetails = ({ eventId, menuLang }) => {
     const [event, setEvent] = useState(null); // Kept for potential future use
     const [news, setNews] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+    const location = useLocation();
+    const currentLang = location.pathname.includes('/km') ? 2 : 1;
+
 
     useEffect(() => {
         const fetchNews = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(
-                    `${API_ENDPOINTS.getEvent}?section_id=${sectionId}&lang=${menuLang}`
-                );
+                const response = await axios.get(`${API_ENDPOINTS.getEvent}`);
                 const data = response.data?.data || [];
 
-                if (!data.length) {
-                    setError('No news data available for this section and language.');
-                    setLoading(false);
-                    return;
-                }
-
-                // Select the first item with display: 1 and matching lang, or first display: 1, or first item
-                const selectedItem = data.find(item => item.display === 1 && item.lang === menuLang) ||
-                                    data.find(item => item.display === 1) ||
-                                    data[0];
+                const selectedItem = data.find(item =>
+                    item.display === 1 &&
+                    item.lang === currentLang &&
+                    item.ref_id === Number(eventId)
+                );
 
                 if (selectedItem) {
                     setNews({
@@ -65,7 +61,7 @@ const EventsNewsDetails = ({ sectionId, menuLang }) => {
             }
         };
         fetchNews();
-    }, [sectionId, menuLang]);
+    }, [eventId, currentLang]);
 
     return (
         <div className=" bg-white">
@@ -92,7 +88,7 @@ const EventsNewsDetails = ({ sectionId, menuLang }) => {
             ) : news ? (
                 <div>
                     <EventBanner
-                        eventId={news.e_id}
+                        eventId={eventId}
                         newId={news.e_id} // Assuming newId is same as e_id; adjust if different
                         title={news.title}
                         postDate={news.date}
@@ -101,7 +97,7 @@ const EventsNewsDetails = ({ sectionId, menuLang }) => {
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                         <SocialSection event={event} news={news} />
                         <motion.h2
-                            className={`text-2xl font-bold mb-4 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}
+                            className={`text-2xl font-bold mb-4 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
@@ -109,7 +105,7 @@ const EventsNewsDetails = ({ sectionId, menuLang }) => {
                             {news.title}
                         </motion.h2>
                         <motion.div
-                            className={`text-gray-700 mb-4 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}
+                            className={`text-gray-700 mb-4 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.2 }}
@@ -117,9 +113,9 @@ const EventsNewsDetails = ({ sectionId, menuLang }) => {
                                 __html: DOMPurify.sanitize(news.detail),
                             }}
                         />
-                        
+
                     </div>
-                    <RelatedEvent eventId={news.e_id} newId={news.e_id} />
+                    <RelatedEvent eventId={eventId} newId={news.e_id} />
                 </div>
             ) : (
                 <motion.div

@@ -3,31 +3,39 @@ import { motion } from 'framer-motion';
 import { FaCalendarAlt } from 'react-icons/fa';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { useLocation } from 'react-router-dom';
 
 const EventBanner = ({ eventId, menuLang}) => {
     const [bannerSection, setBannerSection] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const location = useLocation();
+    const currentLang = location.pathname.includes('/km') ? 2 : 1;
 
     useEffect(() => {
         if (eventId) {
             const fetchBanner = async () => {
                 try {
-                    const response = await axios.get(`${API_ENDPOINTS.getEvent}/${eventId}`);
-                    const data = response.data?.data;
-                    setBannerSection({
-                        title: data.e_title || 'Untitled Event',
-                        postDate: data.e_date
-                            ? new Date(data.e_date).toLocaleDateString('en-GB', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                  year: 'numeric',
-                              })
-                            : 'TBD', // Format: "22 Aug 2025"
-                        image: data.img?.img
-                            ? `${API}/storage/uploads/${data.img?.img}`
-                            : '/placeholder-image.jpg',
-                    });
+                    const response = await axios.get(`${API_ENDPOINTS.getEvent}`);
+                    const allEvents = response.data?.data || [];
+                    const selectedEvent = allEvents.find(
+                        item => item.ref_id === Number(eventId) && item.lang === currentLang
+                    );
+                    if (selectedEvent) {
+                        setBannerSection({
+                            title: selectedEvent.e_title || 'Untitled Event',
+                            postDate: selectedEvent.e_date
+                                ? new Date(selectedEvent.e_date).toLocaleDateString('en-GB', {
+                                      day: '2-digit',
+                                      month: 'short',
+                                      year: 'numeric',
+                                  })
+                                : 'TBD',
+                            image: selectedEvent.img?.img
+                                ? `${API}/storage/uploads/${selectedEvent.img?.img}`
+                                : '/placeholder-image.jpg',
+                        });
+                    }
                     setLoading(false);
                 } catch (err) {
                     setError('Failed to load event banner.');
@@ -84,7 +92,7 @@ const EventBanner = ({ eventId, menuLang}) => {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.4 }}
                         viewport={{ once: true, amount: 0.5 }}
-                        className={`text-3xl sm:text-4xl font-bold drop-shadow-md ${menuLang === 2 ? 'font-khmer' : 'font-sans'}`}
+                        className={`text-3xl sm:text-4xl font-bold drop-shadow-md ${currentLang === 2 ? 'font-khmer leading-10' : 'font-sans'}`}
                     >
                         {bannerSection.title}
                     </motion.h1>
@@ -96,7 +104,7 @@ const EventBanner = ({ eventId, menuLang}) => {
                         className="mt-2 text-md flex items-center text-gray-50 drop-shadow-md"
                     >
                         <FaCalendarAlt className={`mr-2 text-lg ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`} />
-                        Post on: {bannerSection.postDate}
+                        {currentLang === 1 ? "Post on" : "បង្ហោះនៅថ្ងៃ"}: {bannerSection.postDate}
                     </motion.p>
                 </motion.div>
             </div>
