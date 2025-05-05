@@ -2,25 +2,37 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 import { BsViewStacked } from "react-icons/bs";
+import { useLocation } from 'react-router-dom';
 
 const FacultyDetail = ({ facultyId }) => {
+    const location = useLocation();
     const [faculty, setFaculty] = useState(null);
     const [socials, setSocials] = useState([]);
     const [facultyInfo, setFacultyInfo] = useState(null);
     const [contacts, setContacts] = useState([]);
     const [backgrounds, setBackgrounds] = useState([]);
     const [researchProjects, setResearchProjects] = useState([]);
+    const [currentLang, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
+
+    useEffect(() => {
+        const newLang = location.pathname.startsWith('/km') ? 2 : 1;
+        if (newLang !== currentLang) {
+            setCurrentLang(newLang);
+        }
+    }, [location.pathname]);
 
     useEffect(() => {
         const fetchFacultyDetail = async () => {
             try {
                 const facultyRes = await axios.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = facultyRes.data?.data || [];
-                const selectedFaculty = allFaculty.find(item => item.f_id === parseInt(facultyId));
+                const selectedFaculty = allFaculty.find(item => item.ref_id === Number(facultyId) && item.lang === currentLang);
 
                 if (selectedFaculty) {
                     setFaculty({
                         name: selectedFaculty.f_name,
+                        f_id: selectedFaculty.f_id,
+                        ref_id: selectedFaculty.ref_id,
                         position: selectedFaculty.f_position,
                         image: selectedFaculty.img?.img
                             ? `${API}/storage/uploads/${selectedFaculty.img.img}`
@@ -29,10 +41,11 @@ const FacultyDetail = ({ facultyId }) => {
                 }
 
                 // Fetch social icons
+                // Note: faculty may not be set yet, so we use selectedFaculty
                 const socialRes = await axios.get(API_ENDPOINTS.getSocial);
                 const allSocials = socialRes.data?.data || [];
                 const filteredSocials = allSocials.filter(social =>
-                    social.social_faculty === parseInt(facultyId) &&
+                    social.social_faculty === parseInt(selectedFaculty?.f_id) &&
                     social.display === 1 &&
                     social.active === 1
                 );
@@ -41,12 +54,18 @@ const FacultyDetail = ({ facultyId }) => {
                 console.error("Error fetching faculty detail or socials:", error);
             }
         };
+        fetchFacultyDetail();
+    }, [facultyId, currentLang]);
+
+    useEffect(() => {
+        if (!faculty) return;
+
         const fetchFacultyInfo = async () => {
             try {
                 const infoRes = await axios.get(API_ENDPOINTS.getFacultyInfo);
                 const allInfo = infoRes.data?.data || [];
                 const selectedInfo = allInfo.find(info =>
-                    info.finfo_f === parseInt(facultyId) &&
+                    info.finfo_f === parseInt(faculty.f_id) &&
                     info.display === 1 &&
                     info.active === 1 &&
                     info.finfo_order === 1
@@ -64,7 +83,7 @@ const FacultyDetail = ({ facultyId }) => {
                 const contactRes = await axios.get(API_ENDPOINTS.getFacultyContact);
                 const allContacts = contactRes.data?.data || [];
                 const filteredContacts = allContacts.filter(contact =>
-                    contact.fc_f === parseInt(facultyId) &&
+                    contact.fc_f === parseInt(faculty.f_id) &&
                     contact.display === 1 &&
                     contact.active === 1
                 );
@@ -78,7 +97,7 @@ const FacultyDetail = ({ facultyId }) => {
                 const bgRes = await axios.get(API_ENDPOINTS.getFacultyBG);
                 const allBackgrounds = bgRes.data?.data || [];
                 const filteredBackgrounds = allBackgrounds.filter(bg =>
-                    bg.fbg_f === parseInt(facultyId) &&
+                    bg.fbg_f === parseInt(faculty.f_id) &&
                     bg.display === 1 &&
                     bg.active === 1
                 );
@@ -92,7 +111,7 @@ const FacultyDetail = ({ facultyId }) => {
                 const projectRes = await axios.get(API_ENDPOINTS.getFacultyInfo);
                 const allProjects = projectRes.data?.data || [];
                 const filteredProjects = allProjects.filter(project =>
-                    project.finfo_f === parseInt(facultyId) &&
+                    project.finfo_f === parseInt(faculty.f_id) &&
                     Number(project.finfo_order) >= 2 &&
                     project.display === 1 &&
                     project.active === 1 &&
@@ -106,11 +125,10 @@ const FacultyDetail = ({ facultyId }) => {
         };
 
         fetchFacultyInfo();
-        fetchFacultyDetail();
         fetchFacultyContact();
         fetchFacultyBackground();
         fetchFacultyResearchProjects();
-    }, [facultyId]);
+    }, [faculty]);
 
     return (
         <>
@@ -185,7 +203,7 @@ const FacultyDetail = ({ facultyId }) => {
                             <div className="hidden md:flex items-center">
                                 <button className="bg-white hover:bg-gray-100 text-red-900 px-4 py-2 sm:px-6 sm:py-3 rounded-lg transition-colors duration-300 flex items-center gap-2 shadow-md text-sm sm:text-base">
                                     <BsViewStacked className="text-base sm:text-lg" />
-                                    <span>View Portfolio</span>
+                                    <span>{currentLang === 1 ? "View Portfolio" : "ប្រវត្តិរូបការងារ"}</span>
                                 </button>
                             </div>
                         </div>
@@ -295,7 +313,7 @@ const FacultyDetail = ({ facultyId }) => {
                     <div className="my-8 sm:my-12">
                         <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
                             <h2 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6 text-gray-800">
-                                Background
+                                {currentLang === 1 ? "Background" : "ប្រវត្តិនៃការសិក្សា"}
                             </h2>
                             {backgrounds.length > 0 && backgrounds.map((bg) => (
                                 <div key={bg.fbg_id} className="flex items-center mb-4">

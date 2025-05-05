@@ -17,7 +17,7 @@ const useDebounce = (value, delay) => {
 const AnnouncementSection = ({ section, menuLang }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isHomePage = location.pathname === "/home";
+  // const isHomePage = location.pathname === "/home";
   const [newsItems, setNewsItems] = useState([]);
   const [headerData, setHeaderData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
   const [error, setError] = useState(null);
   const [headerError, setHeaderError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
@@ -46,18 +45,13 @@ const AnnouncementSection = ({ section, menuLang }) => {
             item.section?.display === 1 &&
             item.section?.active === 1
         );
-
-        if (matchedHeader) {
-          setHeaderData({
-            hsec_title: matchedHeader.hsec_title || "Announcements",
-            hsec_amount: matchedHeader.hsec_amount || 4
-          });
-        } else {
-          setHeaderData({
-            hsec_title: "Announcements",
-            hsec_amount: 4
-          });
-        }
+        setHeaderData({
+          hsec_title: matchedHeader.hsec_title || "Announcements",
+          hsec_amount: matchedHeader.hsec_amount || 4,
+          hsec_subtitle: matchedHeader.hsec_subtitle || "",
+          hsec_btntitle: matchedHeader.hsec_btntitle || "",
+          hsec_routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
+        });
       } catch (error) {
         console.error('Failed to fetch header data:', error);
         setHeaderError('Failed to load section header. Using default values.');
@@ -74,9 +68,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
       try {
         setLoading(true);
         const response = await axios.get(API_ENDPOINTS.getAnnouncement);
-
-        // const announcements = Array.isArray(response.data?.data) ? response.data.data : [];
-
         const transformed = response.data.data
           .filter((announcement) => {
             // Ensure announcement exists and has required properties
@@ -128,15 +119,18 @@ const AnnouncementSection = ({ section, menuLang }) => {
     fetchHeaderData().then(fetchAnnouncements);
   }, []);
 
-  const filteredNews = newsItems.filter(item => {
-    const matchesSearch =
-      item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-    return matchesSearch;
-  });
+  const resolvePageAlias = async (routePage) => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.getPage);
+      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
 
-
-  const handleClearSearch = () => setSearchTerm('');
+      const matched = pages.find((page) => page.p_title === routePage);
+      return matched?.p_alias || null;
+    } catch (error) {
+      console.error("Failed to fetch page alias:", error);
+      return null;
+    }
+  }
 
   if (headerLoading || loading) {
     return (
@@ -175,25 +169,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
             } text-3xl font-semibold mb-4`}>
             {headerData.hsec_title}
           </h1>
-
-          {!isHomePage && (
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <div className="relative w-full">
-                <input
-                  type="text"
-                  placeholder="Search news"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-blue-300 w-full"
-                  aria-label="Search news"
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaSearch className="text-gray-400" />
-                </div>
-              </div>
-            </div>
-          )}
-          {isHomePage && (
             <motion.div
               initial={{ opacity: 0, y: -50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -202,58 +177,46 @@ const AnnouncementSection = ({ section, menuLang }) => {
               className="w-full md:w-auto mt-4 md:mt-0"
             >
               <button
-                onClick={() => navigate('/news&events')}
+                onClick={() => navigate(headerData.hsec_routepage)}
                 className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1"
               >
-                <span className="mr-2 xl:text-sm text-[12px]">View All</span>
+                <span className="mr-2 xl:text-sm text-[12px]">{headerData.hsec_btntitle}</span>
                 <FaArrowRight className="text-red-800" />
               </button>
             </motion.div>
-          )}
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-          {filteredNews.length > 0 ? (
-            filteredNews.map((item) => (
-              <div
-                key={item.ref_id}
-                className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
-                onClick={() => navigate(`/announcement/${item.ref_id}`)}
-              >
-                <div className="p-3 w-full lg:w-1/2 h-full">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="w-full h-full object-cover rounded-lg"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = DEFAULT_IMAGE;
-                    }}
-                  />
-                </div>
-                <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
-                  <h2 className={`text-lg font-semibold mb-4 ${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
-                    }`}>{item.title}</h2>
-                  <p className={`${menuLang === 2 ? "fonts-khmer" : "font-sans"
-                    }text-gray-600`}>{item.description}</p>
-                  <p className={`text-gray-500 text-sm mt-2 ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
-                    }`}>{item.date}</p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center text-gray-600 col-span-full py-12">
-              <p>No news found matching your criteria.</p>
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="mt-4 text-red-800 hover:underline"
-                >
-                  Clear search
-                </button>
-              )}
+          {newsItems.map((item) => (
+          <div
+            key={item.ref_id}
+            className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
+            onClick={() => {
+              const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+              navigate(`${prefix}/announcement/${item.ref_id}`);
+            }}
+            >
+            <div className="p-3 w-full lg:w-1/2 h-full">
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                className="w-full h-full object-cover rounded-lg"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = DEFAULT_IMAGE;
+                }}
+              />
             </div>
-          )}
+            <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
+              <h2 className={`text-lg font-semibold mb-4 ${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                }`}>{item.title}</h2>
+              <p className={`${menuLang === 2 ? "fonts-khmer" : "font-sans"
+                }text-gray-600`}>{item.description}</p>
+              <p className={`text-gray-500 text-sm mt-2 ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                }`}>{item.date}</p>
+            </div>
+          </div>
+            ))}
         </div>
       </div>
     </div>
