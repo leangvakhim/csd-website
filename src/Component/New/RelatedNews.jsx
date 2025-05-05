@@ -4,33 +4,46 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
 
-const RelatedNews = ({ sectionId, menuLang }) => {
+const RelatedNews = ({ sectionId, menuLang, newId }) => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
         const fetchEvents = async () => {
             try {
                 const response = await axios.get(
-                    `${API_ENDPOINTS.getNews}?section_id=${sectionId}&lang=${menuLang}`
+                    `${API_ENDPOINTS.getNews}`
                 );
                 const data = response.data?.data || [];
                 const eventData = Array.isArray(data) ? data : [data].filter(Boolean);
-                const formattedEvents = eventData
-                .map((item, index) => ({
+                const filteredEvents = eventData.filter(
+                  item => item.lang === currentLang && item.ref_id !== Number(newId)
+                );
+
+                const formattedEvents = filteredEvents
+                  .map((item, index) => ({
                     id: item.n_id || index + 1,
                     title: item.n_title || 'Untitled Event',
+                    ref_id: item.ref_id,
                     image: item.img?.img
-                        ? `${API}/storage/uploads/${item.img.img}`
-                        : '/placeholder-image.jpg',
+                      ? `${API}/storage/uploads/${item.img.img}`
+                      : '/placeholder-image.jpg',
                     description: item.n_shorttitle || 'No description available.',
-                    date: item.n_date || 'TBD',
+                    date: item.n_date
+                        ? new Date(item.n_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        })
+                        : 'TBD',
                     category: item.n_tags,
-                }))
-                .slice(0, 4); // 🔥 Limit to 4 items
-            
+                  }))
+                  .slice(0, 4);
+
                 setEvents(formattedEvents);
                 setLoading(false);
             } catch (err) {
@@ -46,7 +59,7 @@ const RelatedNews = ({ sectionId, menuLang }) => {
         return (
             <div className="my-16">
                 <div className="container mx-auto px-4">
-                    <p>Loading events...</p>
+                    <p>Loading news...</p>
                 </div>
             </div>
         );
@@ -66,8 +79,8 @@ const RelatedNews = ({ sectionId, menuLang }) => {
         return (
             <div className="my-16">
                 <div className="container mx-auto px-4">
-                    <h2 className="text-4xl mb-6 font-semibold">Related Articles</h2>
-                    <p>No related events found.</p>
+                    <h2 className={`text-4xl mb-6 font-semibold ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{currentLang === 1 ? "Related Articles" : "អត្ថបទដែលទាក់ទង"}</h2>
+                    <p>{currentLang === 1 ? "No related news found." : "មិនមានព័ត៌មានដែលស្វែងរក"}</p>
                 </div>
             </div>
         );
@@ -77,8 +90,8 @@ const RelatedNews = ({ sectionId, menuLang }) => {
         <div className="my-16">
             <div className="container mx-auto px-4">
                 {/* Header Section */}
-                <div className="flex flex-col sm:flex-row justify-between">
-                    <h2 className="text-4xl mb-6 font-semibold">Related Articles</h2>
+                <div className={`flex flex-col sm:flex-row justify-between ${currentLang === 2 ? 'font-khmer' : 'font-sans'}`}>
+                    <h2 className={`text-2xl mb-6 font-semibold ${currentLang === 2 ? 'font-khmer' : 'font-sans'}`}>{currentLang === 1 ? "Related Articles" : "អត្ថបទដែលទាក់ទង"}</h2>
                     {/* Scroll buttons removed to match RelatedArtical */}
                 </div>
 
@@ -87,8 +100,8 @@ const RelatedNews = ({ sectionId, menuLang }) => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         {events.map((event) => (
                             <Link
-                                key={event.id}
-                                to={`/news/${event.id}`}
+                                key={event.ref_id}
+                                to={`${prefix}/news/${event.ref_id}`}
                                 className="text-start"
                             >
                                 <motion.div
@@ -105,17 +118,17 @@ const RelatedNews = ({ sectionId, menuLang }) => {
 
                                     <div className="p-6 w-full lg:w-1/2">
                                         {event.category && (
-                                            <span className={`text-xs font-semibold text-red-600 uppercase bg-indigo-100 px-2 py-1 rounded-full ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
+                                            <span className={`text-xs font-semibold text-red-600 uppercase bg-indigo-100 px-2 py-1 rounded-full ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                                                 {event.category}
                                             </span>
                                         )}
-                                        <h3 className={`mt-2 text-lg font-semibold text-gray-900 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>
+                                        <h3 className={`mt-2 text-lg font-semibold text-gray-900 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>
                                             {event.title}
                                         </h3>
-                                        <p className={`mt-2 text-sm text-gray-800 ${menuLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>
+                                        <p className={`mt-2 text-sm text-gray-800 ${currentLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>
                                             {event.description}
                                         </p>
-                                        <span className={`text-sm text-gray-800 flex items-center gap-4 mt-4 ${menuLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>
+                                        <span className={`text-sm text-gray-800 flex items-center gap-4 mt-4 ${currentLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>
                                             <FaCalendarAlt />
                                             {event.date}
                                         </span>

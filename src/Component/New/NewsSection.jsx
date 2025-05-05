@@ -51,6 +51,9 @@ const NewsSection = ({ section, menuLang }) => {
         if (matchedHeader) {
           setHeaderData({
             hsec_title: matchedHeader.hsec_title || 'New',
+            hsec_subtitle: matchedHeader.hsec_subtitle || "",
+            hsec_btntitle: matchedHeader.hsec_btntitle || "",
+            hsec_routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
             hsec_amount: typeof matchedHeader.hsec_amount === 'number' && matchedHeader.hsec_amount !== null ? matchedHeader.hsec_amount : 4,
           });
         } else {
@@ -74,6 +77,19 @@ const NewsSection = ({ section, menuLang }) => {
     fetchHeaderData();
   }, []);
 
+  const resolvePageAlias = async (routePage) => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.getPage);
+      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
+
+      const matched = pages.find((page) => page.p_title === routePage);
+      return matched?.p_alias || null;
+    } catch (error) {
+      console.error("Failed to fetch page alias:", error);
+      return null;
+    }
+  }
+
   // Fetch news data
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -90,6 +106,7 @@ const NewsSection = ({ section, menuLang }) => {
         );
         const transformed = filteredList.map(announcement => ({
           id: announcement.n_id,
+          ref_id: announcement.ref_id,
           tag: announcement.n_tags,
           title: announcement.n_title,
           description: announcement.n_shorttitle || '',
@@ -169,25 +186,6 @@ const NewsSection = ({ section, menuLang }) => {
             } text-3xl font-semibold mb-4`}>
             {headerData.hsec_title}
           </h1>
-
-          {!isHomePage && (
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="relative w-full sm:w-64">
-                <input
-                  type="text"
-                  placeholder="Search by title"
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-blue-300 w-full"
-                  aria-label="Search news"
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaSearch className="text-gray-400" />
-                </div>
-              </div>
-            </div>
-          )}
-          {isHomePage && (
             <motion.div
               initial={{ opacity: 0, y: -50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -195,62 +193,80 @@ const NewsSection = ({ section, menuLang }) => {
               viewport={{ once: true }}
               className="w-full md:w-auto mt-4 md:mt-0"
             >
-              <button
-                onClick={() => navigate('/news&events')}
-                className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1"
-              >
-                <span className="mr-2 lg:text-sm text-[12px]">View All</span>
-                <FaArrowRight className="text-red-800" />
-              </button>
-            </motion.div>
-          )}
-        </motion.div>
+                {headerData.hsec_routepage ? (
+                  <button
+                      onClick={() => navigate(headerData.hsec_routepage)}
+                      className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1`}
+                    >
+                    <span className="mr-2 lg:text-sm text-[12px]">{headerData.hsec_btntitle}</span>
+                    <FaArrowRight className="text-red-800" />
+                  </button>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <div className="relative w-full">
+                        <input
+                            type="text"
+                            placeholder="Search news"
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-red-300 w-full"
+                            aria-label="Search news"
+                        />
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaSearch className="text-gray-400" />
+                        </div>
+                        {searchTerm && (
+                            <button
+                                onClick={handleClearSearch}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                aria-label="Clear search"
+                            >
+                                <FaTimes className="text-sm" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+                )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-          {filteredNews.length > 0 ? (
-            filteredNews.slice(0, isHomePage ? 4 : undefined).map(item => (
-              <div
-                key={item.id}
-                className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
-                onClick={() => navigate(`/news/${item.id}`)}
-              >
-                <div className="p-3 w-full lg:w-1/2 h-58">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div className="p-6 flex flex-col w-full lg:w-1/2 justify-center">
-                  {item.tag && (
-                    <span className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2">
-                      {item.tag}
-                    </span>
-                  )}
-                  <h3 className={`${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
-                    } text-lg font-semibold mb-4`}>{item.title}</h3>
-                  <p className={`${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
-                    } text-gray-600`}>{item.description}</p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center text-gray-600 col-span-full py-12">
-              <p>No news found matching your criteria.</p>
-              {(searchTerm || selectedTag) && (
-                <button
+            </motion.div>
+        </motion.div>
+        {filteredNews.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+            {newsItems.map(item => (
+                <div
+                  key={item.ref_id}
+                  className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
                   onClick={() => {
-                    setSearchTerm('');
-                    setSelectedTag('');
+                    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+                    navigate(`${prefix}/news/${item.ref_id}`);
                   }}
-                  className="mt-4 text-red-800 hover:underline"
                 >
-                  Clear all filters
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+                  <div className="p-3 w-full lg:w-1/2 h-58">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                  <div className="p-6 flex flex-col w-full lg:w-1/2 justify-center">
+                    {item.tag && (
+                      <span className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2">
+                        {item.tag}
+                      </span>
+                    )}
+                    <h3 className={`${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                      } text-lg font-semibold mb-4`}>{item.title}</h3>
+                    <p className={`${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                      } text-gray-600`}>{item.description}</p>
+                  </div>
+                </div>
+              ))}
+          </div>
+        ): (
+          <p className="text-center text-gray-500">
+            No news found.
+          </p>
+        )}
       </div>
     </div>
   );

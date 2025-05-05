@@ -7,17 +7,18 @@ import NewsBanner from './NewsBanner';
 import SocialSection from '../Social/SocialSection';
 import RelatedNews from './RelatedNews';
 
-const NewDetails = ({ sectionId, menuLang }) => {
+const NewDetails = ({ sectionId, menuLang, newId }) => {
     const [news, setNews] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
         const fetchNews = async () => {
             setLoading(true);
             try {
                 const response = await axios.get(
-                    `${API_ENDPOINTS.getNews}?section_id=${sectionId}&lang=${menuLang}`
+                    `${API_ENDPOINTS.getNews}`
                 );
                 const data = response.data?.data || [];
 
@@ -27,10 +28,11 @@ const NewDetails = ({ sectionId, menuLang }) => {
                     return;
                 }
 
-                // Select the first item with display: 1 and matching lang, or first display: 1, or first item
-                const selectedItem = data.find(item => item.display === 1 && item.lang === menuLang) ||
-                                    data.find(item => item.display === 1) ||
-                                    data[0];
+                const selectedItem = data.find(item =>
+                    item.display === 1 &&
+                    item.lang === currentLang &&
+                    item.ref_id === Number(newId)
+                );
 
                 if (selectedItem) {
                     setNews({
@@ -63,7 +65,7 @@ const NewDetails = ({ sectionId, menuLang }) => {
             }
         };
         fetchNews();
-    }, [sectionId, menuLang]);
+    }, [sectionId, newId, currentLang]);
 
     return (
         <div className="min-h-screen">
@@ -77,15 +79,16 @@ const NewDetails = ({ sectionId, menuLang }) => {
                         title={news.title}
                         postDate={news.date}
                         image={news.image}
+                        newId={newId}
                     />
                     <div className='px-2'>
 
-                    
-                   
+
+
                     <div className="container mx-auto px-4 py-8">
                     <SocialSection />
                         <motion.h2
-                            className={`text-2xl font-bold mb-4 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}
+                            className={`text-2xl font-bold mb-4 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
@@ -93,7 +96,7 @@ const NewDetails = ({ sectionId, menuLang }) => {
                             {news.title}
                         </motion.h2>
                         <motion.div
-                            className={`text-gray-700 mb-4 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}
+                            className={`text-gray-700 mb-4 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.2 }}
@@ -101,7 +104,7 @@ const NewDetails = ({ sectionId, menuLang }) => {
                                 __html: DOMPurify.sanitize(news.detail),
                             }}
                         />
-                        <RelatedNews />
+                        <RelatedNews newId={newId}/>
                          </div>
                     </div>
                 </div>
