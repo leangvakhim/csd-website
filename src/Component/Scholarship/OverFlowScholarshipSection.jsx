@@ -193,7 +193,7 @@ const OverFlowScholarshipSection = ({sectionData}) => {
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-semibold text-gray-900 mb-3 md:mb-0"
+            className={`text-2xl md:text-3xl font-semibold text-gray-900 mb-3 md:mb-0 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}
           >
             {sectionData.hsec_title || 'Check Out Scholarship Opportunities'}
           </motion.h2>
@@ -204,7 +204,7 @@ const OverFlowScholarshipSection = ({sectionData}) => {
             transition={{ duration: 0.5, delay: 0.6 }}
             viewport={{ once: true }}
           >
-            <Link to={resolvedAlias} className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1">
+            <Link to={resolvedAlias} className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
               <span className="mr-2 text-sm">{sectionData.hsec_btntitle}</span>
               <FaArrowRight className="text-red-800" />
             </Link>
@@ -239,22 +239,22 @@ const OverFlowScholarshipSection = ({sectionData}) => {
 
                 <div className="p-4">
                   {scholarship.tag && (
-                    <span className="inline-block text-xs font-semibold text-red-600 uppercase bg-indigo-100 px-2 py-1 rounded-full mb-2">
+                    <span className={`inline-block text-xs font-semibold text-red-600 uppercase bg-indigo-100 px-2 py-1 rounded-full mb-2 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                       {scholarship.tag}
                     </span>
                   )}
 
-                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 h-14">{scholarship.title}</h3>
+                  <h2 className={`text-lg font-semibold text-gray-900 line-clamp-2 h-14 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : "font-semibold"}`}>{scholarship.title}</h2>
 
                   <p className="mt-2 text-sm text-gray-700 line-clamp-3 h-14 mb-2">{scholarship.description}</p>
 
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3">
-                    <span className="text-sm text-gray-800 mb-3 sm:mb-0">
+                    <span className={`text-sm text-gray-800 mb-3 sm:mb-0 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                       <span className="font-medium">{currentLang === 1 ? "Deadline:" : "ថ្ងៃផុតកំណត់ៈ"}</span> {scholarship.deadline}
                     </span>
 
                     <button
-                      className="bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl text-sm w-full sm:w-auto text-center transition-colors duration-200"
+                      className={`bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl text-sm w-full sm:w-auto text-center transition-colors duration-200 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}
                       onClick={() => navigate(`/scholarship/${scholarship.id}`)}
                     >
                       {currentLang === 1 ? "View Detail" : "មើលលម្អិត"}

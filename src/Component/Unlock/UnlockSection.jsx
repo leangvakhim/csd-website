@@ -70,8 +70,8 @@ const UnlockSection = ({key, section, menuLang}) => {
                             />
                         </div>
                         <motion.div className="text-white p-6 rounded-lg shadow-lg xl:w-[641px] mx-auto">
-                            <h2 className="text-3xl font-bold mb-4">{unlockData.umd_title}</h2>
-                            <p className="mb-6">{unlockData.umd_detail}</p>
+                            <h2 className={`text-3xl font-bold mb-4 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>{unlockData.umd_title}</h2>
+                            <p className={`mb-6 ${menuLang === 2 ? "fonts-khmer" : "font-sans"}`}>{unlockData.umd_detail}</p>
                             {/* <motion.button
                                 whileHover={{ scale: 1.1 }}
                                 className="bg-white text-red-900 font-bold py-2 px-4 rounded-lg"

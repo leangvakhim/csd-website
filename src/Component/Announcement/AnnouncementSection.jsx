@@ -171,7 +171,8 @@ const AnnouncementSection = ({ section, menuLang }) => {
           viewport={{ once: true }}
           className="flex flex-col sm:flex-row justify-between items-center mb-8"
         >
-          <h1 className="text-3xl font-semibold mb-4">
+          <h1 className={`${menuLang === 2 ? "font-khmer" : "font-sans"
+            } text-3xl font-semibold mb-4`}>
             {headerData.hsec_title}
           </h1>
 
@@ -231,9 +232,12 @@ const AnnouncementSection = ({ section, menuLang }) => {
                   />
                 </div>
                 <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
-                  <h3 className="text-lg font-semibold mb-4">{item.title}</h3>
-                  <p className="text-gray-600">{item.description}</p>
-                  <p className="text-gray-500 text-sm mt-2">{item.date}</p>
+                  <h2 className={`text-lg font-semibold mb-4 ${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                    }`}>{item.title}</h2>
+                  <p className={`${menuLang === 2 ? "fonts-khmer" : "font-sans"
+                    }text-gray-600`}>{item.description}</p>
+                  <p className={`text-gray-500 text-sm mt-2 ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                    }`}>{item.date}</p>
                 </div>
               </div>
             ))

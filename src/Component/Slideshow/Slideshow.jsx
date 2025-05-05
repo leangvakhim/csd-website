@@ -131,7 +131,9 @@ const Slideshow = ({key, section, menuLang}) => {
             className="w-24 h-24"
             />
             <motion.h1
-            className="xl:text-5xl text-4xl font-bold leading-tight mb-6 max-w-2xl"
+            className={`lg:text-5xl text-4xl font-bold leading-tight mb-6 max-w-2xl ${
+                menuLang === 2 ? "font-khmer" : "font-sans"
+              }`}
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
@@ -140,7 +142,9 @@ const Slideshow = ({key, section, menuLang}) => {
             </motion.h1>
 
             <motion.p
-            className="xl:text-lg text-[12px] text-gray-100 mb-8 max-w-lg"
+            className={`l:text-lg text-[12px] text-gray-100 mb-8 max-w-lg ${
+                menuLang === 2 ? "fonts-khmer" : "font-sans"
+              }`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
@@ -158,7 +162,9 @@ const Slideshow = ({key, section, menuLang}) => {
             {/* About Button */}
             <Link
                 to={slides[currentSlide].buttonLink1}
-                className={`${slides[currentSlide].buttonColor} text-white px-8 py-2 xl:text-md text-[12px] xl:text-lg rounded-full transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg flex items-center justify-center`}
+                className={`${slides[currentSlide].buttonColor} text-white px-8 py-2 lg:text-md text-[12px] xl:text-lg rounded-full transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg flex items-center justify-center ${
+                    menuLang === 2 ? "fonts-khmer" : "font-sans"
+                  }`}
             >
                 {slides[currentSlide].buttonText1}
                 {slides[currentSlide].linkIcon}
@@ -167,7 +173,9 @@ const Slideshow = ({key, section, menuLang}) => {
             {/* Explore Program Button */}
             <Link
                 to={slides[currentSlide].buttonLink2}
-                className={`border text-white px-8 py-2 xl:text-md text-[12px] xl:text-lg rounded-full transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg flex items-center justify-center`}
+                className={`${
+                    menuLang === 2 ? "font-khmer" : "font-sans"
+                  } border text-white px-8 py-2 xl:text-md text-[12px] xl:text-lg rounded-full transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg flex items-center justify-center`}
             >
                 {slides[currentSlide].buttonText2}
                 <MdExplore className="ml-2 items-center" />

@@ -85,7 +85,7 @@ const NewDetails = ({ sectionId, menuLang }) => {
                     <div className="container mx-auto px-4 py-8">
                     <SocialSection />
                         <motion.h2
-                            className="text-2xl font-bold mb-4"
+                            className={`text-2xl font-bold mb-4 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
@@ -93,7 +93,7 @@ const NewDetails = ({ sectionId, menuLang }) => {
                             {news.title}
                         </motion.h2>
                         <motion.div
-                            className="text-gray-700 mb-4"
+                            className={`text-gray-700 mb-4 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.2 }}

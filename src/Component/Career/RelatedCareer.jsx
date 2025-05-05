@@ -78,7 +78,7 @@ const RelatedCareer = ({ sectionId, menuLang }) => {
             <div className="container mx-auto px-4">
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row justify-between">
-                    <h2 className="text-4xl mb-6 font-semibold">Related Articles</h2>
+                    <h2 className={`text-4xl mb-6 font-semibold ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>Related Articles</h2>
                     {/* Scroll buttons removed to match RelatedArtical */}
                 </div>
 
@@ -88,7 +88,7 @@ const RelatedCareer = ({ sectionId, menuLang }) => {
                         {events.map((event) => (
                             <Link
                                 key={event.id}
-                                to={`/news&events/${event.id}`}
+                                to={`/career/${event.id}`}
                                 className="text-start"
                             >
                                 <motion.div
@@ -105,17 +105,17 @@ const RelatedCareer = ({ sectionId, menuLang }) => {
 
                                     <div className="p-6 w-full lg:w-1/2">
                                         {event.category && (
-                                            <span className="text-xs font-semibold text-red-600 uppercase bg-indigo-100 px-2 py-1 rounded-full">
+                                            <span className={`text-xs font-semibold text-red-600 uppercase bg-indigo-100 px-2 py-1 rounded-full ${menuLang === 2 ? "fonts-khmer" : "font-sans-serif"}`}>
                                                 {event.category}
                                             </span>
                                         )}
-                                        <h3 className="mt-2 text-lg font-semibold text-gray-900">
+                                        <h3 className={`mt-2 text-lg font-semibold text-gray-900 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>
                                             {event.title}
                                         </h3>
-                                        <p className="mt-2 text-sm text-gray-800">
+                                        <p className={`mt-2 text-sm text-gray-800 ${menuLang === 2 ? "fonts-khmer" : "font-sans-serif"}`}>
                                             {event.description}
                                         </p>
-                                        <span className="text-sm text-gray-800 flex items-center gap-4 mt-4">
+                                        <span className={`text-sm text-gray-800 flex items-center gap-4 mt-4 ${menuLang === 2 ? "fonts-khmer" : "font-sans-serif"}`}>
                                             <FaCalendarAlt />
                                             {event.date}
                                         </span>

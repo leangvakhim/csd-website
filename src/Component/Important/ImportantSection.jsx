@@ -67,7 +67,7 @@ const ImportantSection = ({ section, menuLang }) => {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
                         viewport={{ once: true, amount: 0.5 }}
-                        className="text-3xl font-semibold mb-4"
+                        className={`text-3xl font-semibold mb-4 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}
                     >
                         {importantData?.idd_title || ""}
                     </motion.h2>
@@ -76,7 +76,7 @@ const ImportantSection = ({ section, menuLang }) => {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.4 }}
                         viewport={{ once: true, amount: 0.5 }}
-                        className="text-gray-800"
+                        className={`text-gray-800 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'} text-lg leading-relaxed`}
                     >
                         {importantData?.idd_subtitle || ""}
                     </motion.p>
@@ -117,15 +117,15 @@ const ImportantSection = ({ section, menuLang }) => {
                           className="bg-white rounded-lg shadow-md p-6"
                         >
                           <div className="grid xl:grid-cols-12 grid-rowsitems-center gap-4 justify-center">
-                            <div className="bg-pink-100 px-4 py-2 flex flex-col items-center xl:col-span-4 col-span-12">
-                              <h3 className="text-lg font-normal mb-2">{item.sidd_tag}</h3>
-                              <span className="text-pink-700 text-lg text-center rounded-md font-semibold">
+                            <div className="bg-pink-100 px-4 py-2 flex flex-col items-center lg:col-span-4 col-span-12">
+                              <h3 className={`text-lg font-normal mb-2 ${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-semibold"}`}>{item.sidd_tag}</h3>
+                              <span className={`text-pink-700 text-lg text-center rounded-md font-semibold ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-semibold"}`}>
                                 {finalDate}
                               </span>
                             </div>
                             <div className='xl:col-span-8 col-span-12'>
-                              <h1 className="text-xl font-semibold mt-2">{item.sidd_title}</h1>
-                              <p className="text-gray-800">{item.sidd_subtitle}</p>
+                              <h1 className={`text-xl font-semibold mt-2 ${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-semibold"}`}>{item.sidd_title}</h1>
+                              <p className={`text-gray-800 ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-semibold"}`}>{item.sidd_subtitle}</p>
                             </div>
                           </div>
                         </motion.div>

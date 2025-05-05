@@ -22,7 +22,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const GallerySection = ({ section }) => {
+const GallerySection = ({ section, menuLang }) => {
   const [galleryData, setGalleryData] = useState({
     title: "",
     description: "",
@@ -116,8 +116,8 @@ const GallerySection = ({ section }) => {
           variants={cardVariants}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl font-semibold mb-4">{galleryData.title}</h2>
-          <p className="text-lg text-gray-800">{galleryData.description}</p>
+          <h2 className={`text-3xl font-semibold mb-4 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{galleryData.title}</h2>
+          <p className={`text-lg text-gray-800 ${menuLang === 2 ? 'fonts-khmer ' : 'font-sans'}`}>{galleryData.description}</p>
         </motion.div>
 
         {/* Image Grid - First row (3 images) */}

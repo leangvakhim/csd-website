@@ -155,7 +155,9 @@ const PotentialSection = ({ section, menuLang }) => {
             variants={cardVariants}
           >
             <motion.h2
-              className="text-3xl font-normal mb-8 text-gray-800"
+              className={`text-3xl font-normal mb-8 text-gray-800 ${
+                menuLang === 2 ? "font-khmer" : "font-semibold"
+              }`}
               variants={cardVariants}
               transition={{ delay: 0.2 }}
             >
@@ -163,7 +165,9 @@ const PotentialSection = ({ section, menuLang }) => {
             </motion.h2>
 
             <p
-              className="text-gray-800 text-[14px] lg:text-[16px] mb-6 leading-relaxed"
+              className={`text-gray-800 text-[14px] lg:text-[16px] mb-6 leading-relaxed ${
+                menuLang === 2 ? "fonts-khmer" : "font-semibold"
+              }`}
               dangerouslySetInnerHTML={{ __html: researchData.description }}
             />
 
@@ -191,10 +195,10 @@ const PotentialSection = ({ section, menuLang }) => {
                     )}
                   </div>
                   <div>
-                    <h3 className="text-lg xl:text-xl font-semibold mb-1 text-gray-800">
+                    <h3 className={`text-lg lg:text-xl font-semibold mb-1 text-gray-800 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>
                       {s.title}
                     </h3>
-                    <p className="text-gray-800 xl:text-lg">{s.description}</p>
+                    <p className={`text-gray-800 lg:text-lg ${menuLang === 2 ? 'fonts-khmer text-[20]' : 'font-sans'}`}>{s.description}</p>
                   </div>
                 </motion.div>
               ))}

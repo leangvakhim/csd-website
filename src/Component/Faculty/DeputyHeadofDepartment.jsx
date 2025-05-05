@@ -63,7 +63,7 @@ const DeputyHeadofDepartment = () => {
             <div className='container mx-auto px-4'>
                 <div className='space-y-10'>
                     <div>
-                        <h1 className="text-2xl font-normal mb-4">{currentLang === 1 ? "Deputy Head of Department:" : "អនុប្រធានដេប៉ាតឺម៉ង់"}</h1>
+                        <h1 className={`text-2xl font-normal mb-4 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{currentLang === 1 ? "Deputy Head of Department:" : "អនុប្រធានដេប៉ាតឺម៉ង់"}</h1>
                     </div>
                     <div className='flex flex-col xl:flex-row xl:flex-wrap gap-8 justify-center'>
                         {deputyData.map((deputy, index) => (
@@ -152,14 +152,14 @@ const DeputyHeadofDepartment = () => {
                                     </div>
                                     <div className='space-y-6 max-w-md relative'>
                                         <div className='flex justify-between items-center'>
-                                            <h1 className='text-2xl font-semibold'>{deputy.name}</h1>
+                                            <h1 className={`text-2xl font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{deputy.name}</h1>
                                             <div className='text-right'>
                                                 <RiDoubleQuotesR className='text-7xl text-red-900' />
                                             </div>
                                         </div>
-                                        <p className='text-left'>{deputy.bio}</p>
+                                        <p className={`text-left ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{deputy.bio}</p>
                                         <Link to={`/faculty/${deputy.id}`}>
-                                            <button className='bg-red-900 px-6 py-2 text-gray-50 rounded-2xl'>
+                                            <button className={`bg-red-900 px-6 py-2 text-gray-50 rounded-2xl ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                                                 {currentLang === 1 ? "View" : "មើលបន្ថែម"}
                                             </button>
                                         </Link>

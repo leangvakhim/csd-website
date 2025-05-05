@@ -22,7 +22,7 @@ const cardVariants = {
   visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
 };
 
-const AcademicSection = ({ section }) => {
+const AcademicSection = ({ section, menuLang }) => {
   const navigate = useNavigate();
   const [academics, setAcademics] = useState(null);
 
@@ -102,12 +102,14 @@ const AcademicSection = ({ section }) => {
             className="w-full lg:w-1/2 text-center lg:text-left order-2 lg:order-1"
             variants={cardVariants}
           >
-            <h1 className="text-3xl font-semibold mb-4">{title}</h1>
+            <h1 className={`text-3xl font-semibold mb-4 ${menuLang === 2 ? "font-khmer" : "font-sans"
+              }`}>{title}</h1>
 
             {description.map((line, idx) => (
               <p
                 key={idx}
-                className="text-sm md:text-base text-gray-800 mb-4 text-justify"
+                className={`text-sm md:text-base text-gray-800 mb-4 text-justify ${menuLang === 2 ? "fonts-khmer" : "font-sans"
+                  }`}
               >
                 {line}
               </p>
@@ -125,7 +127,8 @@ const AcademicSection = ({ section }) => {
                   <div className="border border-red-800 rounded-full p-2">
                     <PiGraduationCapDuotone size={25} className="text-red-800" />
                   </div>
-                  <p className="text-sm md:text-base text-red-800 font-medium">
+                  <p className={`text-sm md:text-base ${menuLang === 2 ? "fonts-khmer" : "font-sans"
+                    } text-red-800 font-medium`}>
                     {prog}
                   </p>
                 </motion.div>

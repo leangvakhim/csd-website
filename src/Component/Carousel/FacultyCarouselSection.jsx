@@ -165,11 +165,11 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
             variants={cardVariants}
             className="w-full md:w-2/3 text-center md:text-left"
           >
-            <h2 className="text-3xl xl:text-4xl font-extrabold text-gray-900">
+            <h2 className={`text-3xl xl:text-4xl font-extrabold text-gray-900 ${currentLang === 2 ? "font-khmer" : "font-semibold"}`}>
               {headerSection.title}
             </h2>
             {headerSection.subtitle && (
-              <p className="text-gray-600 mt-4 text-lg">
+              <p className={`text-gray-600 mt-4 text-lg ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                 {headerSection.subtitle}
               </p>
             )}
@@ -180,9 +180,9 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
           >
             <Link
               to={headerSection.routepage}
-              className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1"
+              className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1  ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}
             >
-              <span className="mr-2 xl:text-sm text-[12px]">{headerSection.btntitle}</span>
+              <span className="mr-2 lg:text-sm text-[12px]">{headerSection.btntitle}</span>
               <FaArrowRight className="text-red-800" />
             </Link>
           </motion.div>
@@ -250,10 +250,10 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
                     </div>
                   </motion.div>
                 </Link>
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className={`text-xl font-semibold text-gray-800 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                   {faculty.name}
                 </h3>
-                <p className="text-sm text-gray-600 font-normal mb-4">
+                <p className={`text-sm text-gray-600 font-normal mb-4 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}> 
                   {faculty.position}
                 </p>
               </motion.div>

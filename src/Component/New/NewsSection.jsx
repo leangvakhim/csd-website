@@ -84,9 +84,9 @@ const NewsSection = ({ section, menuLang }) => {
 
         const filteredList = newsList.filter(
           item => item.img &&
-          item.img.img &&
-          item.lang === currentLang &&
-          item.display === 1
+            item.img.img &&
+            item.lang === currentLang &&
+            item.display === 1
         );
         const transformed = filteredList.map(announcement => ({
           id: announcement.n_id,
@@ -95,10 +95,10 @@ const NewsSection = ({ section, menuLang }) => {
           description: announcement.n_shorttitle || '',
           date: announcement.n_postdate
             ? new Date(announcement.n_postdate).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })
             : 'TBD',
           imageUrl: announcement?.img?.img
             ? `${BASE_IMAGE_URL}/${announcement.img.img}`
@@ -165,7 +165,8 @@ const NewsSection = ({ section, menuLang }) => {
           viewport={{ once: true }}
           className="flex flex-col sm:flex-row justify-between items-center mb-8"
         >
-          <h1 className="text-3xl font-semibold mb-4">
+          <h1 className={`${menuLang === 2 ? "font-khmer " : "font-sans"
+            } text-3xl font-semibold mb-4`}>
             {headerData.hsec_title}
           </h1>
 
@@ -226,8 +227,10 @@ const NewsSection = ({ section, menuLang }) => {
                       {item.tag}
                     </span>
                   )}
-                  <h3 className="text-lg font-semibold mb-4">{item.title}</h3>
-                  <p className="text-gray-600">{item.description}</p>
+                  <h3 className={`${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                    } text-lg font-semibold mb-4`}>{item.title}</h3>
+                  <p className={`${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                    } text-gray-600`}>{item.description}</p>
                 </div>
               </div>
             ))

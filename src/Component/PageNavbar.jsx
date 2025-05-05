@@ -3,10 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { FiChevronDown } from "react-icons/fi";
 import { motion } from "framer-motion";
 
-const PageNavbar = ({ menus }) => {
+const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentLang }) => {
   const [dropdown, setDropdown] = useState(null);
   const location = useLocation();
-  const navbarRef = useRef(null); // Renamed for clarity
+  const navbarRef = useRef(null);
 
   // Close dropdown if the user clicks outside
   useEffect(() => {
@@ -20,16 +20,25 @@ const PageNavbar = ({ menus }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Helper to generate menu URLs
+  const getMenuUrl = (menu) => {
+    const basePath = currentLang === 2 ? "/km" : "";
+    return menu.p_alias ? `${basePath}/${menu.p_alias}` : `${basePath}/${menu.title.toLowerCase().replace(/\s+/g, "-")}`;
+  };
+
   return (
     <nav
-      className="container mx-auto relative lg:flex lg:space-x-6 text-sm 2xl:text-base"
+      lang={currentLang === 2 ? "km" : "en"}
+      className={`container mx-auto relative lg:flex lg:space-x-6 text-sm 2xl:text-base ${
+        currentLang === 2 ? "lang-khmer font-khmer" : "lang-english font-sans"
+      }`}
       ref={navbarRef}
     >
       <div className="lg:flex space-x-6 uppercase">
         {menus
           .filter((menu) => menu.menup_id === null) // Parent menus only
           .map((menu) => {
-            const isActive = location.pathname === `/${menu.title.toLowerCase()}`;
+            const isActive = location.pathname === getMenuUrl(menu);
             const hasChildren =
               menu.children &&
               menu.children.length > 0 &&
@@ -45,10 +54,13 @@ const PageNavbar = ({ menus }) => {
                 {/* Parent Menu Item as Link */}
                 <Link
                   to={menu.p_alias || `/${menu.title.toLowerCase()}`}
-                  className={`flex items-center uppercase hover:text-red-900 ${
-                    isActive ? "text-red-900 font-bold" : ""
-                  }`}
-                  onClick={() => setDropdown(null)} // Close dropdown on click
+                  className={`flex items-center text-[18px] uppercase hover:text-red-900 ${
+                    currentLang === 2 ? "fonts-khmer" : "font-sans"
+                  } ${isActive ? "text-red-900 font-bold" : ""}`}
+                  onClick={() => {
+                    setDropdown(null);
+                    onMenuClick(menu.menu_id);
+                  }}
                 >
                   {menu.title}
                   {hasChildren && <FiChevronDown className="inline ml-2" />}
@@ -71,12 +83,17 @@ const PageNavbar = ({ menus }) => {
                           <Link
                             key={child.menu_id}
                             to={childAlias}
-                            className={`block px-4 py-2 hover:text-red-900 ${
+                            className={`block px-4 py-2 text-[18px]  hover:text-red-900 ${
+                              currentLang === 2 ? "fonts-khmer " : "font-semibold"
+                            } ${
                               location.pathname === childAlias
                                 ? "text-red-900 font-bold"
                                 : ""
                             }`}
-                            onClick={() => setDropdown(null)}
+                            onClick={() => {
+                              setDropdown(null);
+                              onMenuClick(child.menu_id);
+                            }}
                           >
                             {child.title}
                           </Link>

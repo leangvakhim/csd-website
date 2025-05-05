@@ -4,7 +4,7 @@ import { FaCheck } from "react-icons/fa";
 import axios from "axios";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
 
-const CriteriaSection = ({section}) => {
+const CriteriaSection = ({section, menuLang}) => {
     const [criteriaData, setCriteriaData] = useState(null);
 
     useEffect(() => {
@@ -55,14 +55,16 @@ const CriteriaSection = ({section}) => {
                viewport={{ once: true, amount: 0.5 }}
               className="w-full xl:w-1/2 px-4 xl:px-0"
             >
-                <h2 className="text-2xl xl:text-3xl font-bold mb-4">
+                <h2 className={`text-2xl xl:text-3xl font-bold mb-4 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}> 
                     {criteriaData.gc_title}
                 </h2>
 
               <div className="grid grid-cols-1">
                 {/* Added grid for responsiveness */}
                 <div
-                  className="text-sm xl:text-lg"
+                  className={`text-sm lg:text-lg text-gray-600 mb-4 ${
+                    menuLang === 2 ? "fonts-khmer" : "font-sans"
+                  }`}
                   dangerouslySetInnerHTML={{ __html: criteriaData?.gc_detail }}
                 />
               </div>

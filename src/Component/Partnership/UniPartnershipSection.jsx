@@ -26,7 +26,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const UniPartnerships = ({ section, headerTitle }) => {
+const UniPartnerships = ({ section, headerTitle, menuLang }) => {
   const [partners, setPartners] = useState([]);
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const UniPartnerships = ({ section, headerTitle }) => {
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
       >
-        <h2 className="text-3xl font-semibold mb-8">
+        <h2 className={`text-3xl font-semibold mb-8 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
           {headerTitle}
         </h2>
 

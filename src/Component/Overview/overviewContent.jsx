@@ -24,7 +24,7 @@ const cardVariants = {
 
 
 
-const Overview = ({section}) => {
+const Overview = ({section, menuLang}) => {
   const { degree } = useParams();
   const [content, setContent] = useState({
     title: "",
@@ -107,7 +107,7 @@ const Overview = ({section}) => {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="text-2xl xl:text-4xl font-extrabold text-gray-900 border-l-4 border-red-700 pl-4"
+                className={`text-3xl font-extrabold text-gray-900 border-l-4 border-red-700 pl-4 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}
               >
                 {content.title}
               </motion.h2>
@@ -117,7 +117,7 @@ const Overview = ({section}) => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="text-sm xl:text-lg text-gray-800 leading-relaxed max-w-2xl"
+                className={`text-sm xl:text-lg text-gray-800 leading-relaxed max-w-2xl ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}
               >
                 {content.description}
               </motion.p>
@@ -135,7 +135,7 @@ const Overview = ({section}) => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="text-3xl font-extrabold text-gray-900"
+                className={`text-3xl font-extrabold text-gray-900 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`} 
               >
                 {content.title}
               </motion.h2>
@@ -144,7 +144,7 @@ const Overview = ({section}) => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
                 viewport={{ once: true }}
-                className="text-[12px] xl:text-[20px] text-gray-900"
+                className={`text-[12px] xl:text-[20px] text-gray-900 leading-relaxed ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}
               >
                 {content.description}
               </motion.p>

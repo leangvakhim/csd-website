@@ -79,7 +79,9 @@ const StudySection = ({key, section, menuLang}) => {
                       whileInView={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.5, delay: 0.4 }}
                       viewport={{ once: true }}
-                      className="text-lg xl:max-w-[743px] w-full mx-auto text-gray-600 mb-8"
+                      className={`text-lg lg:max-w-[743px] w-full mx-auto text-gray-600 mb-8 ${
+                        menuLang === 2 ? 'font-khmer' : 'font-semibold'
+                      }`}
                   >
                       {studyInfo.subtitle}
                   </motion.p>
@@ -108,10 +110,10 @@ const StudySection = ({key, section, menuLang}) => {
                           <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-0`}>
                               <PiGraduationCapDuotone size={32} className={`${index === 0 ? 'text-white' : 'text-black'}`} />
                           </div>
-                        <h3 className="text-2xl font-semibold mb-2 text-start">{card.y_title}</h3>
-                        <p className="mb-4 text-start">{card.y_subtitle}</p>
+                        <h3 className={`text-2xl font-semibold mb-2 text-start ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{card.y_title}</h3>
+                        <p className={`mb-4 text-start ${menuLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>{card.y_subtitle}</p>
                         <div
-                          className="text-md leading-relaxed text-left"
+                          className={`text-md leading-relaxed text-left ${menuLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'} `}
                           dangerouslySetInnerHTML={{ __html: card.y_detail || '' }}
                         />
                       </motion.div>

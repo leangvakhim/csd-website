@@ -107,8 +107,8 @@ const CareerSection = ({ section, menuLang }) => {
                     >
                         <div className="flex flex-col sm:flex-row items-start mb-8">
                             <div className="mr-6">
-                                <h2 className="text-3xl font-semibold mb-2">{headerData.hsec_title}</h2>
-                                <p className="mt-4 text-gray-800">{headerData.hsec_subtitle}</p>
+                                <h2 className={`text-3xl font-semibold mb-2 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>{headerData.hsec_title}</h2>
+                                <p className={`mt-4 text-gray-800 ${menuLang === 2 ? "fonts-khmer" : "font-sans"}`}>{headerData.hsec_subtitle}</p>
                             </div>
                             <button
                                 onClick={() => navigate('/career')}
@@ -143,11 +143,11 @@ const CareerSection = ({ section, menuLang }) => {
                                         className="absolute bottom-0 left-0 w-full text-white p-4 space-y-2"
                                         style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
                                     >
-                                        <h3 className="text-lg font-semibold">{career.title}</h3>
-                                        <p className="text-gray-200 line-clamp-2">{career.description}</p>
+                                        <h3 className={`text-lg font-semibold ${menuLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.title}</h3>
+                                        <p className={`text-gray-200 line-clamp-2 ${menuLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.description}</p>
                                         <div className="flex items-center text-sm">
                                             <FaCalendarAlt className="mr-2" />
-                                            <p className="text-gray-200">{career.date}</p>
+                                            <p className={`text-gray-200 ${menuLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.date}</p>
                                         </div>
                                     </div>
                                 </motion.div>

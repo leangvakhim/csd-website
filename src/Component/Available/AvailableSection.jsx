@@ -76,7 +76,7 @@ const AvailableSection = ({key, section, menuLang}) => {
                 viewport={{ once: true }}
                 className="container mx-auto px-4"
             >
-                <h2 className="text-3xl font-bold mb-8">
+                <h2 className={`text-3xl font-bold mb-8 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                     {apdTitle}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
@@ -104,7 +104,7 @@ const AvailableSection = ({key, section, menuLang}) => {
                                             <PiGraduationCapDuotone className="text-2xl text-red-700" />
                                         </div>
                                         <span className="border h-6"></span>
-                                        <div className="text-sm sm:text-[14px] xl:text-lg font-medium text-center">
+                                        <div className={`text-sm sm:text-[14px] xl:text-lg font-medium text-center ${menuLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans-serif'}`}>
                                             {program.title}
                                         </div>
                                     </div>

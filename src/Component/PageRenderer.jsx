@@ -64,8 +64,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
     }, [page]);
 
     useEffect(() => {
-      const timer = setTimeout(() => setShouldRender(true), 0);
-      return () => clearTimeout(timer);
+        const timer = setTimeout(() => setShouldRender(true), 0);
+        return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -74,11 +74,9 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
             axios
                 .get(`${API_ENDPOINTS.getSection}?page_id=${page.p_id}`)
                 .then((res) => {
-                    // console.log("PageRenderer: Sections API response:", res.data);
                     const pageSections = res.data.data
                         .filter((section) => section.sec_page === page.p_id && section.display === 1)
                         .sort((a, b) => a.sec_order - b.sec_order);
-                    // console.log("PageRenderer: Filtered and sorted sections:", pageSections);
                     setSections(pageSections);
                     setError(null);
                 })
@@ -86,30 +84,24 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                     console.error('PageRenderer: Error fetching sections:', err);
                     setError('Failed to load page sections. Please try again later.');
                 });
-        } else {
-            console.log("PageRenderer: No page.p_id provided, skipping API call");
         }
     }, [page]);
 
     if (error) {
-        console.log("PageRenderer: Rendering error state:", error);
         return <div className="text-center py-8 text-red-600">{error}</div>;
     }
 
     if (sections.length === 0 && !onlyContentMode && shouldRender) {
-        // console.log("PageRenderer: No sections to render");
         return (
-            <>
+            <div lang={isKhmer ? 'km' : 'en'} className={isKhmer ? 'lang-khmer' : 'lang-english'}>
                 <PageHeader currentLang={currentLang} setCurrentLang={setCurrentLang} settings={settings} setSettings={setSettings} />
                 <div className="text-center py-8 text-gray-600">No sections available for this page.</div>
-            </>
+            </div>
         );
     }
 
-    // console.log("PageRenderer: Rendering sections:", sections);
     return (
-        <>
-
+        <div lang={isKhmer ? 'km' : 'en'} className={isKhmer ? 'lang-khmer' : 'lang-english'}>
             <div className="sticky top-0 z-50">
                 <PageHeader currentLang={currentLang} setCurrentLang={setCurrentLang} settings={settings} setSettings={setSettings} />
             </div>
@@ -218,7 +210,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
             <div>
                 <Footer />
             </div>
-        </>
+        </div>
     );
 };
 

@@ -111,7 +111,9 @@ const ContactSection = ({ section, menuLang }) => {
             <div className="text-center">
               {/* Heading */}
               <motion.h2
-                className="text-3xl sm:text-4xl font-bold text-gray-50 mb-6"
+                className={`text-3xl sm:text-4xl font-bold text-gray-50 mb-6 ${
+                  menuLang === 2 ? "font-khmer" : "font-semibold"
+                }`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
@@ -122,7 +124,9 @@ const ContactSection = ({ section, menuLang }) => {
 
               {/* Description */}
               <motion.p
-                className="text-lg text-gray-50 mb-12"
+                className={` text-gray-50 mb-12 ${
+                  menuLang === 2 ? "fonts-khmer font-[20px]" : "font-sans"
+                }`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
@@ -153,8 +157,8 @@ const ContactSection = ({ section, menuLang }) => {
                       )}
                     </div>
                     {/* Title and Content */}
-                    <h3 className="mt-4 text-xl font-semibold text-gray-50">{contact.title}</h3>
-                    <p className="mt-2 text-gray-50">{contact.content}</p>
+                    <h3 className={`mt-4 text-xl font-semibold text-gray-50 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{contact.title}</h3>
+                    <p className={`mt-2 text-gray-50 ${menuLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>{contact.content}</p>
                   </motion.div>
                 ))}
               </div>

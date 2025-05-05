@@ -4,7 +4,7 @@ import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import { MdComputer } from "react-icons/md";
 
-const CareerBanner = ({careerId}) => {
+const CareerBanner = ({careerId, menuLang}) => {
     const [bannerSection, setBannerSection] = useState(null);
 
     useEffect(() => {
@@ -65,7 +65,7 @@ const CareerBanner = ({careerId}) => {
                                         viewport={{ once: true, amount: 0.5 }}
                                         className='max-w-xl *:mb-6'
                                     >
-                                        <h3 className="lg:text-4xl text-3xl font-semibold mb-2">
+                                        <h3 className={`lg:text-4xl text-3xl font-semibold mb-2 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>
                                             {bannerSection.title}
                                         </h3>
                                         <motion.p
@@ -73,7 +73,7 @@ const CareerBanner = ({careerId}) => {
                                             whileInView={{ opacity: 1, y: 0 }}
                                             transition={{ duration: 0.8, delay: 0.6 }}
                                             viewport={{ once: true, amount: 0.5 }}
-                                            className="mb-4 xl:text-[14px] text-gray-50 text-[12px] flex gap-2"
+                                            className={`mb-4 xl:text-[14px] text-gray-50 text-[12px] flex gap-2 ${menuLang === 2 ? "fonts-khmer" : "font-sans-serif"}`}
                                         >
                                             {bannerSection.description}
                                         </motion.p>

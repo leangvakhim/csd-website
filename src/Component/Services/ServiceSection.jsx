@@ -97,8 +97,12 @@ const ServiceSection = ({ section, menuLang }) => {
 
                 {/* Title and Description */}
                 <div className="text-center md:text-left">
-                  <h3 className="text-lg font-semibold mb-4">{service.title}</h3>
-                  <p className="md:text-base text-gray-600">{service.description}</p>
+                  <h2 className={`text-lg font-semibold mb-4 ${
+              menuLang === 2 ? "font-khmer font-semibold" : "font-sans"
+            }`}>{service.title}</h2>
+                  <p className={`md:text-base text-gray-600 ${
+              menuLang === 2 ? "fonts-khmer" : "font-sans"
+            }`}>{service.description}</p>
                 </div>
               </div>
             </motion.div>

@@ -137,7 +137,7 @@ const ApplySection = ({key, section, menuLang}) => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               viewport={{ once: true, amount: 0.5 }}
-              className="text-3xl font-semibold mb-6"
+              className={`text-3xl mb-6 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}
             >
               {applyInfo.ha_title}
             </motion.h2>
@@ -152,7 +152,7 @@ const ApplySection = ({key, section, menuLang}) => {
                   viewport={{ once: true, amount: 0.5 }}
                 >
                   <div className="p-6 border rounded-2xl flex items-center justify-between">
-                    <span className="lg:text-xl text-md">{step}</span>
+                    <span className={`lg:text-xl text-md ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"}`}>{step}</span>
                     <FaArrowRight className="ml-2" />
                   </div>
                 </motion.li>
@@ -169,9 +169,9 @@ const ApplySection = ({key, section, menuLang}) => {
             >
               {applyInfo && (
                 <div className="bg-white p-6 rounded-md shadow-md">
-                  <h2 className="text-xl font-semibold mb-4">{applyInfo.ha_tagtitle}</h2>
-                  <p className="mb-4">{applyInfo.ha_subtitletag}</p>
-                  <p className="mb-4 text-center text-lg xl:text-xl">
+                  <h2 className={`text-xl font-semibold mb-4 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>{applyInfo.ha_tagtitle}</h2>
+                  <p className={`mb-4 ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"} `}>{applyInfo.ha_subtitletag}</p>
+                  <p className={`${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"} mb-4 text-center text-lg lg:text-xl`}>
                     <FaCalendarAlt className="inline-block mr-2" />
                     {formatDate(applyInfo.ha_date)}
                   </p>
@@ -180,12 +180,12 @@ const ApplySection = ({key, section, menuLang}) => {
 
               <div className="py-6 w-full px-4 bg-red-900 text-white shadow-lg rounded-2xl flex justify-center">
                 <div className="space-y-5">
-                  <h3 className="text-lg font-semibold">{currentLang === 1 ? "Contact Info" : "ទំនាកទំនងបន្ថែម"}</h3>
-                  <p className="flex items-center">
+                  <h2 className={`text-lg font-semibold ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>{currentLang === 1 ? "Contact Info" : "ទំនាកទំនងបន្ថែម"}</h2>
+                  <p className={`flex items-center ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"}`}>
                     <FaPhoneAlt className="mr-2" />
                     {contactDetails.phone}
                   </p>
-                  <p className="flex items-center">
+                  <p className={`flex items-center ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"}`}>
                     <FaEnvelope className="mr-2" />
                     {contactDetails.email}
                   </p>
