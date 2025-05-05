@@ -190,9 +190,7 @@ const StudentResearch = () => {
                     <h3 className="xl:text-xl text-lg font-semibold mb-2 line-clamp-2">
                       {section.title}
                     </h3>
-                    <p className="mb-4 xl:text-[16px] text-[12px] line-clamp-3">
-                      {section.description}
-                    </p>
+                   
                     <button
                       onClick={() => navigate(`/researchlab/${section.id}`)}
                       className="bg-red-900 hover:bg-red-800 xl:text-[14px] text-[12px] text-white py-2 px-6 rounded-4xl flex items-center"

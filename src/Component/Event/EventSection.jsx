@@ -157,7 +157,7 @@ const EventSection = ({ section, menuLang }) => {
                     className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8"
                 >
                     <div>
-                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-3 sm:mb-4">
+                        <h1 className="text-3xl  font-semibold mb-3 sm:mb-4">
                             {headerData.hsec_title || 'Events'}
                         </h1>
                         {headerData.hsec_subtitle && (
