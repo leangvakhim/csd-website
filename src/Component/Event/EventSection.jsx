@@ -28,11 +28,24 @@ const EventSection = ({ section, menuLang }) => {
     const [selectedTag, setSelectedTag] = useState('');
     const [headerData, setHeaderData] = useState({});
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
+    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
 
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
     const DEFAULT_IMAGE = '/placeholder-image.jpg';
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
+    const resolvePageAlias = async (routePage) => {
+        try {
+            const res = await axios.get(API_ENDPOINTS.getPage);
+            const pages = Array.isArray(res.data?.data) ? res.data.data : [];
+
+            const matched = pages.find((page) => page.p_title === routePage);
+            return matched?.p_alias || null;
+        } catch (error) {
+            console.error("Failed to fetch page alias:", error);
+            return null;
+        }
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -49,19 +62,13 @@ const EventSection = ({ section, menuLang }) => {
                         item.section?.active === 1
                 );
 
-                if (matchedHeader) {
-                    setHeaderData({
-                        hsec_title: matchedHeader.hsec_title || "Event",
-                        hsec_amount: matchedHeader.hsec_amount || 4,
-                        hsec_subtitle: matchedHeader.hsec_subtitle || "",
-                    });
-                } else {
-                    setHeaderData({
-                        hsec_title: "Event",
-                        hsec_amount: 4,
-                        hsec_subtitle: "",
-                    });
-                }
+                setHeaderData({
+                    hsec_title: matchedHeader.hsec_title || "Event",
+                    hsec_btntitle: matchedHeader.hsec_btntitle || 4,
+                    hsec_subtitle: matchedHeader.hsec_subtitle || "",
+                    hsec_routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
+                    hsec_amount: typeof matchedHeader.hsec_amount === 'number' && matchedHeader.hsec_amount !== null ? matchedHeader.hsec_amount : 4,
+                });
             } catch (error) {
                 console.error('Failed to fetch header data:', error);
                 setHeaderError('Failed to load section header. Using default values.');
@@ -84,6 +91,7 @@ const EventSection = ({ section, menuLang }) => {
                     .slice(0, 4)
                     .map(item => ({
                         id: item.e_id,
+                        ref_id: item.ref_id,
                         tag: item.e_tags || 'Events',
                         title: item.e_title || 'Untitled Event',
                         description: item.e_shorttitle || 'No description available',
@@ -168,49 +176,39 @@ const EventSection = ({ section, menuLang }) => {
                         )}
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 items-center  lg:mt-0">
-                        {!isHomePage && (
-                            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                                <div className="relative w-full">
-                                    <input
-                                        type="text"
-                                        placeholder="Search events"
-                                        value={searchTerm}
-                                        onChange={e => setSearchTerm(e.target.value)}
-                                        className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-blue-300 w-full"
-                                        aria-label="Search events"
-                                    />
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <FaSearch className="text-gray-400" />
-                                    </div>
-                                    {searchTerm && (
-                                        <button
-                                            onClick={handleClearSearch}
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                                            aria-label="Clear search"
-                                        >
-                                            <FaTimes className="text-sm" />
-                                        </button>
-                                    )}
-                                </div>
-
-                            </div>
-                        )}
-                        {isHomePage && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -50 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.6 }}
-                                viewport={{ once: true }}
-                                className="w-full md:w-auto mt-4 md:mt-0"
+                        {headerData.hsec_routepage ? (
+                            <button
+                                onClick={() => navigate(headerData.hsec_routepage)}
+                                className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1`}
                             >
-                                <button
-                                    onClick={() => navigate('/news&events')}
-                                    className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1"
-                                >
-                                    <span className="mr-2 xl:text-sm text-[12px]">View All</span>
-                                    <FaArrowRight className="text-red-800" />
-                                </button>
-                            </motion.div>
+                            <span className="mr-2 lg:text-sm text-[12px]">{headerData.hsec_btntitle}</span>
+                            <FaArrowRight className="text-red-800" />
+                            </button>
+                        ) : (
+                            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                            <div className="relative w-full">
+                                <input
+                                    type="text"
+                                    placeholder="Search events"
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                    className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-red-300 w-full"
+                                    aria-label="Search events"
+                                />
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <FaSearch className="text-gray-400" />
+                                </div>
+                                {searchTerm && (
+                                    <button
+                                        onClick={handleClearSearch}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                        aria-label="Clear search"
+                                    >
+                                        <FaTimes className="text-sm" />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                         )}
                     </div>
                 </motion.div>
@@ -221,14 +219,14 @@ const EventSection = ({ section, menuLang }) => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
                             {filteredEvents.map((event, index) => (
                                 <motion.div
-                                    key={event.id}
+                                    key={event.ref_id}
                                     initial={{ opacity: 0, y: 50 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.6, delay: index * 0.2 }}
                                     viewport={{ once: true, amount: 0.3 }}
                                 >
                                     <Link
-                                        to={`/events/${event.id}`}
+                                        to={`${prefix}/events/${event.ref_id}`}
                                         className="block group"
                                         aria-label={event.title}
                                     >

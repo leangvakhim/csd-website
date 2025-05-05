@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
-const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
 
 const RelatedNews = ({ sectionId, menuLang, newId }) => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {

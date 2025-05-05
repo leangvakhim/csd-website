@@ -71,7 +71,7 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
 
     case '/events':
       if (lastSegment && lastSegment !== 'events') {
-        return <EventsNewsDetails  />;
+        return <EventsNewsDetails  eventId={lastSegment}/>;
       }
       return <div></div>; // Main page content
 
