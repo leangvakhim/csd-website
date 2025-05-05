@@ -3,14 +3,20 @@ import axios from "axios";
 import Papa from "papaparse";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import { useLocation } from "react-router-dom";
 
-const AnnouncementDetails = ({ announcementID, menuLang }) => {
-
+const AnnouncementDetails = ({announcementID}) => {
   const [students, setStudents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [announcement, setAnnouncement] = useState({ title: '', detail: '' });
   const itemsPerPage = 10;
   const totalPages = Math.ceil(students.length / itemsPerPage);
+  const location = useLocation();
+  const [currentLang, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
+
+  useEffect(() => {
+    setCurrentLang(location.pathname.startsWith('/km') ? 1 : 2);
+  }, [location.pathname]);
 
   const indexOfLastStudent = currentPage * itemsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - itemsPerPage;
@@ -40,17 +46,21 @@ const AnnouncementDetails = ({ announcementID, menuLang }) => {
         console.error("Error fetching data:", error);
       });
 
-    axios.get(`${API_ENDPOINTS.getAnnouncement}/${announcementID}`)
+    axios.get(API_ENDPOINTS.getAnnouncement)
       .then(response => {
-        const data = response.data?.data;
-        if (data && data.am_title && data.am_detail) {
-          setAnnouncement({ title: data.am_title, detail: data.am_detail });
+        const allAnnouncements = response.data?.data || [];
+        const matched = allAnnouncements.find(
+          item => item.ref_id ===  Number(announcementID) && item.lang === currentLang
+        );
+
+        if (matched && matched.am_title && matched.am_detail) {
+          setAnnouncement({ title: matched.am_title, detail: matched.am_detail });
         }
       })
       .catch(error => {
         console.error("Error fetching announcement detail:", error);
       });
-  }, [announcementID]);
+  }, [announcementID, location.pathname]);
 
   const subjects = students.length > 0 ? Object.keys(students[0].subjects) : [];
 

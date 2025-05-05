@@ -60,25 +60,7 @@ function AppRoutes() {
       {pages.map(page => (
         <Route
           key={page.p_id}
-          path={
-            page.p_alias === '/faculty'
-              ? '/faculty/*'
-              : page.p_alias === '/research'
-                ? '/research/*'
-                : page.p_alias === '/scholarship'
-                  ? '/scholarship/*'
-                  : page.p_alias === '/researchlab'
-                    ? '/researchlab/*'
-                    : page.p_alias === '/events'
-                      ? '/events/*'
-                        : page.p_alias === '/news'
-                          ? '/news/*'
-                          : page.p_alias === '/career'
-                            ? '/career/*'
-                            : page.p_alias === '/announcement'
-                              ? '/announcement/*'
-                              : page.p_alias
-          }
+          path={`/:lang(km)?${page.p_alias}/*`}
           element={
             <PageRenderer
               page={page}

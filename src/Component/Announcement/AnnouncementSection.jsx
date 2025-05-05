@@ -108,6 +108,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
               id: announcement.am_id ?? null,
               title: announcement.am_title ?? '',
               description: announcement.am_shortdesc ?? '',
+              ref_id: announcement.ref_id ?? '',
               date: formattedDate,
               imageUrl: announcement?.img?.img
                 ? `${BASE_IMAGE_URL}/${announcement.img.img}`
@@ -133,6 +134,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
       item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
     return matchesSearch;
   });
+
 
   const handleClearSearch = () => setSearchTerm('');
 
@@ -214,9 +216,9 @@ const AnnouncementSection = ({ section, menuLang }) => {
           {filteredNews.length > 0 ? (
             filteredNews.map((item) => (
               <div
-                key={item.id}
+                key={item.ref_id}
                 className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
-                onClick={() => navigate(`/announcement/${item.id}`)}
+                onClick={() => navigate(`/announcement/${item.ref_id}`)}
               >
                 <div className="p-3 w-full lg:w-1/2 h-full">
                   <img
@@ -229,7 +231,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
                     }}
                   />
                 </div>
-                {/* Text Content */}
                 <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
                   <h2 className={`text-lg font-semibold mb-4 ${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
                     }`}>{item.title}</h2>
