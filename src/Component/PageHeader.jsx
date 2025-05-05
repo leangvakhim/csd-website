@@ -157,7 +157,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
               />
               <h2
                 className={`lg:text-lg  text-sm uppercase hidden sm:block ${
-                  currentLang === 2 ? "font-khmer" : "font-bold"
+                  currentLang === 2 ? "font-khmer leading-8" : "font-bold"
                 }`}
               >
                 {settings.facultyTitle} <br /> {settings.departmentTitle}
@@ -264,7 +264,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
                         className="flex items-center justify-between"
                       >
                         <Link
-                          
+
                           className={`uppercase hover:text-red-800 ${
                             currentLang === 2 ? "fonts-khmer" : "font-sans"
                           } ${isActive ? "text-red-900 font-bold" : ""}`}

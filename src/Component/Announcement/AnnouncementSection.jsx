@@ -25,11 +25,21 @@ const AnnouncementSection = ({ section, menuLang }) => {
   const [error, setError] = useState(null);
   const [headerError, setHeaderError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
 
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
+  const filteredNews = newsItems.filter(item => {
+    const matchesSearch =
+      item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+    return matchesSearch;
+  });
+
+  const handleClearSearch = () => setSearchTerm('');
 
   useEffect(() => {
     const fetchHeaderData = async () => {
@@ -176,17 +186,90 @@ const AnnouncementSection = ({ section, menuLang }) => {
               viewport={{ once: true }}
               className="w-full md:w-auto mt-4 md:mt-0"
             >
-              <button
+              {/* <button
                 onClick={() => navigate(headerData.hsec_routepage)}
                 className="flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1"
               >
                 <span className="mr-2 xl:text-sm text-[12px]">{headerData.hsec_btntitle}</span>
                 <FaArrowRight className="text-red-800" />
-              </button>
+              </button> */}
+              {headerData.hsec_routepage ? (
+                  <button
+                      onClick={() => navigate(headerData.hsec_routepage)}
+                      className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1`}
+                    >
+                    <span className="mr-2 lg:text-sm text-[12px]">{headerData.hsec_btntitle}</span>
+                    <FaArrowRight className="text-red-800" />
+                  </button>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <div className="relative w-full">
+                        <input
+                            type="text"
+                            placeholder="Search announcement"
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-red-300 w-full"
+                            aria-label="Search announcement"
+                        />
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaSearch className="text-gray-400" />
+                        </div>
+                        {searchTerm && (
+                            <button
+                                onClick={handleClearSearch}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                aria-label="Clear search"
+                            >
+                                <FaTimes className="text-sm" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+                )}
             </motion.div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+        {filteredNews.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+            {newsItems.map(item => (
+                <div
+                  key={item.ref_id}
+                  className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
+                  onClick={() => {
+                    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+                    navigate(`${prefix}/announcement/${item.ref_id}`);
+                  }}
+                  >
+                  <div className="p-3 w-full lg:w-1/2 h-full">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = DEFAULT_IMAGE;
+                      }}
+                    />
+                  </div>
+                  <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
+                    <h2 className={`text-lg font-semibold mb-4 ${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                      }`}>{item.title}</h2>
+                    <p className={`${menuLang === 2 ? "fonts-khmer" : "font-sans"
+                      }text-gray-600`}>{item.description}</p>
+                    <p className={`text-gray-500 text-sm mt-2 ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                      }`}>{item.date}</p>
+                  </div>
+                </div>
+              ))}
+          </div>
+        ): (
+          <p className="text-center text-gray-500">
+            No announcemnt found.
+          </p>
+        )}
+
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {newsItems.map((item) => (
           <div
             key={item.ref_id}
@@ -217,7 +300,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
             </div>
           </div>
             ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );
