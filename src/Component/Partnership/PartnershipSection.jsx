@@ -125,10 +125,10 @@ const PartnershipSection = ({ section, headerTitle, menuLang }) => {
           <div className="text-center md:text-left">
             <h2
               className={`text-3xl font-semibold mb-4 ${
-                currentLang === 2 ? 'font-moul' : 'font-sans'
+                currentLang === 2 ? 'font-khmer' : 'font-semibold'
               }`}
             >
-              {headerTitle || (currentLang === 2 ? 'ដៃគូរបស់យើង' : 'Our Partners')}
+              {headerTitle}
             </h2>
           </div>
 

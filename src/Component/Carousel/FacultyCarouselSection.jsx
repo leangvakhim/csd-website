@@ -35,6 +35,7 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
   const [error, setError] = useState(null);
   const location = useLocation();
   const currentLang = location.pathname.includes('/km') ? 2 : 1;
+  const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
 
   const resolvePageAlias = async (routePage) => {
     try {
@@ -89,6 +90,7 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
         .filter((faculty) => faculty.lang === currentLang)
         .map((faculty) => ({
           id: faculty.f_id,
+          ref_id: faculty.ref_id,
           name: faculty.f_name || "Unknown Faculty",
           position: faculty.f_position || "No position",
           image: faculty.img?.img
@@ -199,7 +201,7 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
                 whileHover={{ scale: 1.05 }}
               >
                 <Link
-                  to={`/faculty/${faculty.id}`}
+                  to={`${prefix}/faculty/${faculty.ref_id}`}
                   className="relative w-48 h-48 md:w-64 md:h-64 mb-4 group"
                 >
                   <img
@@ -253,7 +255,7 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
                 <h3 className={`text-xl font-semibold text-gray-800 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                   {faculty.name}
                 </h3>
-                <p className={`text-sm text-gray-600 font-normal mb-4 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}> 
+                <p className={`text-sm text-gray-600 font-normal mb-4 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                   {faculty.position}
                 </p>
               </motion.div>
