@@ -5,7 +5,7 @@ import { API_ENDPOINTS, API } from "../../Service/APIconfig";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
 
-const AnnouncementDetails = ({announcementID}) => {
+const AnnouncementDetails = ({announcementID, menuLang}) => {
   const [students, setStudents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [announcement, setAnnouncement] = useState({ title: '', detail: '' });
