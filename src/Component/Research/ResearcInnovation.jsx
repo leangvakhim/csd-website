@@ -132,7 +132,9 @@ const ResearchInnovations = ({section}) => {
                 <div className="mt-3 sm:mt-4">
                   <motion.button
                     className="text-xs sm:text-sm bg-red-900 hover:bg-red-800 text-white py-1 sm:py-2 px-3 sm:px-4 rounded-2xl flex items-center font-normal"
-                    onClick={() => navigate(`research/${item.id}`)}
+                    onClick={() =>
+                      navigate(`/research/${item.id}`, { replace: true })
+                    }
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, delay: 0.8 }}
@@ -204,7 +206,9 @@ const ResearchInnovations = ({section}) => {
                     {section.subtitle}
                   </motion.p>
                   <motion.button
-                    onClick={() => navigate(`research/${section.id}`)}
+                    onClick={() =>
+                      navigate(`/research/${section.id}`, { replace: true })
+                    }
                     className="text-xs sm:text-sm bg-red-900 hover:bg-red-800 text-white py-1 sm:py-2 px-3 sm:px-4 rounded-2xl flex items-center font-normal"
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
@@ -212,7 +216,7 @@ const ResearchInnovations = ({section}) => {
                     viewport={{ once: true, amount: 0.3 }}
                   >
                     <MdExplore className="mr-1" />
-                    Explore
+                    {currentLang === 1 ? "Explore" : "មើលបន្ថែម"}
                   </motion.button>
                 </div>
               </div>
