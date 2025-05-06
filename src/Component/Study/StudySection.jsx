@@ -69,7 +69,7 @@ const StudySection = ({key, section, menuLang}) => {
                       whileInView={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.5, delay: 0.2 }}
                       viewport={{ once: true }}
-                      className="text-3xl font-semibold mb-4"
+                      className={`text-3xl font-semibold mb-4 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}
                   >
                       {studyInfo.title}
                   </motion.h2>
@@ -80,7 +80,7 @@ const StudySection = ({key, section, menuLang}) => {
                       transition={{ duration: 0.5, delay: 0.4 }}
                       viewport={{ once: true }}
                       className={`text-lg lg:max-w-[743px] w-full mx-auto text-gray-600 mb-8 ${
-                        menuLang === 2 ? 'font-khmer' : 'font-semibold'
+                        menuLang === 2 ? 'fonts-khmer' : 'font-sans'
                       }`}
                   >
                       {studyInfo.subtitle}
@@ -138,7 +138,9 @@ const StudySection = ({key, section, menuLang}) => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.2 }}
                     viewport={{ once: true, amount: 0.5 }}
-                    className="text-3xl font-bold text-gray-800 mb-6"
+                    className={`text-3xl font-bold text-gray-800 mb-6 ${
+                      menuLang === 2 ? "font-khmer" : "font-semibold"
+                    }`}
                 >
                     {studyInfo.title}
                 </motion.h2>
@@ -147,7 +149,9 @@ const StudySection = ({key, section, menuLang}) => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
                     viewport={{ once: true, amount: 0.5 }}
-                    className="text-gray-600 xl:text-lg text-[12px] mb-12 sm:text-justify"
+                    className={`text-gray-600 xl:text-lg text-[12px] mb-12 sm:text-justify ${
+                      menuLang === 2 ? "fonts-khmer" : "font-sans"
+                    }`}
                 >
                     {studyInfo.subtitle}
                 </motion.p>
@@ -159,7 +163,9 @@ const StudySection = ({key, section, menuLang}) => {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true, amount: 0.5 }}
-                        className="bg-white p-6 rounded-lg shadow-md"
+                        className={`bg-white p-6 rounded-lg shadow-md ${
+                          menuLang === 2 ? "fonts-khmer leading-8 " : "font-sans"
+                        }`}
                         dangerouslySetInnerHTML={{ __html: card?.y_detail || '' }}
                     />
                   ))}

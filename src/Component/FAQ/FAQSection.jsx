@@ -33,6 +33,7 @@ const FAQSection = ({section}) => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const currentLang = location.pathname.includes('/km') ? 2 : 1;
 
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -124,14 +125,14 @@ const FAQSection = ({section}) => {
             <motion.h1
               variants={cardVariants}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-3xl font-bold text-gray-800 mb-6 text-start"
+              className={`text-3xl font-bold text-gray-800 mb-6 text-start ${currentLang === 2 ? "font-khmer" : "font-semibold"}`}
             >
               {content.title}
             </motion.h1>
             <motion.p
               variants={cardVariants}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="text-gray-800 xl:text-lg text-[12px] mb-12 text-start"
+              className={`text-gray-800 xl:text-lg text-[12px] mb-12 text-start ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}
             >
               {content.description}
             </motion.p>
@@ -142,6 +143,7 @@ const FAQSection = ({section}) => {
             {faqItems.length > 0 ? (
               faqItems.map((faq, index) => (
                 <motion.div
+
                   key={index}
                   variants={cardVariants}
                   transition={{ duration: 0.5, delay: index * 0.2 }}
@@ -149,7 +151,7 @@ const FAQSection = ({section}) => {
                   onClick={() => toggleFAQ(index)}
                 >
                   <div className="flex justify-between items-center">
-                    <h3 className="text-lg lg:text-2xl font-bold text-gray-800">
+                    <h3 className={`text-lg lg:text-2xl font-bold text-gray-800 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                       {faq.question}
                     </h3>
                     <motion.div
@@ -164,7 +166,7 @@ const FAQSection = ({section}) => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="text-gray-800 text-sm lg:text-lg  mt-4 text-justify"
+                      className={`text-gray-800 text-sm lg:text-lg  mt-4 text-justify ${currentLang === 2 ? "fonts-khmer leading-8" : "font-sans"}`}
                     >
                       {faq.answer}
                     </motion.p>

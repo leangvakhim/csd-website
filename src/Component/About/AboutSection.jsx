@@ -101,7 +101,7 @@ const AboutSection = ({ section }) => {
                                         <StatisticCard
                                             value={stat.value}
                                             rank={stat.rank}
-                                            className="text-center text-lg font-semibold"
+                                            className={`text-center text-lg font-semibold ${currentLang === 2 ? 'fonts-khmer ' : 'font-sans'}`}
                                         />
                                     </motion.div>
                                 ))}

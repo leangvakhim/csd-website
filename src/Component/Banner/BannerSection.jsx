@@ -135,7 +135,7 @@ const BannerSection = ({ section, menuLang }) => {
 
   return (
     <motion.div
-    
+
       className={`relative w-full h-[600px] flex items-center justify-center text-center text-white bg-cover bg-center z-0 `}
       style={{
         backgroundImage: `url(${bannerData.image})`,
@@ -166,7 +166,7 @@ const BannerSection = ({ section, menuLang }) => {
         </motion.h1>
         <motion.p
           className={`mt-4  text-gray-50 drop-shadow-md ${
-            menuLang === 2 ? "font-khmer text-[20px]" : "font-sans"
+            menuLang === 2 ? "fonts-khmer" : "font-sans"
           }`}
           variants={childVariants}
         >

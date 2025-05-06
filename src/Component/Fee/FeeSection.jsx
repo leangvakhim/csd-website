@@ -23,8 +23,9 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const FeeSection = ({ section }) => {
+const FeeSection = ({ section,  }) => {
   const [tuition, setTuition] = useState(null);
+  const [currentLang, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
 
   // Fetch fee data based on section.sec_id
   useEffect(() => {
@@ -96,7 +97,7 @@ const FeeSection = ({ section }) => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <motion.h2
-              className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-gray-800"
+              className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-gray-800 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}
               variants={cardVariants}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
@@ -106,7 +107,7 @@ const FeeSection = ({ section }) => {
               {tuition.description.map((paragraph, index) => (
                 <motion.p
                   key={index}
-                  className="text-[12px] sm:text-[14px] lg:text-[16px] text-gray-700 mb-4 sm:mb-6 leading-relaxed"
+                  className={`text-[12px] sm:text-[14px] lg:text-[16px] text-gray-700 mb-4 sm:mb-6 leading-relaxed ${currentLang === 2 ? 'fonts-khmer ' : 'font-sans'}`}
                   variants={cardVariants}
                   transition={{ duration: 0.6, delay: 0.6 + index * 0.2 }}
                 >
@@ -126,11 +127,8 @@ const FeeSection = ({ section }) => {
                 </div>
                 {tuition.price ? (
                   <>
-                    <span className="text-2xl sm:text-3xl lg:text-4xl">
+                    <span className={`text-2xl sm:text-3xl lg:text-4xl ${currentLang === 2 ? 'fonts-khmer ' : 'font-sans'}`}>
                       {tuition.price.split(" /")[0]}{" "}
-                    </span>
-                    <span className="text-[10px] sm:text-xs text-gray-500">
-                      /{tuition.price.split(" /")[1]}
                     </span>
                   </>
                 ) : (

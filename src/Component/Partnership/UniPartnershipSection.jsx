@@ -28,6 +28,7 @@ const cardVariants = {
 
 const UniPartnerships = ({ section, headerTitle, menuLang }) => {
   const [partners, setPartners] = useState([]);
+  const [currentLng, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
 
   useEffect(() => {
     const fetchPartners = async () => {
@@ -82,7 +83,7 @@ const UniPartnerships = ({ section, headerTitle, menuLang }) => {
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
       >
-        <h2 className={`text-3xl font-semibold mb-8 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
+        <h2 className={`text-3xl font-semibold mb-8 ${currentLng === 2 ? 'font-khmer' : 'font-semibold'}`}>
           {headerTitle}
         </h2>
 

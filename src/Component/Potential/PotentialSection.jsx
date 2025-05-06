@@ -195,7 +195,7 @@ const PotentialSection = ({ section, menuLang }) => {
                     )}
                   </div>
                   <div>
-                    <h3 className={`text-lg lg:text-xl font-semibold mb-1 text-gray-800 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>
+                    <h3 className={`text-lg lg:text-xl !font-semibold mb-1 text-gray-800 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>
                       {s.title}
                     </h3>
                     <p className={`text-gray-800 lg:text-lg ${menuLang === 2 ? 'fonts-khmer text-[20]' : 'font-sans'}`}>{s.description}</p>

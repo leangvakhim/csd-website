@@ -184,7 +184,9 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
               to={headerSection.routepage}
               className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1  ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}
             >
-              <span className="mr-2 lg:text-sm text-[12px]">{headerSection.btntitle}</span>
+              <span className={`mr-2 lg:text-sm text-[12px] ${
+                      menuLang === 2 ? "fonts-khmer" : "font-sans"
+                    }`}>{headerSection.btntitle}</span>
               <FaArrowRight className="text-red-800" />
             </Link>
           </motion.div>
@@ -195,7 +197,7 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
           <div className="flex snap-x snap-mandatory overflow-x-auto py-6 px-4 scroll-smooth gap-4 md:gap-8">
             {facultyMembers.map((faculty) => (
               <motion.div
-                key={faculty.id}
+                key={faculty.ref_id}
                 variants={cardVariants}
                 className="min-w-[300px] sm:min-w-[250px] flex-shrink-0 snap-center mx-2 bg-white rounded-lg shadow-lg p-4 flex flex-col items-center justify-center hover:shadow-xl transition duration-300"
                 whileHover={{ scale: 1.05 }}
