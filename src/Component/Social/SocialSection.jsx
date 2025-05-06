@@ -21,6 +21,7 @@ const SocialSection = ({ sectionId, menuLang }) => {
           setSocialLinks(sorted);
         })
         .catch(err => console.error("Failed to fetch social links:", err));
+
     }, []);
 
     return (
@@ -29,13 +30,8 @@ const SocialSection = ({ sectionId, menuLang }) => {
                 <div className="flex justify-start ">
                     <motion.div
                         className="flex space-x-3"
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        variants={{
-                            hidden: { opacity: 0 },
-                            visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
-                        }}
+                        initial="visible"
+                        animate="visible"
                     >
                         {socialLinks.map((item, index) => (
                         <motion.div

@@ -53,7 +53,6 @@ const EventSection = ({ section, menuLang }) => {
                 setHeaderLoading(true);
                 const response = await axios.get(API_ENDPOINTS.getHeaderSection);
                 const headerList = response.data?.data || [];
-
                 const matchedHeader = headerList.find(
                     (item) =>
                         item.hsec_sec === section.sec_id &&
@@ -62,13 +61,25 @@ const EventSection = ({ section, menuLang }) => {
                         item.section?.active === 1
                 );
 
-                setHeaderData({
-                    hsec_title: matchedHeader.hsec_title || "Event",
-                    hsec_btntitle: matchedHeader.hsec_btntitle || 4,
-                    hsec_subtitle: matchedHeader.hsec_subtitle || "",
-                    hsec_routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
-                    hsec_amount: typeof matchedHeader.hsec_amount === 'number' && matchedHeader.hsec_amount !== null ? matchedHeader.hsec_amount : 4,
-                });
+                if (!matchedHeader) {
+                    throw new Error("No matched header section found for this Event section.");
+                }
+
+                if (matchedHeader) {
+                    setHeaderData({
+                        hsec_title: matchedHeader.hsec_title || 'Event',
+                        hsec_subtitle: matchedHeader.hsec_subtitle || "",
+                        hsec_btntitle: matchedHeader.hsec_btntitle || "",
+                        hsec_routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
+                        hsec_amount: typeof matchedHeader.hsec_amount === 'number' && matchedHeader.hsec_amount !== null ? matchedHeader.hsec_amount : 4,
+                    });
+                    } else {
+                    setHeaderData({
+                        hsec_title: 'New',
+                        hsec_amount: 4,
+                    });
+                }
+
             } catch (error) {
                 console.error('Failed to fetch header data:', error);
                 setHeaderError('Failed to load section header. Using default values.');
@@ -165,7 +176,7 @@ const EventSection = ({ section, menuLang }) => {
                     className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8"
                 >
                     <div>
-                        <h1 className={`text-3xl  font-semibold mb-3 sm:mb-4 ${menuLang === 2 ? "font-khmer" : "font-sans"
+                        <h1 className={`text-3xl  font-semibold mb-3 sm:mb-4 ${currentLang === 2 ? "font-khmer" : "font-sans"
                             }`}>
                             {headerData.hsec_title || 'Events'}
                         </h1>
