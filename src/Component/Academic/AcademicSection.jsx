@@ -139,7 +139,8 @@ const AcademicSection = ({ section, menuLang }) => {
             <motion.div variants={cardVariants} transition={{ delay: 0.6 }}>
               <button
                 onClick={() => navigate(route)}
-                className="bg-red-800 text-white rounded-4xl py-2 px-6 flex items-center hover:bg-red-600 transition duration-300"
+                className={`bg-red-800 text-white rounded-4xl py-2 px-6 flex items-center hover:bg-red-600 transition duration-300 ${menuLang === 2 ? "fonts-khmer" : "font-sans"
+                      }`}
               >
                 {buttonText}
                 <MdExplore className="ml-2" />

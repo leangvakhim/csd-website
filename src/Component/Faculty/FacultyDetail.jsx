@@ -171,10 +171,10 @@ const FacultyDetail = ({ facultyId }) => {
                                 </div>
                                 {/* Profile Info */}
                                 <div className="hidden md:flex flex-col ml-0 md:ml-6 flex-1 text-white pb-4">
-                                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">
+                                    <h1 className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-2 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                                         {faculty?.name}
                                     </h1>
-                                    <h2 className="text-base sm:text-lg lg:text-xl text-gray-200">
+                                    <h2 className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} text-base sm:text-lg lg:text-xl text-gray-200`}>
                                         {faculty?.position}
                                     </h2>
                                     <div className="mt-4">
@@ -202,8 +202,8 @@ const FacultyDetail = ({ facultyId }) => {
                             {/* Action Button - Desktop */}
                             <div className="hidden md:flex items-center">
                                 <button className="bg-white hover:bg-gray-100 text-red-900 px-4 py-2 sm:px-6 sm:py-3 rounded-lg transition-colors duration-300 flex items-center gap-2 shadow-md text-sm sm:text-base">
-                                    <BsViewStacked className="text-base sm:text-lg" />
-                                    <span>{currentLang === 1 ? "View Portfolio" : "ប្រវត្តិរូបការងារ"}</span>
+                                    <BsViewStacked className={`text-base sm:text-lg`} />
+                                    <span className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} >{currentLang === 1 ? "View Portfolio" : "ប្រវត្តិរូបការងារ"}</span>
                                 </button>
                             </div>
                         </div>
@@ -212,10 +212,10 @@ const FacultyDetail = ({ facultyId }) => {
 
                 {/* Mobile Profile Info */}
                 <div className="md:hidden pt-20 sm:pt-24 px-4 text-center">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                    <h1 className={`text-2xl sm:text-3xl font-bold text-gray-900 mb-2 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                         {faculty?.name}
                     </h1>
-                    <h2 className="text-base sm:text-lg text-gray-600 mb-4">
+                    <h2 className={`text-base sm:text-lg text-gray-600 my-4 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                         {faculty?.position}
                     </h2>
                     <div className="flex justify-center mb-4">
@@ -231,7 +231,7 @@ const FacultyDetail = ({ facultyId }) => {
                                     <img
                                         src={social.img?.img ? `${API}/storage/uploads/${social.img.img}` : "/placeholder-icon.png"}
                                         alt="Social Icon"
-                                        className="w-6 h-6 rounded-full object-cover"
+                                        className="w-6 h-6 rounded-full object-contain p-0.5"
                                     />
                                 </a>
                             ))}
@@ -239,7 +239,7 @@ const FacultyDetail = ({ facultyId }) => {
                     </div>
                     <button className="w-full max-w-xs mx-auto bg-red-800 hover:bg-red-900 text-white px-6 py-3 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2 shadow-md text-sm sm:text-base">
                         <BsViewStacked className="text-base sm:text-lg" />
-                        <span>View Portfolio</span>
+                            <span className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} >{currentLang === 1 ? "View Portfolio" : "ប្រវត្តិរូបការងារ"}</span>
                     </button>
                 </div>
             </section>
@@ -253,11 +253,11 @@ const FacultyDetail = ({ facultyId }) => {
                             {/* About Section */}
                             {facultyInfo && (
                                 <section className="space-y-4">
-                                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                                    <h2 className={`text-2xl sm:text-3xl font-bold text-gray-900 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                                         {facultyInfo.finfo_title}
                                     </h2>
                                     <div
-                                        className="space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base"
+                                        className={`space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base ${currentLang === 2 ? "fonts-khmer" : "font-sans"} `}
                                         dangerouslySetInnerHTML={{ __html: facultyInfo.finfo_detail }}
                                     ></div>
                                 </section>
@@ -268,16 +268,16 @@ const FacultyDetail = ({ facultyId }) => {
                             {/* Contact Section */}
                             {contacts.length > 0 && (
                                 <div className="space-y-4">
-                                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-                                        Contact Info
+                                    <h3 className={`text-xl sm:text-2xl font-bold text-gray-900 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
+                                        {currentLang === 1 ? "Contact Info" : "ព័ត៌មានទំនាក់ទំនង"}
                                     </h3>
-                                    <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+                                    <div className={`flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                                         {contacts.map(contact => (
                                             <p
                                                 key={contact.fc_id}
                                                 className="text-red-700 hover:text-red-600 px-4 py-2 bg-pink-100 rounded-full transition-colors text-sm sm:text-base"
                                             >
-                                                <span className="font-normal">{contact.fc_name}</span>
+                                                <span className={`font-normal ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{contact.fc_name}</span>
                                             </p>
                                         ))}
                                     </div>
@@ -293,11 +293,11 @@ const FacultyDetail = ({ facultyId }) => {
                                 {researchProjects && researchProjects.map((project) => (
                                     <div key={project.finfo_id || `${project.finfo_f}-${project.finfo_order}`} className="py-4">
                                         <section className="space-y-4">
-                                            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                                            <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-bold text-gray-900`}>
                                                 {project.finfo_title}
                                             </h2>
                                             <div
-                                                className="space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base"
+                                                className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base`}
                                                 dangerouslySetInnerHTML={{ __html: project.finfo_detail }}
                                             ></div>
                                         </section>
@@ -312,7 +312,7 @@ const FacultyDetail = ({ facultyId }) => {
                 <div className="w-full md:w-80 lg:w-96">
                     <div className="my-8 sm:my-12">
                         <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
-                            <h2 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6 text-gray-800">
+                            <h2 className={`text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6 text-gray-800 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                                 {currentLang === 1 ? "Background" : "ប្រវត្តិនៃការសិក្សា"}
                             </h2>
                             {backgrounds.length > 0 && backgrounds.map((bg) => (
@@ -323,7 +323,7 @@ const FacultyDetail = ({ facultyId }) => {
                                         className="w-10 h-10 sm:w-12 sm:h-12 mr-3 sm:mr-4 rounded-full object-cover"
                                     />
                                     <div>
-                                        <p className="text-gray-700 text-sm sm:text-base">{bg.fbg_name}</p>
+                                        <p className={` ${currentLang === 2 ? "fonts-khmer" : "font-sans"} text-gray-700 text-sm sm:text-base`}>{bg.fbg_name}</p>
                                     </div>
                                 </div>
                             ))}

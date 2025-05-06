@@ -99,7 +99,7 @@ const ScholarshipBanner = ({ scholarshipId }) => {
             viewport={{ once: true, amount: 0.5 }}
             className="text-md flex items-center text-gray-50 drop-shadow-md"
           >
-            <FaCalendarAlt className="mr-2 text-lg" />
+            <FaCalendarAlt className={`mr-2 text-lg ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`} />
             {currentLang === 1 ? "Post on" : "បង្ហោះនៅថ្ងៃ"}: {bannerSection.postDate}
           </motion.p>
         </motion.div>

@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 const FacultyMemeber = () => {
     const [facultyMembers, setFacultyMembers] = useState([]);
     const [socials, setSocials] = useState({});
+    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     useEffect(() => {
         const fetchFacultyMembers = async () => {
@@ -21,6 +22,7 @@ const FacultyMemeber = () => {
 
                 const formattedMembers = filteredMembers.map(member => ({
                     id: member.f_id,
+                    ref_id: member.ref_id,
                     name: member.f_name,
                     position: member.f_position,
                     bio: member.f_portfolio || 'No bio available.',
@@ -142,8 +144,8 @@ const FacultyMemeber = () => {
                                             <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{member.position}</p>
                                         </div>
                                         <Link
-                                            to={`/faculty/${member.id}`}
-                                            className='bg-red-900 px-6 py-2 text-gray-50 rounded-2xl inline-block'
+                                            to={`${prefix}/faculty/${member.ref_id}`}
+                                            className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} bg-red-900 px-6 py-2 text-gray-50 rounded-2xl inline-block`}
                                         >
                                             {currentLang === 1 ? "View" : "មើលបន្ថែម"}
                                         </Link>

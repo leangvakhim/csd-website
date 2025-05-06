@@ -191,9 +191,10 @@ const EventSection = ({ section, menuLang }) => {
                             <button
                                 onClick={() => navigate(headerData.hsec_routepage)}
                                 className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1`}
-                            >
-                            <span className="mr-2 lg:text-sm text-[12px]">{headerData.hsec_btntitle}</span>
-                            <FaArrowRight className="text-red-800" />
+                                >
+                                <span className={`mr-2 lg:text-sm text-[12px] ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                                    }`}>{headerData.hsec_btntitle}</span>
+                                <FaArrowRight className="text-red-800" />
                             </button>
                         ) : (
                             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -253,19 +254,20 @@ const EventSection = ({ section, menuLang }) => {
                                             </div>
                                             <div className="w-full lg:w-1/2  p-4 sm:p-5">
                                                 {event.category && (
-                                                    <span className="text-xs font-semibold text-red-600 uppercase bg-red-100 px-2 py-1 rounded-full">
-                                                        {event.tags}
+                                                    <span className={`${currentLang === 2 ? "fonts-khmer " : "font-sans"
+                                                    } bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2`}>
+                                                        {event.tag}
                                                     </span>
                                                 )}
-                                                <h3 className={`${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                                                <h3 className={`${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
                                                     } text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4`}>
                                                     {event.title}
                                                 </h3>
-                                                <p className={`${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                                                <p className={`${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
                                                     } text-xs sm:text-sm text-gray-700 line-clamp-3`}>
                                                     {event.description}
                                                 </p>
-                                                <span className={`${menuLang === 2 ? "fonts-khmer text-[16px]" : "font-sans"
+                                                <span className={`${currentLang === 2 ? "fonts-khmer text-[16px]" : "font-sans"
                                                     } text-xs sm:text-sm text-gray-700 flex items-center gap-2 mt-3 sm:mt-4`}>
                                                     <PiCalendarDots className="text-red-600" />
                                                     {event.date}

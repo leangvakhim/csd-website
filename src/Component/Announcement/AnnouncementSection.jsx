@@ -175,7 +175,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
           viewport={{ once: true }}
           className="flex flex-col sm:flex-row justify-between items-center mb-8"
         >
-          <h1 className={`${menuLang === 2 ? "font-khmer" : "font-sans"
+          <h1 className={`${currentLang === 2 ? "font-khmer" : "font-sans"
             } text-3xl font-semibold mb-4`}>
             {headerData.hsec_title}
           </h1>
@@ -191,7 +191,8 @@ const AnnouncementSection = ({ section, menuLang }) => {
                       onClick={() => navigate(headerData.hsec_routepage)}
                       className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1`}
                     >
-                    <span className="mr-2 lg:text-sm text-[12px]">{headerData.hsec_btntitle}</span>
+                    <span className={`mr-2 lg:text-sm text-[12px] ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                      }`}>{headerData.hsec_btntitle}</span>
                     <FaArrowRight className="text-red-800" />
                   </button>
                 ) : (
@@ -246,11 +247,11 @@ const AnnouncementSection = ({ section, menuLang }) => {
                     />
                   </div>
                   <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
-                    <h2 className={`text-lg font-semibold mb-4 ${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                    <h2 className={`text-lg font-semibold mb-4 ${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
                       }`}>{item.title}</h2>
-                    <p className={`${menuLang === 2 ? "fonts-khmer" : "font-sans"
+                    <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"
                       }text-gray-600`}>{item.description}</p>
-                    <p className={`text-gray-500 text-sm mt-2 ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                    <p className={`text-gray-500 text-sm mt-2 ${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
                       }`}>{item.date}</p>
                   </div>
                 </div>
@@ -261,39 +262,6 @@ const AnnouncementSection = ({ section, menuLang }) => {
             No announcemnt found.
           </p>
         )}
-
-        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-          {newsItems.map((item) => (
-          <div
-            key={item.ref_id}
-            className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
-            onClick={() => {
-              const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-              navigate(`${prefix}/announcement/${item.ref_id}`);
-            }}
-            >
-            <div className="p-3 w-full lg:w-1/2 h-full">
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                className="w-full h-full object-cover rounded-lg"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = DEFAULT_IMAGE;
-                }}
-              />
-            </div>
-            <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
-              <h2 className={`text-lg font-semibold mb-4 ${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
-                }`}>{item.title}</h2>
-              <p className={`${menuLang === 2 ? "fonts-khmer" : "font-sans"
-                }text-gray-600`}>{item.description}</p>
-              <p className={`text-gray-500 text-sm mt-2 ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
-                }`}>{item.date}</p>
-            </div>
-          </div>
-            ))}
-        </div> */}
       </div>
     </div>
   );

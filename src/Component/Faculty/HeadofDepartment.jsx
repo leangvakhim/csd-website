@@ -8,6 +8,7 @@ import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 const HeadofDepartment = () => {
     const [head, setHead] = useState(null);
     const [socials, setSocials] = useState([]);
+    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
 
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     useEffect(() => {
@@ -25,6 +26,7 @@ const HeadofDepartment = () => {
                     const headData = filteredHead[0];
                     setHead({
                         id: headData.f_id,
+                        ref_id: headData.ref_id,
                         name: headData.f_name,
                         bio: headData.f_portfolio || 'No bio available.',
                         image: headData.img?.img
@@ -61,7 +63,7 @@ const HeadofDepartment = () => {
                         <h1 className={`text-2xl font-normal mb-4 ${currentLang === 2 ? "font-khmer" : "font-semibold"}`}>{currentLang === 1 ? "Head of Department:" : "ប្រធានដេប៉ាតឺម៉ង់"}</h1>
                     </div>
                     {head && (
-                        <div key={head.id} className='max-w-5xl mx-auto shadow-lg rounded-2xl items-center p-4' id="head-department-profile">
+                        <div key={head.ref_id} className='max-w-5xl mx-auto shadow-lg rounded-2xl items-center p-4' id="head-department-profile">
                             <div className="flex flex-col lg:flex-row gap-6 items-center">
                                 {/* Image Container */}
                                 <div className="relative w-96 h-96 mb-4 group" id="profile-image-container">
@@ -147,7 +149,9 @@ const HeadofDepartment = () => {
                                         </div>
                                     </div>
                                     <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{head.bio}</p>
-                                    <Link to={`/faculty/${head.id}`}>
+                                    <Link
+                                        to={`${prefix}/faculty/${head.ref_id}`}
+                                    >
                                         <button className={`bg-red-900 px-6 py-2 text-gray-50 rounded-2xl ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} id="view-button">
                                             {currentLang === 1 ? "View" : "មើលបន្ថែម"}
                                         </button>
