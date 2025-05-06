@@ -1,31 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
-
-
-
+import { useLocation } from 'react-router-dom';
 
 const ResearchLabDetails = ({researchlabId}) => {
     const [researchLab, setResearchLab] = useState(null);
+    const location = useLocation();
+    const currentLang = location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        axios.get(`${API_ENDPOINTS.getResearchlab}/${researchlabId}`)
+        axios.get(`${API_ENDPOINTS.getResearchlab}`)
             .then(response => {
-                const lab = response.data.data;
-                setResearchLab(lab);
+                const filtered = response.data.data
+                    .filter(item =>
+                        item.ref_id === Number(researchlabId) &&
+                        item.lang === currentLang &&
+                        item.display === 1 &&
+                        item.active === 1
+                    )
+                setResearchLab(filtered);
             })
             .catch(error => {
                 console.error("Failed to fetch research lab data:", error);
             });
-    }, [researchlabId]);
+    }, [researchlabId, currentLang, location.pathname]);
 
     return (
-        <div className="my-16">
-            <div className="container mx-auto px-4 text-center flex flex-col items-center">
+        <div className="my-8">
+            <div className="container mx-auto px-4 flex flex-col">
                 {researchLab ? (
-                    <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: researchLab.rsdl_detail }} />
+                    <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: researchLab[0].rsdl_detail }} />
                 ) : (
-                    <p>Loading research lab details...</p>
+                    <p className='text-center'>Loading research lab details...</p>
                 )}
             </div>
         </div>
