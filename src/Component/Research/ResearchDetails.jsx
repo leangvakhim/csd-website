@@ -11,23 +11,56 @@ import StudentResearch from './StudentResearch';
 import ResearchInnovations from './ResearcInnovation';
 
 
-const ResearchDetails = ({ researchId }) => {
+const ResearchDetails = ({ refId }) => {
     const [sections, setSections] = useState([]);
+    const [researchs, setResearchs] = useState([]);
+    const currentResearch = researchs.length > 0 ? researchs[0] : null;
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
+    useEffect(() => {
+        const fetchResearchs = async () => {
+            try {
+                const response = await axios.get(API_ENDPOINTS.getResearch);
+
+                const filtered = response.data.data
+                    .filter(item =>
+                        item.ref_id === Number(refId) &&
+                        item.lang === currentLang &&
+                        item.display === 1 &&
+                        item.active === 1
+                    )
+                    .sort((a, b) => a.rsd_order - b.rsd_order);
+                setResearchs(filtered);
+            } catch (error) {
+                console.error('Failed to fetch researchs:', error);
+            }
+        };
+
+        fetchResearchs();
+    }, [refId, currentLang]);
 
     useEffect(() => {
         const fetchSections = async () => {
+            if (!researchs.length || !researchs[0].rsd_id) return;
+
             try {
                 const response = await axios.get(API_ENDPOINTS.getResearchTitle);
                 const sorted = response.data.data
-                    .filter(item => item.display === 1 && item.active === 1 && item.rsdt_text === parseInt(researchId))
+                    .filter(item =>
+                        item.display === 1 &&
+                        item.active === 1 &&
+                        item.rsdt_text === parseInt(researchs[0].rsd_id)
+                    )
                     .sort((a, b) => a.rsdt_order - b.rsdt_order);
+
                 setSections(sorted);
             } catch (error) {
                 console.error('Failed to fetch research sections:', error);
             }
         };
+
         fetchSections();
-    }, [researchId]);
+    }, [researchs]);
 
     const renderSection = (section) => {
 
@@ -46,14 +79,16 @@ const ResearchDetails = ({ researchId }) => {
 
     return (
         <div>
-            <ResearchBanner researchId={researchId} />
+            {currentResearch && (
+                <ResearchBanner researchId={currentResearch.rsd_id} />
+            )}
             {sections.map(section => (
                 <div key={section.rsdt_id}>
                     {renderSection(section)}
                 </div>
             ))}
-            <StudentResearch />
-            <RecentResearch />
+            {/* <StudentResearch />
+            <RecentResearch /> */}
         </div>
     );
 }

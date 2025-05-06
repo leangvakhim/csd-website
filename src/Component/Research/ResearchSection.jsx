@@ -35,6 +35,18 @@ const ResearchSection = ({section, menuLang}) => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
+  const resolvePageAlias = async (routePage) => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.getPage);
+      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
+
+      const matched = pages.find((page) => page.p_title === routePage);
+      return matched?.p_alias || null;
+    } catch (error) {
+      console.error("Failed to fetch page alias:", error);
+      return null;
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +59,7 @@ const ResearchSection = ({section, menuLang}) => {
             && item.lang === currentLang)
           .map((item) => ({
             id: item.rsd_id,
+            ref_id: item.ref_id,
             title: item.rsd_title || 'Untitled Research',
             description: item.rsd_subtitle || 'No description available',
             image: item.image?.img
@@ -72,6 +85,8 @@ const ResearchSection = ({section, menuLang}) => {
           setHeaderData({
             title: matchedHeader.hsec_title || '',
             subtitle: matchedHeader.hsec_subtitle || '',
+            routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
+            btntitle: matchedHeader.hsec_btntitle || '',
           });
         } else {
           setHeaderData({
@@ -191,21 +206,22 @@ const ResearchSection = ({section, menuLang}) => {
                   <div className="flex flex-col justify-center items-end py-2 sm:py-3">
                     <button className="text-black text-[9px] sm:text-[10px] lg:text-xs bg-gray-300 py-1 sm:py-1.5 px-2 sm:px-3 lg:px-4 shadow-md rounded-full flex items-center mb-2">
                       <MdComputer className="mr-1 text-xs sm:text-sm" />
-                      <span className={`truncate w-full ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
+                      <span className={`truncate w-full ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
                         {section.lead}
                       </span>
                     </button>
                   </div>
                   <div>
-                    <h3 className={`text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 line-clamp-2 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans-serif'}`}>
+                    <h3 className={`text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 line-clamp-2 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans-serif'}`}>
                       {section.title}
                     </h3>
-                    <p className={`mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base line-clamp-2 sm:line-clamp-3 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
+                    <p className={`mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base line-clamp-2 sm:line-clamp-3 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
                       {section.description}
                     </p>
                     <button
                       onClick={() => {
-                        navigate(`/research/${section.id}`);
+                        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+                        navigate(`${prefix}/research/${section.ref_id}`);
                       }}
                       className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
                         }`}
