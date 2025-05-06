@@ -182,7 +182,7 @@ const NewsSection = ({ section, menuLang }) => {
           viewport={{ once: true }}
           className="flex flex-col sm:flex-row justify-between items-center mb-8"
         >
-          <h1 className={`${menuLang === 2 ? "font-khmer " : "font-sans"
+          <h1 className={`${currentLang === 2 ? "font-khmer " : "font-sans"
             } text-3xl font-semibold mb-4`}>
             {headerData.hsec_title}
           </h1>
@@ -198,7 +198,8 @@ const NewsSection = ({ section, menuLang }) => {
                       onClick={() => navigate(headerData.hsec_routepage)}
                       className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1`}
                     >
-                    <span className="mr-2 lg:text-sm text-[12px]">{headerData.hsec_btntitle}</span>
+                    <span className={`mr-2 lg:text-sm text-[12px] ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                      }`}>{headerData.hsec_btntitle}</span>
                     <FaArrowRight className="text-red-800" />
                   </button>
                 ) : (
@@ -250,13 +251,14 @@ const NewsSection = ({ section, menuLang }) => {
                   </div>
                   <div className="p-6 flex flex-col w-full lg:w-1/2 justify-center">
                     {item.tag && (
-                      <span className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2">
+                      <span className={`${currentLang === 2 ? "fonts-khmer " : "font-sans"
+                      } bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2`}>
                         {item.tag}
                       </span>
                     )}
-                    <h3 className={`${menuLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                    <h3 className={`${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
                       } text-lg font-semibold mb-4`}>{item.title}</h3>
-                    <p className={`${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                    <p className={`${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
                       } text-gray-600`}>{item.description}</p>
                   </div>
                 </div>

@@ -10,6 +10,7 @@ import axios from 'axios';
 
 
 const Slideshow = ({key, section, menuLang}) => {
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     const [slides, setSlides] = useState([]);
 
     const resolvePageAlias = async (routePage) => {
@@ -132,7 +133,7 @@ const Slideshow = ({key, section, menuLang}) => {
             />
             <motion.h1
             className={`lg:text-5xl text-4xl font-bold leading-tight mb-6 max-w-2xl ${
-                menuLang === 2 ? "font-khmer" : "font-sans"
+                currentLang === 2 ? "font-khmer" : "font-sans"
               }`}
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -143,7 +144,7 @@ const Slideshow = ({key, section, menuLang}) => {
 
             <motion.p
             className={`l:text-lg text-[12px] text-gray-100 mb-8 max-w-lg ${
-                menuLang === 2 ? "fonts-khmer" : "font-sans"
+                currentLang === 2 ? "fonts-khmer" : "font-sans"
               }`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -163,7 +164,7 @@ const Slideshow = ({key, section, menuLang}) => {
             <Link
                 to={slides[currentSlide].buttonLink1}
                 className={`${slides[currentSlide].buttonColor} text-white px-8 py-2 lg:text-md text-[12px] xl:text-lg rounded-full transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg flex items-center justify-center ${
-                    menuLang === 2 ? "fonts-khmer" : "font-sans"
+                    currentLang === 2 ? "fonts-khmer" : "font-sans"
                   }`}
             >
                 {slides[currentSlide].buttonText1}
@@ -174,7 +175,7 @@ const Slideshow = ({key, section, menuLang}) => {
             <Link
                 to={slides[currentSlide].buttonLink2}
                 className={`${
-                    menuLang === 2 ? "font-khmer" : "font-sans"
+                    currentLang === 2 ? "font-khmer" : "font-sans"
                   } border text-white px-8 py-2 xl:text-md text-[12px] xl:text-lg rounded-full transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg flex items-center justify-center`}
             >
                 {slides[currentSlide].buttonText2}

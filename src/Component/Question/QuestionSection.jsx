@@ -37,7 +37,8 @@ const QuestionSection = () => {
                   initial={{ opacity: 0, y: -20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="text-3xl text-center mb-4 font-semibold"
+                  className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                      } text-3xl text-center mb-4 font-semibold`}
                 >
                   {currentLang === 1 ? "Contact Us If You Have Any Questions" : "សូមទាក់ទងមកយើង ប្រសិនបើអ្នកមានចម្ងល់"}
                 </motion.h1>
@@ -49,7 +50,8 @@ const QuestionSection = () => {
                       transition={{ duration: 0.8, delay: 0.4, ease: "easeInOut" }}
                       viewport={{ once: true }}
                     >
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                      } block text-sm font-medium text-gray-700`}>
                         {currentLang === 1 ? "First Name*" : "នាមខ្លួន*"}
                       </label>
                       <input
@@ -64,7 +66,8 @@ const QuestionSection = () => {
                       transition={{ duration: 0.8, delay: 0.5, ease: "easeInOut" }}
                       viewport={{ once: true }}
                     >
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                      } block text-sm font-medium text-gray-700`}>
                         {currentLang === 1 ? "Last Name*" : "នាមត្រកូល*"}
                       </label>
                       <input
@@ -80,7 +83,8 @@ const QuestionSection = () => {
                     transition={{ duration: 0.8, delay: 0.6, ease: "easeInOut" }}
                     viewport={{ once: true }}
                   >
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className={`block text-sm font-medium text-gray-700 ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                      }`}>
                       {currentLang === 1 ? "Email*" : "អ៊ីមែល*"}
                     </label>
                     <input
@@ -95,7 +99,8 @@ const QuestionSection = () => {
                     transition={{ duration: 0.8, delay: 0.7, ease: "easeInOut" }}
                     viewport={{ once: true }}
                   >
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className={`block text-sm font-medium text-gray-700 ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                      }`}>
                       {currentLang === 1 ? "Description" : "ពិពណ៌នា"}
                     </label>
                     <textarea
@@ -112,7 +117,8 @@ const QuestionSection = () => {
                   >
                     <button
                       type="submit"
-                      className="py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                      } py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}
                     >
                       {currentLang === 1 ? "Submit" : "បញ្ជូន"}
                     </button>

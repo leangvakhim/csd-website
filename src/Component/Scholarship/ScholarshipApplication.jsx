@@ -194,7 +194,8 @@ const ScholarshipApplication = ({ scholarshipId }) => {
               <img
                 src={applicationData.bannerImage}
                 alt="Scholarship Application"
-                onClick={() => viewPdfFromAPI(applicationData.bannerImage)}
+                // onClick={() => viewPdfFromAPI(applicationData.bannerImage)}
+                onClick={viewPdfFromAPI}
                 className="w-full h-auto max-h-[575px] object-contain rounded-lg shadow-md cursor-pointer"
                 onError={(e) => {
                   e.target.onerror = null;
@@ -212,11 +213,11 @@ const ScholarshipApplication = ({ scholarshipId }) => {
             transition={{ duration: 0.6 }}
             className="w-full"
           >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+            <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6`}>
               {currentLang === 1 ? "Application Details" : "ព័ត៌មានលម្អិតអំពីការដាក់ពាក្យ"}
             </h2>
             {applicationData.details.length > 0 ? (
-              <div role="list" className="space-y-6">
+              <div role="list" className={`space-y-6 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                 {applicationData.details.map((detail) => (
                   <motion.div
                     key={detail.id}

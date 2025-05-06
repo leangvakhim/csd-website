@@ -8,6 +8,7 @@ import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 const DeputyHeadofDepartment = () => {
     const [deputyData, setDeputyData] = useState([]);
     const [socials, setSocials] = useState({});
+    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
 
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     useEffect(() => {
@@ -26,6 +27,7 @@ const DeputyHeadofDepartment = () => {
                     .slice(1, 3);
                 const formattedDeputies = deputies.map(deputy => ({
                     id: deputy.f_id,
+                    ref_id: deputy.ref_id,
                     name: deputy.f_name,
                     bio: deputy.f_portfolio || 'No bio available.',
                     image: deputy.img?.img
@@ -68,7 +70,7 @@ const DeputyHeadofDepartment = () => {
                     <div className='flex flex-col xl:flex-row xl:flex-wrap gap-8 justify-center'>
                         {deputyData.map((deputy, index) => (
                             <div
-                                key={deputy.id}
+                                key={deputy.ref_id}
                                 className={`
                                     shadow-lg rounded-2xl p-4
                                     xl:w-[calc(50%-1rem)]
@@ -158,7 +160,9 @@ const DeputyHeadofDepartment = () => {
                                             </div>
                                         </div>
                                         <p className={`text-left ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{deputy.bio}</p>
-                                        <Link to={`/faculty/${deputy.id}`}>
+                                        <Link
+                                            to={`${prefix}/faculty/${deputy.ref_id}`}
+                                        >
                                             <button className={`bg-red-900 px-6 py-2 text-gray-50 rounded-2xl ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                                                 {currentLang === 1 ? "View" : "មើលបន្ថែម"}
                                             </button>
