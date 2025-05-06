@@ -87,8 +87,8 @@ const ResearchDetails = ({ refId }) => {
                     {renderSection(section)}
                 </div>
             ))}
-            {/* <StudentResearch />
-            <RecentResearch /> */}
+            <StudentResearch />
+            {/* <RecentResearch /> */}
         </div>
     );
 }

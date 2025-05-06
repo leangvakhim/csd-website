@@ -3,12 +3,14 @@ import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import { MdComputer } from 'react-icons/md';
+import { useLocation } from 'react-router-dom';
 
 const ResearchBanner = ({ researchId }) => {
   const [bannerSection, setBannerSection] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+  const location = useLocation();
+  const currentLang = location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
     setIsLoading(true);
@@ -21,7 +23,7 @@ const ResearchBanner = ({ researchId }) => {
             title: data.rsd_title,
             description: data.rsd_subtitle || '',
             image: `${API}/storage/uploads/${data.image.img}`,
-            lead: data.rsd_lead || (menuLang === 2 ? 'ការស្រាវជ្រាវ' : 'Research'),
+            lead: data.rsd_lead || (currentLang === 2 ? 'ការស្រាវជ្រាវ' : 'Research'),
           });
         } else {
           console.log('ResearchBanner: Invalid or incomplete research data');
@@ -98,12 +100,10 @@ const ResearchBanner = ({ researchId }) => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             viewport={{ once: true, amount: 0.5 }}
-            className="max-w-xl"
+            className={`max-w-xl `}
           >
             <h2
-              className={`lg:text-4xl text-3xl font-semibold mb-4 ${
-                currentLang === 2 ? 'font-khmer' : 'font-sans'
-              }`}
+              className={`lg:text-4xl text-3xl font-semibold mb-4 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}
             >
               {bannerSection.title}
             </h2>
