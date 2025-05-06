@@ -5,8 +5,7 @@ import { motion } from 'framer-motion';
 
 const ResearchMeeting = ({rsdtId}) => {
     const [professorData, setProfessorData] = useState(null);
-
-    console.log("rsdtId is; ",rsdtId);
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
         const fetchMeetingData = async () => {
@@ -41,9 +40,9 @@ const ResearchMeeting = ({rsdtId}) => {
 
                     {/* Text Section */}
                     <div className="md:w-2/3 md:pl-8">
-                        <h2 className="text-3xl font-semibold mb-4">{rsdm_title}</h2>
+                        <h2 className={`text-3xl font-semibold mb-4 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{rsdm_title}</h2>
                         <div
-                            className="text-gray-700 mb-6"
+                            className={`text-gray-700 mb-6 ${currentLang === 2 ? 'fonts-khmer leading-8' : 'font-sans-serif'}`}
                             dangerouslySetInnerHTML={{ __html: rsdm_detail }}
                         />
                     </div>

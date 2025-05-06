@@ -61,7 +61,7 @@ const ResearchInnovations = ({section, menuLang}) => {
           {currentLang === 1 ? "Research & Innovations" : "កិច្ចការស្រាវជ្រាវ & នវានុវត្តន៍"}
         </h1>
 
-        {/* Featured Research Section */}
+        {/* Featured Research Section (1 card)*/}
         {researchData.slice(0, 1).map((item) => (
           <motion.div
             key={item.id}
@@ -103,7 +103,7 @@ const ResearchInnovations = ({section, menuLang}) => {
                 >
                   {item.subtitle}
                 </motion.h3>
-               
+
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   {item.buttons.map((btn, btnIndex) => (
@@ -141,7 +141,7 @@ const ResearchInnovations = ({section, menuLang}) => {
           </motion.div>
         ))}
 
-        {/* Research Cards Grid */}
+        {/* Research Cards Grid (2 cards)*/}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {researchData.map((section, index) => (
             <motion.div

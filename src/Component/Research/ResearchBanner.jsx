@@ -4,26 +4,16 @@ import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import { MdComputer } from 'react-icons/md';
 
-const ResearchBanner = ({ researchId, menuLang }) => {
+const ResearchBanner = ({ researchId }) => {
   const [bannerSection, setBannerSection] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
-    if (!researchId) {
-      console.log('ResearchBanner: No researchId provided');
-      setError(
-        menuLang === 2
-          ? 'គ្មានលេខសម្គាល់ការស្រាវជ្រាវ'
-          : 'No research ID provided'
-      );
-      setIsLoading(false);
-      return;
-    }
-
     setIsLoading(true);
     axios
-      .get(`${API_ENDPOINTS.getResearch}/${researchId}?lang=${menuLang}`)
+      .get(`${API_ENDPOINTS.getResearch}/${researchId}`)
       .then((res) => {
         const data = res.data?.data;
         if (data && data.rsd_title && data.image?.img) {
@@ -35,67 +25,36 @@ const ResearchBanner = ({ researchId, menuLang }) => {
           });
         } else {
           console.log('ResearchBanner: Invalid or incomplete research data');
-          setError(
-            menuLang === 2
-              ? 'ទិន្នន័យការស្រាវជ្រាវមិនត្រឹមត្រូវ'
-              : 'Invalid research data'
-          );
         }
         setIsLoading(false);
       })
       .catch((err) => {
         console.error('Error fetching research details:', err);
-        setError(
-          menuLang === 2
-            ? 'បរាជ័យក្នុងការទាញយកទិន្នន័យការស្រាវជ្រាវ'
-            : 'Failed to load research data'
-        );
         setIsLoading(false);
       });
-  }, [researchId, menuLang]);
+  }, [researchId, currentLang]);
 
   if (isLoading) {
     return (
       <section
-        lang={menuLang === 2 ? 'km' : 'en'}
+        lang={currentLang === 2 ? 'km' : 'en'}
         className={`text-center py-8 text-gray-600 ${
-          menuLang === 2 ? 'lang-khmer font-khmer' : 'lang-english font-sans'
+          currentLang === 2 ? 'lang-khmer font-khmer' : 'lang-english font-sans'
         }`}
       >
-        {menuLang === 2 ? 'កំពុងផ្ទុក...' : 'Loading research banner...'}
-      </section>
-    );
-  }
-
-  if (error || !bannerSection) {
-    return (
-      <section
-        lang={menuLang === 2 ? 'km' : 'en'}
-        className={`text-center py-8 text-red-600 ${
-          menuLang === 2 ? 'lang-khmer font-khmer' : 'lang-english font-sans'
-        }`}
-        role="banner"
-        aria-label={menuLang === 2 ? 'ផ្នែកបដាស្រាវជ្រាវ' : 'Research banner section'}
-      >
-        <p>{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700"
-        >
-          {menuLang === 2 ? 'សាកល្បងម្តងទៀត' : 'Retry'}
-        </button>
+        {currentLang === 2 ? 'កំពុងផ្ទុក...' : 'Loading research banner...'}
       </section>
     );
   }
 
   return (
     <section
-      lang={menuLang === 2 ? 'km' : 'en'}
+      lang={currentLang === 2 ? 'km' : 'en'}
       className={`relative ${
-        menuLang === 2 ? 'lang-khmer' : 'lang-english'
+        currentLang === 2 ? 'lang-khmer' : 'lang-english'
       }`}
       role="banner"
-      aria-label={menuLang === 2 ? 'ផ្នែកបដាស្រាវជ្រាវ' : 'Research banner section'}
+      aria-label={currentLang === 2 ? 'ផ្នែកបដាស្រាវជ្រាវ' : 'Research banner section'}
     >
       <motion.div
         initial={{ opacity: 0, y: 50 }}
@@ -126,7 +85,7 @@ const ResearchBanner = ({ researchId, menuLang }) => {
               transition={{ duration: 0.8 }}
               viewport={{ once: true, amount: 0.5 }}
               className={`text-black lg:text-base text-sm bg-gray-400 py-2 px-4 shadow-md rounded-full flex items-center mb-2 ${
-                menuLang === 2 ? 'font-khmer' : 'font-sans'
+                currentLang === 2 ? 'font-khmer' : 'font-sans'
               }`}
               aria-label={bannerSection.lead}
             >
@@ -143,7 +102,7 @@ const ResearchBanner = ({ researchId, menuLang }) => {
           >
             <h2
               className={`lg:text-4xl text-3xl font-semibold mb-4 ${
-                menuLang === 2 ? 'font-moul' : 'font-sans'
+                currentLang === 2 ? 'font-khmer' : 'font-sans'
               }`}
             >
               {bannerSection.title}
@@ -154,7 +113,7 @@ const ResearchBanner = ({ researchId, menuLang }) => {
               transition={{ duration: 0.8, delay: 0.6 }}
               viewport={{ once: true, amount: 0.5 }}
               className={`mb-4 xl:text-base text-sm text-gray-50 ${
-                menuLang === 2 ? 'font-khmer' : 'font-sans'
+                currentLang === 2 ? 'fonts-khmer' : 'font-sans'
               }`}
             >
               {bannerSection.description}

@@ -4,6 +4,7 @@ import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 
 const ResearchProject = ({rsdtId}) => {
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     const [projectRequirement, setProjectRequirement] = useState({ rsdp_title: '', rsdp_detail: '' });
 
     useEffect(() => {
@@ -41,11 +42,11 @@ const ResearchProject = ({rsdtId}) => {
                             viewport={{ once: true, amount: 0.5 }}
                             className="w-full px-4 xl:px-0"
                         >
-                            <h2 className="text-2xl xl:text-3xl font-bold mb-4">
+                            <h2 className={`text-2xl xl:text-3xl font-bold mb-4 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                                 {projectRequirement.rsdp_title}
                             </h2>
                             <div
-                                className="text-sm lg:text-lg text-gray-800"
+                                className={`text-sm lg:text-lg text-gray-800 ${currentLang === 2 ? 'fonts-khmer leading-8' : 'font-sans-serif'}`}
                                 dangerouslySetInnerHTML={{ __html: projectRequirement.rsdp_detail }}
                             />
                         </motion.div>

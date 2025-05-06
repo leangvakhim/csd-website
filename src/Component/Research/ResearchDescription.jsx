@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 
 const ResearchDescription = ({rsdtId}) => {
     const [descriptionSection, setDescriptionSection] = useState({ rsdd_title: '', rsdd_details: '' });
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
         if (rsdtId) {
@@ -34,7 +35,7 @@ const ResearchDescription = ({rsdtId}) => {
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.5, delay: 0.2 }}
                                 viewport={{ once: true }}
-                                className="xl:text-3xl w-full text-2xl font-extrabold text-gray-900"
+                                className={`xl:text-3xl w-full text-2xl font-extrabold text-gray-900 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}
                             >
                                 {descriptionSection.rsdd_title}
                             </motion.h2>
@@ -45,7 +46,7 @@ const ResearchDescription = ({rsdtId}) => {
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.5, delay: 0.6 }}
                                 viewport={{ once: true }}
-                                className="text-sm w-full xl:text-lg text-gray-800"
+                                className={`text-sm w-full xl:text-lg text-gray-800 ${currentLang === 2 ? 'fonts-khmer leading-8' : 'font-sans-serif'}`}
                                 dangerouslySetInnerHTML={{ __html: descriptionSection.rsdd_details }}
                             />
                         </div>
