@@ -101,7 +101,7 @@ const BasicRequirements = ({ key, section, menuLang}) => {
                       dy={10}
                       letterSpacing={6}
                     >
-                      <textPath href="#halfCirclePath" startOffset="50%">
+                      <textPath className={`${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`} href="#halfCirclePath" startOffset="50%">
                         {gcData.gc_tag}
                       </textPath>
                     </text>

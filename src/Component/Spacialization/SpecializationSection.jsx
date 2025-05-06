@@ -123,7 +123,7 @@ const SpecializationSection = ({ section, menuLang }) => {
               {innovation.title}
             </motion.h1>
 
-            <p className={`text-gray-800 text-[12px] sm:text-[14px] lg:text-[16px] mb-4 leading-relaxed ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>
+            <p className={`text-gray-800 text-[12px] sm:text-[14px] lg:text-[16px] mb-4 leading-relaxed ${menuLang === 2 ? "fonts-khmer" : "font-semibold"}`}>
               {innovation.description}
             </p>
 
@@ -157,7 +157,7 @@ const SpecializationSection = ({ section, menuLang }) => {
                     </div>
                   </div>
                   <div>
-                    <h6 className={`text-lg font-bold ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{s.title}</h6>
+                    <h6 className={`text-lg !font-bold ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{s.title}</h6>
                     <p className={`text-sm lg:text-lg ${menuLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>{s.description}</p>
                   </div>
                 </motion.div>

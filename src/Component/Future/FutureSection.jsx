@@ -8,6 +8,7 @@ import { FaCheck } from "react-icons/fa";
 
 const FutureSection = ({key, section, menuLang}) => {
   const [selectedBenefitIndex, setSelectedBenefitIndex] = useState(1);
+  const [currentLang, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
 
   const [futureData, setFutureData] = useState(null);
   const [benefitsData, setBenefitsData] = useState([]);
@@ -90,13 +91,17 @@ const FutureSection = ({key, section, menuLang}) => {
                     viewport={{ once: true, amount: 0.5 }}
                   >
                     <motion.h2
-                      className="text-3xl xl:text-4xl font-semibold mb-6 text-red-900"
+                      className={`text-3xl xl:text-4xl font-semibold mb-6 text-red-900 ${
+                        currentLang === 2 ? 'font-khmer leading-12' : 'font-semibold'
+                      }`}
                       variants={itemVariants}
                     >
                       {futureData?.title}
                     </motion.h2>
                     <motion.p
-                      className="text-md xl:text-lg text-gray-700 sm:text-justify"
+                      className={`text-md xl:text-lg text-gray-700 sm:text-justify ${
+                      currentLang === 2 ? 'fonts-khmer leading-8' : 'font-sans'
+                    }`}
                       variants={itemVariants}
                     >
                       {futureData?.subtitle}
@@ -158,8 +163,12 @@ const FutureSection = ({key, section, menuLang}) => {
                               </div>
 
                               <div>
-                                  <h3 className="text-xl font-semibold">{benefit.title}</h3>
-                                  <p className="text-md ">{benefit.description}</p>
+                                  <h3 className={`text-xl  ${
+                                    currentLang === 2 ? 'fonts-khmer !font-bold' : 'font-sans'
+                                  }`}>{benefit.title}</h3>
+                                  <p className={`text-md ${
+                                    currentLang === 2 ? 'fonts-khmer leading-7' : 'font-sans'
+                                  }`}>{benefit.description}</p>
                               </div>
                           </motion.div>
                       ))}
