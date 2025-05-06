@@ -26,6 +26,7 @@ const NewsBanner = ({menuLang, newId}) => {
           if (selectedItem) {
               setBannerSection({
                   title: selectedItem.n_title,
+                  description: selectedItem.n_shorttitle,
                   postDate: selectedItem.n_date
                       ? new Date(selectedItem.n_date).toLocaleDateString('en-GB', {
                             day: '2-digit',

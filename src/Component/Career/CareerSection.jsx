@@ -13,6 +13,8 @@ const CareerSection = ({ section, menuLang }) => {
     const [headerData, setHeaderData] = useState({
         hsec_title: 'default title',
         hsec_subtitle: 'default subtitle',
+        hsec_btntitle: null,
+        hsec_routepage: null,
     });
 
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
@@ -34,6 +36,8 @@ const CareerSection = ({ section, menuLang }) => {
                         setHeaderData({
                             hsec_title: filtered.hsec_title || 'default title',
                             hsec_subtitle: filtered.hsec_subtitle || 'default subtitle',
+                            hsec_btntitle: filtered.hsec_btntitle,
+                            hsec_routepage: filtered.hsec_routepage,
                         });
                     }
                 }
@@ -44,11 +48,11 @@ const CareerSection = ({ section, menuLang }) => {
                         (item) =>
                             item.display === 1 &&
                             item.active === 1 &&
-
                             item.lang === currentLang
                     )
                     .map((item) => ({
                         id: item.c_id,
+                        ref_id: item.ref_id,
                         title: item.c_title,
                         description: item.c_shorttitle,
                         date: new Date(item.c_date).toLocaleDateString('en-US', {
@@ -69,8 +73,6 @@ const CareerSection = ({ section, menuLang }) => {
 
         fetchCareerData();
     }, [currentLang]); // Re-fetch data if the language changes
-
-
 
     const containerVariants = {
         hidden: { opacity: 0, y: 50 },
@@ -107,15 +109,17 @@ const CareerSection = ({ section, menuLang }) => {
                     >
                         <div className="flex flex-col sm:flex-row items-start mb-8">
                             <div className="mr-6">
-                                <h2 className={`text-3xl font-semibold mb-2 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>{headerData.hsec_title}</h2>
-                                <p className={`mt-4 text-gray-800 ${menuLang === 2 ? "fonts-khmer" : "font-sans"}`}>{headerData.hsec_subtitle}</p>
+                                <h2 className={`text-3xl font-semibold mb-2 ${currentLang === 2 ? "font-khmer" : "font-semibold"}`}>{headerData.hsec_title}</h2>
+                                <p className={`mt-4 text-gray-800 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{headerData.hsec_subtitle}</p>
                             </div>
-                            <button
-                                onClick={() => navigate('/career')}
-                                className="bg-red-700 text-white p-3 rounded-lg flex items-center justify-center mt-4 sm:mt-0 hover:bg-red-800 transition duration-300"
-                            >
+                            {headerData.hsec_btntitle && (
+                                <button
+                                    onClick={() => navigate(headerData.hsec_routepage)}
+                                    className="bg-red-700 text-white p-3 rounded-lg flex items-center justify-center mt-4 sm:mt-0 hover:bg-red-800 transition duration-300"
+                                >
                                 <FaArrowRight className="h-6 w-6" />
                             </button>
+                            )}
                         </div>
                     </motion.div>
 
@@ -127,8 +131,11 @@ const CareerSection = ({ section, menuLang }) => {
                         {careers.length > 0 ? (
                             careers.map((career, index) => (
                                 <motion.div
-                                    key={career.id}
-                                    onClick={() => navigate(`/career/${career.id}`)}
+                                    key={career.ref_id}
+                                    onClick={() => {
+                                        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+                                        navigate(`${prefix}/career/${career.ref_id}`);
+                                    }}
                                     className="snap-start cursor-pointer relative sm:w-80 w-70 flex-shrink-0 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
                                     variants={itemVariants}
                                     whileHover={{ scale: 1.05 }}
@@ -143,11 +150,11 @@ const CareerSection = ({ section, menuLang }) => {
                                         className="absolute bottom-0 left-0 w-full text-white p-4 space-y-2"
                                         style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
                                     >
-                                        <h3 className={`text-lg font-semibold ${menuLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.title}</h3>
-                                        <p className={`text-gray-200 line-clamp-2 ${menuLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.description}</p>
+                                        <h3 className={`text-lg font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.title}</h3>
+                                        <p className={`text-gray-200 line-clamp-2 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.description}</p>
                                         <div className="flex items-center text-sm">
                                             <FaCalendarAlt className="mr-2" />
-                                            <p className={`text-gray-200 ${menuLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.date}</p>
+                                            <p className={`text-gray-200 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.date}</p>
                                         </div>
                                     </div>
                                 </motion.div>
