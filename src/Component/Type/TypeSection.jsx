@@ -56,7 +56,7 @@ const TypeSection = ({ section, menuLang }) => {
         <div className="mb-8 flex flex-col lg:flex-row xl:justify-between xl:items-start gap-6">
           <h2 className={`text-3xl font-bold ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{mainTitle}</h2>
 
-          <p className={`text-gray-800 max-w-2xl ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{description}</p>
+          <p className={`text-gray-800 max-w-2xl ${menuLang === 2 ? 'fonts-khmer leading-8' : 'font-sans'}`}>{description}</p>
         </div>
       </motion.div>
       <motion.div
@@ -72,7 +72,7 @@ const TypeSection = ({ section, menuLang }) => {
                 className={`rounded-lg p-6 shadow-lg border !border-gray-300 ${index % 2 === 1 ? 'mr-4 bg-red-800 text-white' : 'ml-4 bg-white text-gray-800'}`}
                 variants={itemVariants}
               >
-                <h3 className={`text-xl font-semibold mb-4 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{scholarship.stse_title}</h3>
+                <h2 className={`text-xl font-semibold mb-4 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{scholarship.stse_title}</h2>
                 <div className="space-y-4">
                   <div className={`flex items-start gap-2 mb-4 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                     <p className="text-lg" dangerouslySetInnerHTML={{ __html: scholarship.stse_detail }} />
@@ -113,14 +113,14 @@ const TypeSection = ({ section, menuLang }) => {
                     <div className="absolute top-[-40px] right-4 text-7xl opacity-90 text-red-700">
                       <RiDoubleQuotesR />
                     </div>
-                    <h3
+                    <h2
                       className={`text-xl font-semibold mb-2 ${
                         i !== 0 ? 'text-red-800' : ''
-                      }`}
+                      } ${menuLang === 2 ? 'font-khmer !text-lg' : 'font-sans'}`}
                     >
                       {s.stse_title}
-                    </h3>
-                    <p className={`${i !== 0 ? 'text-gray-700' : ''}`}>
+                    </h2>
+                    <p className={`${i !== 0 ? 'text-gray-700' : ''} ${menuLang === 2 ? 'fonts-khmer leading-8' : 'font-sans'}`}>
                       {s.stse_detail.replace(/<\/?[^>]+(>|$)/g, '')}
                     </p>
                   </motion.div>
