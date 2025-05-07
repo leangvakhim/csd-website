@@ -1,5 +1,5 @@
-// const API = "https://aimostore.shop";
-const API = "http://127.0.0.1:8000";
+const API = "https://aimostore.shop";
+// const API = "http://127.0.0.1:8000";
 const API_BASEURL = `${API}/api`;
 
 const API_ENDPOINTS = {
