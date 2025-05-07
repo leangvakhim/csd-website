@@ -257,9 +257,9 @@ const NewsSection = ({ section, menuLang }) => {
                       </span>
                     )}
                     <h3 className={`${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
-                      } text-lg font-semibold mb-4`}>{item.title}</h3>
+                      } text-lg font-semibold mb-4 line-clamp-2 overflow-hidden `}>{item.title}</h3>
                     <p className={`${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
-                      } text-gray-600`}>{item.description}</p>
+                      } text-gray-600 line-clamp-3 overflow-hidden `}>{item.description}</p>
                   </div>
                 </div>
               ))}

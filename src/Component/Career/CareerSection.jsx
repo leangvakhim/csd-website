@@ -150,8 +150,8 @@ const CareerSection = ({ section, menuLang }) => {
                                         className="absolute bottom-0 left-0 w-full text-white p-4 space-y-2"
                                         style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
                                     >
-                                        <h3 className={`text-lg font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.title}</h3>
-                                        <p className={`text-gray-200 line-clamp-2 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.description}</p>
+                                        <h3 className={`text-lg font-semibold line-clamp-1 overflow-hidden ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.title}</h3>
+                                        <p className={`text-gray-200 line-clamp-1 overflow-hidden ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.description}</p>
                                         <div className="flex items-center text-sm">
                                             <FaCalendarAlt className="mr-2" />
                                             <p className={`text-gray-200 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{career.date}</p>

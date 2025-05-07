@@ -193,14 +193,14 @@ const StudentResearch = () => {
                             e.target.src = '/placeholder-image.jpg';
                           }}
                         />
-                        <span className={`${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'} text-sm`}>
+                        <span className={`${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'} text-[10px] md:text-sm`}>
                           {button.title}
                         </span>
                       </button>
                     ))}
                   </div>
                   <div>
-                    <h3 className={`xl:text-xl text-lg font-semibold mb-2 line-clamp-2 ${currentLang === 2 ? 'fonts-khmer leading-8' : 'font-sans-serif'}`}>
+                    <h3 className={`xl:text-xl text-lg font-semibold mb-2 line-clamp-1  ${currentLang === 2 ? 'fonts-khmer leading-8' : 'font-sans-serif'}`}>
                       {section.title}
                     </h3>
 

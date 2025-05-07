@@ -247,10 +247,10 @@ const AnnouncementSection = ({ section, menuLang }) => {
                     />
                   </div>
                   <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
-                    <h2 className={`text-lg font-semibold mb-4 ${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                    <h2 className={`text-lg font-semibold mb-4 line-clamp-2 overflow-hidden ${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
                       }`}>{item.title}</h2>
                     <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"
-                      }text-gray-600`}>{item.description}</p>
+                      } text-gray-600 line-clamp-3 overflow-hidden`}>{item.description}</p>
                     <p className={`text-gray-500 text-sm mt-2 ${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
                       }`}>{item.date}</p>
                   </div>

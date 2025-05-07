@@ -174,13 +174,13 @@ const ResearchSection = ({section, menuLang}) => {
                 </button>
               )}
             </div>
-            <button
+            {/* <button
               onClick={() => setSelectedFilter(selectedFilter ? '' : 'IoT')}
               className="flex items-center gap-2 bg-red-800 text-white px-4 py-2 rounded-full shadow hover:bg-red-900 transition w-full sm:w-auto justify-center text-sm sm:text-base"
             >
               <FaFilter className="text-sm" />
               <span>Filter</span>
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -212,10 +212,10 @@ const ResearchSection = ({section, menuLang}) => {
                     </button>
                   </div>
                   <div>
-                    <h3 className={`text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 line-clamp-2 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans-serif'}`}>
+                    <h3 className={`line-clamp-1 overflow-hidden text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans-serif'}`}>
                       {section.title}
                     </h3>
-                    <p className={`mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base line-clamp-2 sm:line-clamp-3 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
+                    <p className={`line-clamp-2 overflow-hidden mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base sm:line-clamp-2 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
                       {section.description}
                     </p>
                     <button
@@ -223,11 +223,11 @@ const ResearchSection = ({section, menuLang}) => {
                         const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
                         navigate(`${prefix}/research/${section.ref_id}`);
                       }}
-                      className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${menuLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
+                      className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
                         }`}
 
                     >
-                      <MdExplore className="mr-1 text-xs sm:text-base" />
+                      <MdExplore className={`mr-1 text-xs sm:text-base `} />
                       {currentLang === 1 ? "Explore" : "មើលបន្ថែម"}
                     </button>
                   </div>
