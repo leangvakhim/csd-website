@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import contactImage from "../../assets/web-sample-1(3).jpg";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../Service/APIconfig";
+import Swal from 'sweetalert2';
 
 const QuestionSection = () => {
   const [formData, setFormData] = useState({
@@ -19,13 +20,28 @@ const QuestionSection = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log("formData is: ",formData);
-      await axios.post(API_ENDPOINTS.submitEmail, formData);
-      alert("Message sent successfully!");
-      setFormData({ m_firstname: "", m_lastname: "", m_email: "", m_description: "" });
+      await axios.post(API_ENDPOINTS.createEmail, formData);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Your message has been sent!',
+      });
+
+      setFormData({
+        m_firstname: "",
+        m_lastname: "",
+        m_email: "",
+        m_description: ""
+      });
     } catch (err) {
       console.error(err);
-      alert("Failed to send message.");
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Failed to send your message. Please try again!',
+      });
     }
   };
 
