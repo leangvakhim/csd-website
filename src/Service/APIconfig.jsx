@@ -196,6 +196,9 @@ const API_ENDPOINTS = {
     // import announcement
     getAnnouncementStudent: `${API_BASEURL}/announcement/student`,
     getAnnouncement: `${API_BASEURL}/announcements`,
+
+    // submit email
+    submitEmail: `${API_BASEURL}/emails/submit`
 };
 
 export { API_BASEURL, API_ENDPOINTS, API };

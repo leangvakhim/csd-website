@@ -6,7 +6,9 @@ const CopyRight = () => {
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     return (
-        <footer className='text-center text-gray-300 py-5'>
+        <footer className={`text-center text-gray-300 py-5 ${
+                    currentLang === 2 ? "fonts-khmer" : "font-sans"
+                  }`}>
             <p className="tracking-wide">
                 © {currentYear} {currentLang === 1 ? "Department of Computer Science. All rights reserved. Developed by" : "រក្សាសិទ្ធិគ្រប់យ៉ាងដោយដេប៉ាតឺម៉ង់ព័ត៌មានវិទ្យា។ អភិវឌ្ឍន៌ដោយ "}{" "}
                 <Link to="/developer" className="text-red-900 hover:underline">

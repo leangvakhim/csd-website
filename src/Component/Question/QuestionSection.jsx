@@ -1,8 +1,34 @@
-import React from "react";
+import React, {useState} from "react";
 import { motion } from "framer-motion";
 import contactImage from "../../assets/web-sample-1(3).jpg";
+import axios from "axios";
+import { API_ENDPOINTS } from "../../Service/APIconfig";
 
 const QuestionSection = () => {
+  const [formData, setFormData] = useState({
+    m_firstname: '',
+    m_lastname: '',
+    m_email: '',
+    m_description: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      console.log("formData is: ",formData);
+      await axios.post(API_ENDPOINTS.submitEmail, formData);
+      alert("Message sent successfully!");
+      setFormData({ m_firstname: "", m_lastname: "", m_email: "", m_description: "" });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to send message.");
+    }
+  };
+
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
   return (
     <div className="my-16">
@@ -42,7 +68,7 @@ const QuestionSection = () => {
                 >
                   {currentLang === 1 ? "Contact Us If You Have Any Questions" : "សូមទាក់ទងមកយើង ប្រសិនបើអ្នកមានចម្ងល់"}
                 </motion.h1>
-                <form className="space-y-6">
+                <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -57,6 +83,9 @@ const QuestionSection = () => {
                       <input
                         type="text"
                         required
+                        name="m_firstname"
+                        value={formData.m_firstname}
+                        onChange={handleChange}
                         className="mt-1 block w-full px-3 py-2 bg-gray-300 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </motion.div>
@@ -72,7 +101,10 @@ const QuestionSection = () => {
                       </label>
                       <input
                         type="text"
+                        name="m_lastname"
                         required
+                        value={formData.m_lastname}
+                        onChange={handleChange}
                         className="mt-1 block w-full px-3 py-2 border bg-gray-300 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </motion.div>
@@ -89,7 +121,10 @@ const QuestionSection = () => {
                     </label>
                     <input
                       type="email"
+                      name="m_email"
                       required
+                      value={formData.m_email}
+                      onChange={handleChange}
                       className="mt-1 block w-full px-3 py-2 border bg-gray-300 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     />
                   </motion.div>
@@ -104,7 +139,10 @@ const QuestionSection = () => {
                       {currentLang === 1 ? "Description" : "ពិពណ៌នា"}
                     </label>
                     <textarea
+                      name="m_description"
                       rows="4"
+                      value={formData.m_description}
+                      onChange={handleChange}
                       className="mt-1 block w-full px-3 py-2 border bg-gray-300 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     ></textarea>
                   </motion.div>

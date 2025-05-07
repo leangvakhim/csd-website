@@ -53,7 +53,7 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
               >
                 {/* Parent Menu Item as Link */}
                 <Link
-                  to={menu.p_alias || `/${menu.title.toLowerCase()}`}
+                  to={menu.p_alias}
                   className={`flex items-center text-[18px] uppercase hover:text-red-900 ${
                     currentLang === 2 ? "fonts-khmer" : "font-sans"
                   } ${isActive ? "text-red-900 font-bold" : ""}`}
