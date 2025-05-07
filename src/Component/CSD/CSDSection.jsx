@@ -130,7 +130,7 @@ const CSDSection = ({key, section, menuLang}) => {
                                   <objective.icon />
                               </div>
                               <div>
-                                  <h3 className={`text-lg sm:text-xl font-semibold mb-2 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{objective.title}</h3>
+                                  <h2 className={`text-lg sm:text-lg mb-2 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'} `}>{objective.title}</h2>
                                   <p className={`text-sm sm:text-base ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{objective.description}</p>
                               </div>
                           </div>
