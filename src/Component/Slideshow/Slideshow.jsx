@@ -175,7 +175,7 @@ const Slideshow = ({key, section, menuLang}) => {
             <Link
                 to={slides[currentSlide].buttonLink2}
                 className={`${
-                    currentLang === 2 ? "font-khmer" : "font-sans"
+                    currentLang === 2 ? "fonts-khmer" : "font-sans"
                   } border text-white px-8 py-2 xl:text-md text-[12px] xl:text-lg rounded-full transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg flex items-center justify-center`}
             >
                 {slides[currentSlide].buttonText2}
