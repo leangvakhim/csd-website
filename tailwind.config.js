@@ -24,6 +24,7 @@ export default {
   plugins: [
     import('@tailwindcss/forms').then(module => module.default),
     import('@tailwindcss/typography').then(module => module.default),
+    require('tailwind-scrollbar-hide'),
     // Other plugins here
   ],
 }

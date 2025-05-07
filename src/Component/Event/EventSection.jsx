@@ -75,7 +75,7 @@ const EventSection = ({ section, menuLang }) => {
                     });
                     } else {
                     setHeaderData({
-                        hsec_title: 'New',
+                        hsec_title: 'Event',
                         hsec_amount: 4,
                     });
                 }
@@ -99,7 +99,8 @@ const EventSection = ({ section, menuLang }) => {
                     .filter((item) =>
                         item.img && item.img.img && item.lang === currentLang
                     )
-                    .slice(0, 4)
+                    .slice(0, headerData.hsec_amount)
+                    .sort((a, b) => b.e_order - a.e_order)
                     .map(item => ({
                         id: item.e_id,
                         ref_id: item.ref_id,
@@ -114,8 +115,7 @@ const EventSection = ({ section, menuLang }) => {
                             })
                             : 'TBD',
                         imageUrl: item.img.img ? `${BASE_IMAGE_URL}/${item.img.img}` : DEFAULT_IMAGE,
-                    }))
-                    .slice(0, headerData.hsec_amount || 4);
+                    }));
 
                 setEvents(transformed);
             } catch (error) {
@@ -131,7 +131,9 @@ const EventSection = ({ section, menuLang }) => {
 
     const tags = [...new Set(events.map(item => item.tag))];
 
-    const filteredEvents = events.filter(item => {
+    const filteredEvents = events
+        .slice(0, headerData.hsec_amount)
+        .filter(item => {
         const matchesSearch =
             item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
             item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
@@ -181,7 +183,8 @@ const EventSection = ({ section, menuLang }) => {
                             {headerData.hsec_title || 'Events'}
                         </h1>
                         {headerData.hsec_subtitle && (
-                            <p className="text-xs sm:text-sm text-gray-500">
+                            <p className={`text-xs sm:text-sm text-gray-500 ${currentLang === 2 ? "fonts-khmer " : "font-sans"
+                            }`}>
                                 {headerData.hsec_subtitle}
                             </p>
                         )}
@@ -226,62 +229,122 @@ const EventSection = ({ section, menuLang }) => {
                 </motion.div>
 
                 {/* Events List */}
-                <div className="py-4">
-                    {filteredEvents.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
-                            {filteredEvents.map((event, index) => (
-                                <motion.div
-                                    key={event.ref_id}
-                                    initial={{ opacity: 0, y: 50 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: index * 0.2 }}
-                                    viewport={{ once: true, amount: 0.3 }}
-                                >
-                                    <Link
-                                        to={`${prefix}/events/${event.ref_id}`}
-                                        className="block group"
-                                        aria-label={event.title}
+                {filteredEvents.length < 5 ? (
+                    <div className="py-4">
+                        {filteredEvents.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
+                                {filteredEvents.map((event, index) => (
+                                    <motion.div
+                                        key={event.ref_id}
+                                        initial={{ opacity: 0, y: 50 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.6, delay: index * 0.2 }}
+                                        viewport={{ once: true, amount: 0.3 }}
                                     >
-                                        <div className="bg-white h-full lg:h-[300px] rounded-2xl p-4 sm:p-5 shadow-md flex flex-col lg:flex-row items-center hover:shadow-lg transition-shadow duration-300">
-                                            <div className="w-full lg:w-1/2 h-full flex justify-center items-center mb-4 lg:mb-0">
-                                                <img
-                                                    src={event.imageUrl}
-                                                    alt={event.title}
-                                                    className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
-                                                    loading="lazy"
-                                                    onError={e => (e.target.src = DEFAULT_IMAGE)}
-                                                />
-                                            </div>
-                                            <div className="w-full lg:w-1/2  p-4 sm:p-5">
-                                                {event.category && (
-                                                    <span className={`${currentLang === 2 ? "fonts-khmer " : "font-sans"
-                                                    } bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2`}>
-                                                        {event.tag}
+                                        <Link
+                                            to={`${prefix}/events/${event.ref_id}`}
+                                            className="block group"
+                                            aria-label={event.title}
+                                        >
+                                            <div className="bg-white h-full lg:h-[300px] rounded-2xl p-4 sm:p-5 shadow-md flex flex-col lg:flex-row items-center hover:shadow-lg transition-shadow duration-300">
+                                                <div className="w-full lg:w-1/2 h-full flex justify-center items-center mb-4 lg:mb-0">
+                                                    <img
+                                                        src={event.imageUrl}
+                                                        alt={event.title}
+                                                        className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
+                                                        loading="lazy"
+                                                        onError={e => (e.target.src = DEFAULT_IMAGE)}
+                                                    />
+                                                </div>
+                                                <div className="w-full lg:w-1/2  p-4 sm:p-5">
+                                                    {event.category && (
+                                                        <span className={`${currentLang === 2 ? "fonts-khmer " : "font-sans"
+                                                        } bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2`}>
+                                                            {event.tag}
+                                                        </span>
+                                                    )}
+                                                    <h3 className={`${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                                                        } line-clamp-2 overflow-hidden text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4`}>
+                                                        {event.title}
+                                                    </h3>
+                                                    <p className={`${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                                                        } text-xs line-clamp-3 overflow-hidden sm:text-sm text-gray-700`}>
+                                                        {event.description}
+                                                    </p>
+                                                    <span className={`${currentLang === 2 ? "fonts-khmer text-[16px]" : "font-sans"
+                                                        } text-xs sm:text-sm text-gray-700 flex items-center gap-2 mt-3 sm:mt-4`}>
+                                                        <PiCalendarDots className="text-red-600" />
+                                                        {event.date}
                                                     </span>
-                                                )}
-                                                <h3 className={`${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
-                                                    } line-clamp-2 overflow-hidden text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4`}>
-                                                    {event.title}
-                                                </h3>
-                                                <p className={`${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
-                                                    } text-xs line-clamp-3 overflow-hidden sm:text-sm text-gray-700`}>
-                                                    {event.description}
-                                                </p>
-                                                <span className={`${currentLang === 2 ? "fonts-khmer text-[16px]" : "font-sans"
-                                                    } text-xs sm:text-sm text-gray-700 flex items-center gap-2 mt-3 sm:mt-4`}>
-                                                    <PiCalendarDots className="text-red-600" />
-                                                    {event.date}
-                                                </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-center text-gray-500">No events found.</p>
-                    )}
-                </div>
+                                        </Link>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-center text-gray-500">No events found.</p>
+                        )}
+                    </div>
+                ) : (
+                    <div className="py-4 overflow-hidden">
+                        {filteredEvents.length > 0 ? (
+                            <div className=" flex overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-hide gap-4 px-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-transparent">
+                                {filteredEvents.map((event, index) => (
+                                    <motion.div
+                                        key={event.ref_id}
+                                        initial={{ opacity: 0, y: 50 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.6, delay: index * 0.2 }}
+                                        viewport={{ once: true, amount: 0.3 }}
+                                        className="w-[calc(50%-0.5rem)] min-w-[calc(50%-0.5rem)] snap-start flex-shrink-0"
+                                    >
+                                        <Link
+                                            to={`${prefix}/events/${event.ref_id}`}
+                                            className="block group"
+                                            aria-label={event.title}
+                                        >
+                                            <div className="bg-white h-full lg:h-[300px] rounded-2xl p-4 sm:p-5 shadow-md flex flex-col lg:flex-row items-center hover:shadow-lg transition-shadow duration-300">
+                                                <div className="w-full lg:w-1/2 h-full flex justify-center items-center mb-4 lg:mb-0">
+                                                    <img
+                                                        src={event.imageUrl}
+                                                        alt={event.title}
+                                                        className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
+                                                        loading="lazy"
+                                                        onError={e => (e.target.src = DEFAULT_IMAGE)}
+                                                    />
+                                                </div>
+                                                <div className="w-full lg:w-1/2  p-4 sm:p-5">
+                                                    {event.category && (
+                                                        <span className={`${currentLang === 2 ? "fonts-khmer " : "font-sans"
+                                                        } bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2`}>
+                                                            {event.tag}
+                                                        </span>
+                                                    )}
+                                                    <h3 className={`${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                                                        } line-clamp-2 overflow-hidden text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4`}>
+                                                        {event.title}
+                                                    </h3>
+                                                    <p className={`${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                                                        } text-xs line-clamp-3 overflow-hidden sm:text-sm text-gray-700`}>
+                                                        {event.description}
+                                                    </p>
+                                                    <span className={`${currentLang === 2 ? "fonts-khmer text-[16px]" : "font-sans"
+                                                        } text-xs sm:text-sm text-gray-700 flex items-center gap-2 mt-3 sm:mt-4`}>
+                                                        <PiCalendarDots className="text-red-600" />
+                                                        {event.date}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-center text-gray-500">No events found.</p>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

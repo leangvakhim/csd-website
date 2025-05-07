@@ -104,7 +104,9 @@ const NewsSection = ({ section, menuLang }) => {
             item.lang === currentLang &&
             item.display === 1
         );
-        const transformed = filteredList.map(announcement => ({
+        const transformed = filteredList
+        .sort((a, b) => b.n_order - a.n_order)
+        .map(announcement => ({
           id: announcement.n_id,
           ref_id: announcement.ref_id,
           tag: announcement.n_tags,
@@ -120,7 +122,8 @@ const NewsSection = ({ section, menuLang }) => {
           imageUrl: announcement?.img?.img
             ? `${BASE_IMAGE_URL}/${announcement.img.img}`
             : DEFAULT_IMAGE,
-        }));
+        }))
+        .slice(0, headerData.hsec_amount);
 
         setNewsItems(
           isHomePage ? transformed.slice(0, headerData.hsec_amount) : transformed
@@ -138,7 +141,9 @@ const NewsSection = ({ section, menuLang }) => {
 
   const tags = [...new Set(newsItems.map(item => item.tag).filter(tag => tag))];
 
-  const filteredNews = newsItems.filter(item => {
+  const filteredNews = newsItems
+    .slice(0, headerData.hsec_amount)
+    .filter(item => {
     const matchesSearch =
       item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
@@ -182,10 +187,18 @@ const NewsSection = ({ section, menuLang }) => {
           viewport={{ once: true }}
           className="flex flex-col sm:flex-row justify-between items-center mb-8"
         >
-          <h1 className={`${currentLang === 2 ? "font-khmer " : "font-sans"
+          <div className='pr-8'>
+            <h1 className={`${currentLang === 2 ? "font-khmer " : "font-sans"
             } text-3xl font-semibold mb-4`}>
             {headerData.hsec_title}
           </h1>
+          {headerData.hsec_subtitle && (
+            <p className={`text-xs sm:text-sm text-gray-500 ${currentLang === 2 ? "fonts-khmer " : "font-sans"
+            }`}>
+              {headerData.hsec_subtitle}
+            </p>
+          )}
+          </div>
             <motion.div
               initial={{ opacity: 0, y: -50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -231,43 +244,88 @@ const NewsSection = ({ section, menuLang }) => {
 
             </motion.div>
         </motion.div>
-        {filteredNews.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-            {newsItems.map(item => (
-                <div
-                  key={item.ref_id}
-                  className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
-                  onClick={() => {
-                    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                    navigate(`${prefix}/news/${item.ref_id}`);
-                  }}
-                >
-                  <div className="p-3 w-full lg:w-1/2 h-58">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="w-full h-full object-cover rounded-lg"
-                    />
+        {filteredNews.length < 5 ? (
+          <div>
+          {filteredNews.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+              {filteredNews.map(item => (
+                  <div
+                    key={item.ref_id}
+                    className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
+                    onClick={() => {
+                      const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+                      navigate(`${prefix}/news/${item.ref_id}`);
+                    }}
+                  >
+                    <div className="p-3 w-full lg:w-1/2 h-58">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="p-6 flex flex-col w-full lg:w-1/2 justify-center">
+                      {item.tag && (
+                        <span className={`${currentLang === 2 ? "fonts-khmer " : "font-sans"
+                        } bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2`}>
+                          {item.tag}
+                        </span>
+                      )}
+                      <h3 className={`${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                        } text-lg font-semibold mb-4 line-clamp-2 overflow-hidden `}>{item.title}</h3>
+                      <p className={`${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                        } text-gray-600 line-clamp-3 overflow-hidden `}>{item.description}</p>
+                    </div>
                   </div>
-                  <div className="p-6 flex flex-col w-full lg:w-1/2 justify-center">
-                    {item.tag && (
-                      <span className={`${currentLang === 2 ? "fonts-khmer " : "font-sans"
-                      } bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2`}>
-                        {item.tag}
-                      </span>
-                    )}
-                    <h3 className={`${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
-                      } text-lg font-semibold mb-4 line-clamp-2 overflow-hidden `}>{item.title}</h3>
-                    <p className={`${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
-                      } text-gray-600 line-clamp-3 overflow-hidden `}>{item.description}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+            </div>
+          ): (
+            <p className="text-center text-gray-500">
+              No news found.
+            </p>
+          )}
+        </div>
+        ) : (
+          <div className='overflow-x-auto overflow-y-hidden px-4 scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-transparent'>
+            {filteredNews.length > 0 ? (
+              <div className="gap-32 md:gap-8 grid grid-flow-col auto-cols-[calc(50%-0.75rem)] snap-x snap-mandatory scroll-smooth">
+                {filteredNews.map(item => (
+                    <div
+                      key={item.ref_id}
+                      className=" min-w-[340px] bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer snap-start"
+                      onClick={() => {
+                        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+                        navigate(`${prefix}/news/${item.ref_id}`);
+                      }}
+                    >
+                      <div className="p-3 w-full lg:w-1/2 h-58">
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      </div>
+                      <div className="p-6 flex flex-col w-full lg:w-1/2 justify-center">
+                        {item.tag && (
+                          <span className={`${currentLang === 2 ? "fonts-khmer " : "font-sans"
+                          } bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-semibold self-start mb-2`}>
+                            {item.tag}
+                          </span>
+                        )}
+                        <h3 className={`${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
+                          } text-lg font-semibold mb-4 line-clamp-2 overflow-hidden `}>{item.title}</h3>
+                        <p className={`${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
+                          } text-gray-600 line-clamp-3 overflow-hidden `}>{item.description}</p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ): (
+              <p className="text-center text-gray-500">
+                No news found.
+              </p>
+            )}
           </div>
-        ): (
-          <p className="text-center text-gray-500">
-            No news found.
-          </p>
         )}
       </div>
     </div>

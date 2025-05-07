@@ -10,7 +10,7 @@ const OverFlowScholarshipSection = ({sectionData}) => {
   const navigate = useNavigate();
   const scrollContainerRef = useRef(null);
   const [scholarships, setScholarships] = useState([]);
-  const [headerData, setHeaderData] = useState({ hsec_title: '', hsec_amount: 4, hsec_btntitle: 'View All' });
+  const [headerData, setHeaderData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
@@ -32,23 +32,36 @@ const OverFlowScholarshipSection = ({sectionData}) => {
   useEffect(() => {
     const fetchHeaderData = async () => {
       try {
-        const headerRes = await axios.get(API_ENDPOINTS.getHeaderSection);
+        const response = await axios.get(API_ENDPOINTS.getHeaderSection);
+        const headerList = response.data?.data || [];
 
-        if (!headerRes?.data) {
-          throw new Error('No data received from API');
-        }
+        const matchedHeader = headerList.find(
+          (item) =>
+            item.hsec_sec === sectionData.sec_id &&
+            item.section?.sec_type === "Scholarship" &&
+            item.section?.display === 1 &&
+            item.section?.active === 1
+        );
 
-        const { hsec_title, hsec_amount, hsec_btntitle } = headerRes.data;
-
-        if (hsec_title && typeof hsec_amount === 'number') {
+        if (!matchedHeader) {
+          console.warn("No matching header found");
           setHeaderData({
-            hsec_title: hsec_title || '',
-            hsec_amount: typeof hsec_amount === 'number' ? hsec_amount : 4,
-            hsec_btntitle: hsec_btntitle || 'View All',
+            hsec_title: "Scholarship",
+            hsec_amount: 4,
+            hsec_subtitle: "",
+            hsec_btntitle: "",
+            hsec_routepage: "",
           });
-        } else {
-          throw new Error('Missing or invalid required fields');
+          return;
         }
+
+        setHeaderData({
+          hsec_title: matchedHeader.hsec_title || "Scholarship",
+          hsec_amount: matchedHeader.hsec_amount,
+          hsec_subtitle: matchedHeader.hsec_subtitle || "",
+          hsec_btntitle: matchedHeader.hsec_btntitle || "",
+          hsec_routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
+        });
       } catch (error) {
         console.error('Failed to fetch header data:', error.message, error);
         setHeaderData({
@@ -205,11 +218,13 @@ const OverFlowScholarshipSection = ({sectionData}) => {
             transition={{ duration: 0.5, delay: 0.6 }}
             viewport={{ once: true }}
           >
-            <Link to={resolvedAlias} className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
-              <span className={`mr-2 text-sm ${currentLang === 2 ? "fonts-khmer" : "font-sans"
-                      }`}>{sectionData.hsec_btntitle}</span>
-              <FaArrowRight className="text-red-800" />
-            </Link>
+            {sectionData.hsec_btntitle && (
+              <Link to={resolvedAlias} className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
+                <span className={`mr-2 text-sm ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                        }`}>{sectionData.hsec_btntitle}</span>
+                <FaArrowRight className="text-red-800" />
+              </Link>
+            )}
           </motion.div>
         </motion.div>
 
