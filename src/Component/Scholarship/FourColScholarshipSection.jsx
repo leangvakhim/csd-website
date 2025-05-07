@@ -224,8 +224,8 @@ const FourColScholarshipSection = ({sectionData}) => {
                 </div>
                 <div className="p-4 w-full">
                   <p className={`text-red-800 mb-4 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>{scholarship.tag}</p>
-                  <h3 className={`text-lg font-semibold mb-2 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{scholarship.title}</h3>
-                  <p className={`text-gray-800 mb-2 ${currentLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>{scholarship.description}</p>
+                  <h3 className={`text-lg font-semibold mb-2 line-clamp-1 overflow-hidden ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>{scholarship.title}</h3>
+                  <p className={`text-gray-800 mb-2 line-clamp-2 overflow-hidden ${currentLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>{scholarship.description}</p>
                   <p className={`text-md py-4 text-gray-800 mb-2 flex items-center ${currentLang === 2 ? 'fonts-khmer text-[18px]' : 'font-sans'}`}>
                     <FaCalendarAlt className="mr-2" />
                     {currentLang === 1 ? "Deadline" : "ថ្ងៃផុតកំណត់"}: {scholarship.deadline}

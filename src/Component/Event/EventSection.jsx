@@ -260,11 +260,11 @@ const EventSection = ({ section, menuLang }) => {
                                                     </span>
                                                 )}
                                                 <h3 className={`${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
-                                                    } text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4`}>
+                                                    } line-clamp-2 overflow-hidden text-base sm:text-lg lg:text-xl font-semibold mt-2 mb-3 sm:mb-4`}>
                                                     {event.title}
                                                 </h3>
                                                 <p className={`${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
-                                                    } text-xs sm:text-sm text-gray-700 line-clamp-3`}>
+                                                    } text-xs line-clamp-3 overflow-hidden sm:text-sm text-gray-700`}>
                                                     {event.description}
                                                 </p>
                                                 <span className={`${currentLang === 2 ? "fonts-khmer text-[16px]" : "font-sans"
