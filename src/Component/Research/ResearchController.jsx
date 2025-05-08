@@ -63,11 +63,11 @@ const ResearchController = ({ section }) => {
     }
 
     // Render based on page alias
-    if (section.page.p_alias === '/home' || section.page.p_alias === "/km/home") {
-      return <ResearchInnovations section={researchData} />;
-    }
+    // if (section.page.p_alias === '/home' || section.page.p_alias === "/km/home") {
+    //   return <ResearchInnovations section={section} />;
+    // }
     if (section.page.p_alias === '/research' || section.page.p_alias === "/km/research") {
-      return <ResearchSection section={researchData} />;
+      return <ResearchSection section={section} />;
     }
 
     // Fallback for other page types
