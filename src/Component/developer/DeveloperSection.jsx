@@ -11,6 +11,28 @@ const DeveloperSection = () => {
   const [developers, setDevelopers] = useState([]);
   const [socials, setSocials] = useState({});
   const modalRef = useRef(null);
+  const [currentLang, setCurrentLang] = useState(
+    window.location.pathname.startsWith('/km') ? 2 : 1
+  );
+
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      const newLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+      setCurrentLang(newLang);
+    };
+
+    const observer = new MutationObserver(handleLanguageChange);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    window.addEventListener('popstate', handleLanguageChange);
+    window.addEventListener('pushstate', handleLanguageChange);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('popstate', handleLanguageChange);
+      window.removeEventListener('pushstate', handleLanguageChange);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchDevelopers = async () => {
@@ -19,31 +41,29 @@ const DeveloperSection = () => {
         const devRes = await axios.get(API_ENDPOINTS.getDevelopers);
         const allDevelopers = devRes.data?.data || [];
 
-        // Filter for lang: 1, display: 1, active: 1
-        const filteredDevelopers = allDevelopers.filter(
-          item =>
-            item.display === 1 &&
-            item.active === 1 &&
-            item.lang === 1 &&
-            // Ensure name is in Latin script (English)
-            /^[A-Za-z\s.]+$/.test(item.d_name)
-        );
+        // Filter for lang: currentLang, display: 1, active: 1, ensuring numbers
+        const filteredDevelopers = allDevelopers.filter(item => {
+          const valid =
+            Number(item.display) === 1 &&
+            Number(item.active) === 1 &&
+            Number(item.lang) === Number(currentLang);
+          return valid;
+        });
 
         // Remove duplicates based on image (d_img) and normalize names
         const uniqueDevelopers = [];
         const seenImages = new Set();
         const seenNames = new Set();
 
-        filteredDevelopers.filter(dev => dev.display === 1 && dev.active === 1)
+        filteredDevelopers
         .sort((a, b) => b.d_order - a.d_order)
         .forEach(dev => {
           const normalizedName = dev.d_name.toLowerCase().replace(/\s+/g, '');
           const imageId = dev.d_img;
-      
+
           if (
             !seenImages.has(imageId) &&
-            !seenNames.has(normalizedName) &&
-            (dev.d_name.includes('Mr.') || dev.d_name.includes('Ms.'))
+            !seenNames.has(normalizedName)
           ) {
             uniqueDevelopers.push({
               id: dev.d_id,
@@ -82,7 +102,7 @@ const DeveloperSection = () => {
     };
 
     fetchDevelopers();
-  }, []);
+  }, [currentLang]);
 
   // Close modal when clicking outside
   useEffect(() => {
@@ -105,7 +125,7 @@ const DeveloperSection = () => {
     <div className="my-16">
       <div className="container mx-auto px-4">
         <div className="space-y-10">
-          <h1 className="text-3xl font-semibold">Project Teams</h1>
+          <h1 className={`text-3xl font-semibold ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{currentLang === 1 ? "Project Teams" : "ក្រុមអ្នកអភិវឌ្ឍន៌"}</h1>
 
           {developers.length === 0 ? (
             <div className="text-center text-gray-500">No developers found.</div>
@@ -158,7 +178,7 @@ const DeveloperSection = () => {
                                           : '/placeholder-icon.png'
                                       }
                                       alt={social.ds_title || 'Social Icon'}
-                                      className="w-6 h-6 rounded-full object-cover"
+                                      className="w-6 h-6 rounded-full object-contain"
                                       onError={e => {
                                         e.target.src = '/placeholder-icon.png';
                                       }}
@@ -188,26 +208,29 @@ const DeveloperSection = () => {
                       </motion.div>
                     </div>
 
-                    <div className="space-y-6 max-w-md">
+                    <div className="space-y-6 max-w-[20rem]">
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <h1 className="text-2xl text-left font-semibold">
+                          <h1 className={`text-2xl text-left font-semibold ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                             {developer.name}
                           </h1>
                           <RiDoubleQuotesR className="text-7xl text-red-900" />
                         </div>
-                        <p>{developer.position}</p>
+                        <p className={`${currentLang === 2 ? "fonts-khmer !text-xl" : "font-sans"
+                      }`}>{developer.position}</p>
                       </div>
 
-                      <p className="text-left">{developer.bio}</p>
+                      <p className={`text-left line-clamp-3 ${currentLang === 2 ? "fonts-khmer leading-8" : "font-sans"
+                      }`}>{developer.bio}</p>
                       <button
                         onClick={() => {
                           setIsOpen(true);
                           setSelectedDeveloper(developer);
                         }}
-                        className="bg-red-900 px-6 py-2 text-gray-50 rounded-2xl"
+                        className={`bg-red-900 px-6 py-2 text-gray-50 rounded-2xl ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                      }`}
                       >
-                        View
+                        {currentLang === 1 ? "View" : "មើលបន្ថែម"}
                       </button>
                     </div>
                   </div>
@@ -237,17 +260,18 @@ const DeveloperSection = () => {
                 />
               </div>
 
-              <div className="w-full sm:w-1/3">
-                <h2 className="text-2xl font-semibold mb-2">
+              <div className="w-full sm:w-2/3">
+                <h2 className={`text-2xl font-semibold mb-2 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                   {selectedDeveloper.name}
                 </h2>
-                <p className="mb-4">{selectedDeveloper.bio}</p>
+                <p className={`mb-4 ${currentLang === 2 ? "fonts-khmer leading-8" : "font-sans"
+                      }`}>{selectedDeveloper.bio}</p>
                 <div className="text-start flex gap-3">
                   {socials[selectedDeveloper.id]?.length > 0 ? (
                     socials[selectedDeveloper.id].map(social => (
                       <motion.div
                         key={social.ds_id}
-                        whileHover={{ scale: 1.1 }}
+                        whileHover={{ scale: 1.2 }}
                         className="bg-white p-3 rounded-full shadow-lg"
                       >
                         <Link
@@ -263,7 +287,7 @@ const DeveloperSection = () => {
                                 : '/placeholder-icon.png'
                             }
                             alt={social.ds_title || 'Social Icon'}
-                            className="w-6 h-6 rounded-full object-cover"
+                            className="w-6 h-6 rounded-full object-contain"
                             onError={e => {
                               e.target.src = '/placeholder-icon.png';
                             }}
