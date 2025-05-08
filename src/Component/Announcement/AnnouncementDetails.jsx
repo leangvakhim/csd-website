@@ -70,10 +70,19 @@ const AnnouncementDetails = ({announcementID, menuLang}) => {
 
   // Calculate page range for pagination
   const paginationRange = () => {
-    if (totalPages <= 3) return Array.from({ length: totalPages }, (_, i) => i + 1);
-    if (currentPage <= 2) return [1, 2, 3];
-    if (currentPage >= totalPages - 1) return [totalPages - 2, totalPages - 1, totalPages];
-    return [currentPage - 1, currentPage, currentPage + 1];
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
+
+    const range = [];
+
+    if (currentPage <= 3) {
+      range.push(1, 2, 3, 4, '...', totalPages);
+    } else if (currentPage >= totalPages - 2) {
+      range.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+    } else {
+      range.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+    }
+
+    return range;
   };
 
   return (
@@ -125,31 +134,18 @@ const AnnouncementDetails = ({announcementID, menuLang}) => {
             <HiChevronLeft size={18} />
           </button>
 
-          {paginationRange().map((page, index) => (
-            <button
-              key={index}
-              onClick={() => handlePageChange(page)}
-              className={`px-3 py-1 border rounded-md ${currentPage === page ? "bg-red-800 text-white" : "text-gray-700 hover:bg-gray-200"
-                }`}
-            >
-              {page}
-            </button>
-          ))}
-
-          {/* Show Last Page if not displayed */}
-          {totalPages > 3 && currentPage < totalPages - 1 && (
-            <span className="px-3 py-1 text-gray-700">...</span>
-          )}
-
-          {/* Last Page Button */}
-          {totalPages > 3 && currentPage < totalPages - 1 && (
-            <button
-              onClick={() => handlePageChange(totalPages)}
-              className={`px-3 py-1 border rounded-md ${currentPage === totalPages ? "bg-red-800 text-white" : "text-gray-700 hover:bg-gray-200"
-                }`}
-            >
-              {totalPages}
-            </button>
+          {paginationRange().map((page, index) =>
+            page === '...' ? (
+              <span key={index} className="px-3 py-1 text-gray-700">...</span>
+            ) : (
+              <button
+                key={index}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1 border rounded-md ${currentPage === page ? "bg-red-800 text-white" : "text-gray-700 hover:bg-gray-200"}`}
+              >
+                {page}
+              </button>
+            )
           )}
 
           <button
