@@ -2,79 +2,61 @@ import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { MdExplore, MdComputer } from 'react-icons/md';
 import { AiOutlineRobot } from 'react-icons/ai';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
-const RecentResearch = ({menuLang}) => {
+const RecentResearch = () => {
   const navigate = useNavigate();
   const [researchData, setResearchData] = useState([]);
   const [headerData, setHeaderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+  const location = useLocation();
+  const currentLang = location.pathname.startsWith('/km') ? 2 : 1;
+  const [tags, setTags] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const researchResponse = await axios.get(API_ENDPOINTS.getResearchlab);
-        const researchData = researchResponse.data?.data || [];
-
-        // Filter for recent data (within the last 30 days)
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+        const researchResponse = await axios.get(API_ENDPOINTS.getResearchlab);
+        const researchData = researchResponse.data?.data || [];
+
         const formattedResearchData = researchData
           .filter((item) => {
-            // Ensure item is active and displayed
             if (item.display !== 1 || item.active !== 1) return false;
             if (item.lang !== currentLang) return false;
-            // Check if the item is recent based on created_at or published_date
+
             const itemDate = item.created_at
               ? new Date(item.created_at)
               : item.published_date
               ? new Date(item.published_date)
               : null;
 
-            // If no date is available, fallback to including all active/displayed items
             return itemDate ? itemDate >= thirtyDaysAgo : true;
           })
           .map((item) => ({
             id: item.rsdl_id,
+            ref_id: item.ref_id,
             title: item.rsdl_title || 'Untitled Research',
-          
+            description: item.rsdl_subtitle || 'No description available',
             image: item.img?.img
               ? `${API}/storage/uploads/${item.img?.img}`
               : '/placeholder-image.jpg',
             lead: item.rsdl_lead || 'Unknown Lead',
+            created_at: new Date(item.created_at),
           }))
-          // Sort by date (most recent first) or rsdl_id if no date is available
           .sort((a, b) => {
-            const dateA = a.created_at || a.published_date || 0;
-            const dateB = b.created_at || b.published_date || 0;
-            return dateB - dateA || b.id - a.id; // Fallback to rsdl_id if dates are equal or missing
+            const dateA = a.created_at || 0;
+            const dateB = b.created_at || 0;
+            return dateB - dateA || b.id - a.id;
           })
-          // Limit to the top 5 recent items
-          .slice(0, 5);
 
-        setResearchData(formattedResearchData);
-
-        const headerResponse = await axios.get(API_ENDPOINTS.getHeaderSection);
-        const header = headerResponse.data?.data || {};
-
-        if (header.display === 1 && header.active === 1) {
-          setHeaderData({
-            title: header.title || ' Recent Research Projects & Publications',
-            subtitle: header.subtitle || 'Explore the latest advancements in computer science research',
-          });
-        } else {
-          setHeaderData({
-            title: 'Recent Research Projects & Publications',
-            subtitle: 'Explore the latest advancements in computer science research',
-          });
-        }
-
+          setResearchData(formattedResearchData);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -84,7 +66,36 @@ const RecentResearch = ({menuLang}) => {
     };
 
     fetchData();
-  }, []);
+  }, [currentLang]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const tagRes = await axios.get(API_ENDPOINTS.getResearchlabTag);
+        const allTags = tagRes.data?.data || [];
+
+        const rsdlId = researchData[0]?.id;
+        if (!rsdlId) return;
+
+        const filteredTags = allTags
+          .filter(tag => tag.rsdlt_rsdl === rsdlId && tag.active === 1)
+          .map(tag => ({
+            title: tag.rsdlt_title,
+            image: tag.img?.img
+              ? `${API}/storage/uploads/${tag.img.img}`
+              : '/placeholder-image.jpg',
+          }));
+
+        setTags(filteredTags);
+      } catch (err) {
+        console.error('Failed to fetch research tags:', err);
+      }
+    };
+
+    if (researchData.length > 0) {
+      fetchTags();
+    }
+  }, [researchData]);
 
   // Navigation for carousel
   const handlePrev = () => {
@@ -95,11 +106,7 @@ const RecentResearch = ({menuLang}) => {
     setCurrentIndex((prev) => (prev === researchData.length - 1 ? 0 : prev + 1));
   };
 
-  // Buttons for display
-  const buttons = [
-    { icon: <MdComputer className="mr-1 text-xs sm:text-sm" />, label: 'Computational Advancements' },
-    { icon: <AiOutlineRobot className="mr-1 text-xs sm:text-sm" />, label: 'AI & Systems Optimization' },
-  ];
+  const buttons = tags;
 
   if (loading) {
     return (
@@ -130,9 +137,9 @@ const RecentResearch = ({menuLang}) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
-          <div className="mb-4 sm:mb-6 sm:mb-0">
-            <h2 className={`text-2xl sm:text-3xl font-semibold mb-2 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{headerData?.title}</h2>
-          
+          <div className="mb-4 sm:mb-0">
+            <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-semibold mb-2`}>{currentLang === 1 ? "Student Research" : "កិច្ចការស្រាវជ្រាវរបស់និស្សិត"}</h2>
+
           </div>
           <div className="flex gap-3 sm:gap-4 items-center">
             <button
@@ -155,7 +162,7 @@ const RecentResearch = ({menuLang}) => {
           <div className="flex space-x-8">
             {researchData.map((section, index) => (
               <div
-                key={section.id}
+                key={section.ref_id}
                 className={`bg-white rounded-lg shadow-md overflow-hidden relative group flex-shrink-0 sm:w-96 w-70 transition-transform duration-300 ${
                   index === currentIndex ? 'scale-100' : 'scale-95 opacity-80'
                 }`}
@@ -175,26 +182,37 @@ const RecentResearch = ({menuLang}) => {
                     {buttons.map((button, buttonIndex) => (
                       <button
                         key={buttonIndex}
-                        className={`text-black xl:text-[12px] text-[10px] bg-gray-300/50 py-2 px-4 shadow-md rounded-4xl flex items-center mb-2 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}
+                        className="text-black xl:text-[12px] text-[10px] bg-gray-300/50 py-2 px-4 shadow-md rounded-4xl flex items-center mb-2"
                       >
-                        {button.icon}
-                        {button.label}
+                        <img
+                          src={button.image}
+                          alt={button.title}
+                          className="w-4 h-4 mr-2 object-contain"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/placeholder-image.jpg';
+                          }}
+                        />
+                        <span className={`${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'} text-[10px] md:text-sm`}>
+                          {button.title}
+                        </span>
                       </button>
                     ))}
                   </div>
                   <div>
-                    <h3 className={`lg:text-xl text-lg font-semibold mb-2 line-clamp-2 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-semibold'}`}>
+                    <h3 className={`xl:text-xl text-lg font-semibold mb-2 line-clamp-1  ${currentLang === 2 ? 'fonts-khmer leading-8' : 'font-sans-serif'}`}>
                       {section.title}
                     </h3>
-                    <p className={`mb-4 xl:text-[16px] text-[12px] line-clamp-3 ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
-                      {section.description}
-                    </p>
+
                     <button
-                      onClick={() => navigate(`/researchlab/${section.id}`)}
-                      className="bg-red-900 hover:bg-red-800 lg:text-[14px] text-[12px] text-white py-2 px-6 rounded-4xl flex items-center"
+                      onClick={() => {
+                        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+                        navigate(`${prefix}/researchlab/${section.ref_id}`);
+                      }}
+                      className={`${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'} bg-red-900 hover:bg-red-800 xl:text-[14px] text-[12px] text-white py-2 px-6 rounded-4xl flex items-center`}
                     >
                       <MdExplore className="mr-2" />
-                      Explore
+                       {currentLang === 1 ? "Explore" : "មើលបន្ថែម"}
                     </button>
                   </div>
                 </div>

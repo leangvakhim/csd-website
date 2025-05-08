@@ -46,6 +46,7 @@ import NewsSection from './New/NewsSection';
 import TypeController from './Type/TypeController';
 import CSDSection from './CSD/CSDSection';
 import CriteriaSection from './Criteria/CriteriaSection';
+import StudentResearch from './Research/StudentResearch';
 
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
@@ -159,7 +160,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Faculty':
                                 return <FacultyCarouselSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Research':
-                                return <ResearchController key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <ResearchSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                                // return <ResearchController key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Scholarship':
                                 return <ScholarshipSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Career':
@@ -179,8 +181,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
 
                             case 'New':
                                 return <NewsSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                            // case 'Lab':
-                            //     return <PartnershipSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'Lab':
+                                return <StudentResearch key={section.sec_id} section={section} menuLang={menuLang} />;
 
                             case 'Potential':
                                 return <PotentialSection key={section.sec_id} section={section} menuLang={menuLang} />;

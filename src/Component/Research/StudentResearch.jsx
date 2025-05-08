@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaArrowRight } from 'react-icons/fa';
 import { MdExplore, MdComputer } from 'react-icons/md';
 import { AiOutlineRobot } from 'react-icons/ai';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 
-const StudentResearch = () => {
+const StudentResearch = ({section}) => {
   const navigate = useNavigate();
   const [researchData, setResearchData] = useState([]);
   const [headerData, setHeaderData] = useState(null);
@@ -20,44 +20,57 @@ const StudentResearch = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
         const researchResponse = await axios.get(API_ENDPOINTS.getResearchlab);
         const researchData = researchResponse.data?.data || [];
-
+        console.log("researchData is: ",researchData);
+        console.log("currentLang is: ",currentLang);
         const formattedResearchData = researchData
-          .filter((item) => {
-            if (item.display !== 1 || item.active !== 1) return false;
-            if (item.lang !== currentLang) return false;
-
-            const itemDate = item.created_at
-              ? new Date(item.created_at)
-              : item.published_date
-              ? new Date(item.published_date)
-              : null;
-
-            return itemDate ? itemDate >= thirtyDaysAgo : true;
-          })
+          .filter((item) =>
+            item.display === 1 &&
+            item.active === 1 &&
+            item.lang === currentLang
+          )
+          .sort((a, b) => b.rsdl_order - a.rsdl_order)
           .map((item) => ({
             id: item.rsdl_id,
             ref_id: item.ref_id,
             title: item.rsdl_title || 'Untitled Research',
-            description: item.rsdl_subtitle || 'No description available',
+            description: item.rsdl_detail || 'No description available',
             image: item.img?.img
               ? `${API}/storage/uploads/${item.img?.img}`
               : '/placeholder-image.jpg',
-            lead: item.rsdl_lead || 'Unknown Lead',
-            created_at: new Date(item.created_at),
           }))
-          .sort((a, b) => {
-            const dateA = a.created_at || 0;
-            const dateB = b.created_at || 0;
-            return dateB - dateA || b.id - a.id;
-          })
+
+          console.log("formattedResearchData is: ",formattedResearchData);
+
+          const headerResponse = await axios.get(API_ENDPOINTS.getHeaderSection);
+          const headerList = headerResponse.data?.data || [];
+
+          const matchedHeader = headerList.find(
+            (item) =>
+              item.hsec_sec === section.sec_id &&
+              item.section?.sec_type === "Lab" &&
+              item.section?.display === 1 &&
+              item.section?.active === 1
+          );
+
+          if (matchedHeader) {
+            setHeaderData({
+              title: matchedHeader.hsec_title || '',
+              subtitle: matchedHeader.hsec_subtitle || '',
+              routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
+              btntitle: matchedHeader.hsec_btntitle || '',
+              amount: matchedHeader.hsec_amount || '',
+            });
+          } else {
+            setHeaderData({
+              title: '',
+              subtitle: '',
+            });
+          }
 
           setResearchData(formattedResearchData);
-        setLoading(false);
+          setLoading(false);
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Failed to load data. Please try again later.');
@@ -67,6 +80,19 @@ const StudentResearch = () => {
 
     fetchData();
   }, [currentLang]);
+
+  const resolvePageAlias = async (routePage) => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.getPage);
+      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
+
+      const matched = pages.find((page) => page.p_title === routePage);
+      return matched?.p_alias || null;
+    } catch (error) {
+      console.error("Failed to fetch page alias:", error);
+      return null;
+    }
+  }
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -132,14 +158,18 @@ const StudentResearch = () => {
     );
   }
 
+  console.log("headerData is: ",headerData);
+
   return (
     <div className="my-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
+        {/* <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
           <div className="mb-4 sm:mb-0">
-            <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-semibold mb-2`}>{currentLang === 1 ? "Student Research" : "កិច្ចការស្រាវជ្រាវរបស់និស្សិត"}</h2>
-
+            <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-semibold mb-2`}>{headerData?.title}</h2>
+            <p className={`text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base max-w-2xl ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
+              {headerData?.subtitle}
+            </p>
           </div>
           <div className="flex gap-3 sm:gap-4 items-center">
             <button
@@ -154,6 +184,78 @@ const StudentResearch = () => {
             >
               <FaChevronRight />
             </button>
+          </div>
+        </div> */}
+        {/* Header Section */}
+        <div className="flex flex-col xl:flex-row justify-between items-center mb-6 sm:mb-8">
+          <div className="mb-4 sm:mb-6 xl:mb-0">
+            <div className='flex justify-between'>
+              <h2 className={`text-2xl sm:text-3xl font-semibold mb-2 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
+                {headerData?.title || 'Students Research'}
+              </h2>
+              <div className='block xl:hidden'>
+                {headerData.btntitle ? (
+                  <button
+                      onClick={() => navigate(headerData.routepage)}
+                      className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1 mr-8`}
+                      >
+                      <span className={`mr-2 lg:text-sm text-[12px] ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                          }`}>{headerData.btntitle}</span>
+                      <FaArrowRight className="text-red-800" />
+                  </button>
+                ) : (
+                  <div className=" flex flex-col sm:flex-row gap-3 sm:gap-4 items-center w-full sm:w-auto">
+                    <div className="flex gap-3 sm:gap-4 items-center">
+                      <button
+                        onClick={handlePrev}
+                        className="p-2 bg-pink-100 text-red-900 rounded-full hover:bg-gray-300"
+                      >
+                        <FaChevronLeft />
+                      </button>
+                      <button
+                        onClick={handleNext}
+                        className="p-2 bg-pink-100 text-red-900 rounded-full hover:bg-gray-300"
+                      >
+                        <FaChevronRight />
+                      </button>
+                    </div>
+                </div>
+                )}
+              </div>
+            </div>
+            <p className={`text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base max-w-2xl ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
+              {headerData?.subtitle ||
+                'A Deep Dive into Computer Science Research: From Fundamentals to Future Innovations'}
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 items-center lg:mt-0 ">
+            {headerData.btntitle ? (
+              <button
+                  onClick={() => navigate(headerData.routepage)}
+                  className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1 mr-8`}
+                  >
+                  <span className={`hidden xl:block mr-2 lg:text-sm text-[12px] ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                      }`}>{headerData.btntitle}</span>
+                  <FaArrowRight className="text-red-800 hidden xl:block" />
+              </button>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center w-full sm:w-auto">
+                <div className="flex gap-3 sm:gap-4 items-center">
+                  <button
+                    onClick={handlePrev}
+                    className="p-2 bg-pink-100 text-red-900 rounded-full hover:bg-gray-300"
+                  >
+                    <FaChevronLeft />
+                  </button>
+                  <button
+                    onClick={handleNext}
+                    className="p-2 bg-pink-100 text-red-900 rounded-full hover:bg-gray-300"
+                  >
+                    <FaChevronRight />
+                  </button>
+                </div>
+            </div>
+            )}
           </div>
         </div>
 
@@ -184,15 +286,17 @@ const StudentResearch = () => {
                         key={buttonIndex}
                         className="text-black xl:text-[12px] text-[10px] bg-gray-300/50 py-2 px-4 shadow-md rounded-4xl flex items-center mb-2"
                       >
-                        <img
-                          src={button.image}
-                          alt={button.title}
-                          className="w-4 h-4 mr-2 object-contain"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = '/placeholder-image.jpg';
-                          }}
-                        />
+                        {button.img && (
+                          <img
+                            src={button.image}
+                            alt={button.title}
+                            className="w-4 h-4 mr-2 object-contain"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/placeholder-image.jpg';
+                            }}
+                          />
+                        )}
                         <span className={`${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'} text-[10px] md:text-sm`}>
                           {button.title}
                         </span>
