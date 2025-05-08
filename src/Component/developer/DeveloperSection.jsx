@@ -178,7 +178,7 @@ const DeveloperSection = () => {
                                           : '/placeholder-icon.png'
                                       }
                                       alt={social.ds_title || 'Social Icon'}
-                                      className="w-6 h-6 rounded-full object-contain"
+                                      className="w-6 h-6 object-contain"
                                       onError={e => {
                                         e.target.src = '/placeholder-icon.png';
                                       }}
@@ -287,7 +287,7 @@ const DeveloperSection = () => {
                                 : '/placeholder-icon.png'
                             }
                             alt={social.ds_title || 'Social Icon'}
-                            className="w-6 h-6 rounded-full object-contain"
+                            className="w-6 h-6 object-contain"
                             onError={e => {
                               e.target.src = '/placeholder-icon.png';
                             }}
