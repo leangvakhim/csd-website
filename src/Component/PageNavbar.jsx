@@ -34,7 +34,7 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
       }`}
       ref={navbarRef}
     >
-      <div className="lg:flex space-x-6 uppercase">
+      <div className="md:flex space-x-6 uppercase">
         {menus
           .filter((menu) => menu.menup_id === null) // Parent menus only
           .map((menu) => {
@@ -54,7 +54,7 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
                 {/* Parent Menu Item as Link */}
                 <Link
                   to={menu.p_alias}
-                  className={`flex items-center text-[18px] uppercase hover:text-red-900 ${
+                  className={`flex items-center text-[16px] uppercase hover:text-red-900 ${
                     currentLang === 2 ? "fonts-khmer" : "font-sans"
                   } ${isActive ? "text-red-900 font-bold" : ""}`}
                   onClick={() => {
