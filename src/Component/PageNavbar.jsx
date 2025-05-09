@@ -20,9 +20,9 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
 
   const getMenuUrl = (menu) => {
     const basePath = currentLang === 2 ? "/km" : "";
-    if (!menu) return basePath || "/";
-    const alias = menu.p_alias || (menu.title ? menu.title.toLowerCase().replace(/\s+/g, "-") : "");
-    return `${basePath}/${alias}`.replace(/\/+$/, "") || "/";
+    // Use p_alias if available, otherwise fallback to "/"
+    const aliasPath = menu.p_alias ? `/${menu.p_alias}` : "/";
+    return `${basePath}${aliasPath}`;
   };
 
   return (
