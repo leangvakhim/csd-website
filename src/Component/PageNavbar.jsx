@@ -8,22 +8,21 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
   const location = useLocation();
   const navbarRef = useRef(null);
 
-  // Close dropdown if the user clicks outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (navbarRef.current && !navbarRef.current.contains(event.target)) {
         setDropdown(null);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Helper to generate menu URLs
   const getMenuUrl = (menu) => {
     const basePath = currentLang === 2 ? "/km" : "";
-    return menu.p_alias ? `${basePath}/${menu.p_alias}` : `${basePath}/${menu.title.toLowerCase().replace(/\s+/g, "-")}`;
+    if (!menu) return basePath || "/";
+    const alias = menu.p_alias || (menu.title ? menu.title.toLowerCase().replace(/\s+/g, "-") : "");
+    return `${basePath}/${alias}`.replace(/\/+$/, "") || "/";
   };
 
   return (
@@ -36,7 +35,7 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
     >
       <div className="md:flex space-x-6 uppercase">
         {menus
-          .filter((menu) => menu.menup_id === null) // Parent menus only
+          .filter((menu) => menu.menup_id === null)
           .map((menu) => {
             const isActive = location.pathname === getMenuUrl(menu);
             const hasChildren =
@@ -48,14 +47,13 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
               <div
                 key={menu.menu_id}
                 className="relative hidden lg:block"
-                onMouseEnter={() => setDropdown(menu.title)}
+                onMouseEnter={() => setDropdown(menu.menu_id)}
                 onMouseLeave={() => setDropdown(null)}
               >
-                {/* Parent Menu Item as Link */}
                 <Link
-                  to={menu.p_alias}
+                  to={getMenuUrl(menu)}
                   className={`flex items-center text-[16px] uppercase hover:text-red-900 ${
-                    currentLang === 2 ? "fonts-khmer" : "font-sans"
+                    currentLang === 2 ? "font-khmer" : "font-sans"
                   } ${isActive ? "text-red-900 font-bold" : ""}`}
                   onClick={() => {
                     setDropdown(null);
@@ -66,8 +64,7 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
                   {hasChildren && <FiChevronDown className="inline ml-2" />}
                 </Link>
 
-                {/* Dropdown for Child Menus */}
-                {hasChildren && dropdown === menu.title && (
+                {hasChildren && dropdown === menu.menu_id && (
                   <motion.div
                     className="absolute left-0 mt-0 bg-white shadow-md rounded-md py-2 w-52 z-50"
                     initial={{ opacity: 0, y: -10 }}
@@ -77,16 +74,15 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
                     {menu.children
                       .filter((child) => child.display === 1)
                       .map((child) => {
-                        const childAlias =
-                          menus.find((item) => item.menu_id === child.menu_id)?.p_alias || "#";
+                        const childUrl = getMenuUrl(child);
                         return (
                           <Link
                             key={child.menu_id}
-                            to={childAlias}
-                            className={`block px-4 py-2 text-[18px]  hover:text-red-900 ${
-                              currentLang === 2 ? "fonts-khmer " : "font-semibold"
+                            to={childUrl}
+                            className={`block px-4 py-2 text-[18px] hover:text-red-900 ${
+                              currentLang === 2 ? "font-khmer" : "font-semibold"
                             } ${
-                              location.pathname === childAlias
+                              location.pathname === childUrl
                                 ? "text-red-900 font-bold"
                                 : ""
                             }`}
