@@ -34,19 +34,61 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
         ]);
 
         const menuData = menuRes.data?.data || [];
+        const pageData = pageRes.data?.data || [];
+
+        // Filter menus by language and display status, sort by menu_order
         const filteredMenus = menuData
           .filter((menu) => menu.lang === currentLang && menu.display === 1)
-          .sort((a, b) => b.menu_order - a.menu_order);
-        setMenus(filteredMenus);
+          .sort((a, b) => b.menu_order - a.menu_order); 
 
-        const pageData = pageRes.data?.data || [];
-        const combinedMenus = filteredMenus.map((menu) => {
-          const matchedPage = pageData.find((page) => page.p_menu === menu.menu_id);
-          return {
-            ...menu,
-            p_alias: matchedPage ? matchedPage.p_alias : null,
-          };
+        // Build a menu tree with children and sanitized p_alias
+        const menuMap = new Map();
+        filteredMenus.forEach((menu) => {
+          menu.children = [];
+          menuMap.set(menu.menu_id, { ...menu });
         });
+
+      
+        filteredMenus.forEach((menu) => {
+          if (menu.menup_id) {
+            const parent = menuMap.get(menu.menup_id);
+            if (parent) {
+              parent.children.push(menuMap.get(menu.menu_id));
+            }
+          }
+        });
+
+        // Combine menus with page aliases, sanitizing p_alias
+        const combinedMenus = Array.from(menuMap.values())
+          .filter((menu) => !menu.menup_id) // Top-level menus only
+          .map((menu) => {
+            const matchedPage = pageData.find((page) => page.p_menu === menu.menu_id);
+            let p_alias = matchedPage ? matchedPage.p_alias : null;
+            
+            if (p_alias) {
+              p_alias = p_alias.replace(/^\/?(km\/)?/, "").replace(/\/$/, "");
+              if (p_alias === "home") p_alias = "";
+            }
+            return {
+              ...menu,
+              p_alias,
+              children: menu.children.map((child) => {
+                const childPage = pageData.find((page) => page.p_menu === child.menu_id);
+                let childAlias = childPage ? childPage.p_alias : null;
+        
+                if (childAlias) {
+                  childAlias = childAlias.replace(/^\/?(km\/)?/, "").replace(/\/$/, "");
+                  if (childAlias === "home") childAlias = "";
+                }
+                return {
+                  ...child,
+                  p_alias: childAlias,
+                };
+              }),
+            };
+          });
+
+        setMenus(filteredMenus);
         setMenusWithAlias(combinedMenus);
       } catch (err) {
         console.error("Error fetching menus or pages:", err);
@@ -55,6 +97,15 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
           ...prev,
           logoUrl: "/placeholder-icon.png",
         }));
+        // Fallback menu structure
+        setMenusWithAlias([
+          {
+            menu_id: "fallback",
+            title: currentLang === 2 ? "ទំព័រដើម" : "Home",
+            p_alias: "",
+            children: [],
+          },
+        ]);
       } finally {
         setIsLoading(false);
       }
@@ -85,10 +136,12 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
     let currentPath = location.pathname;
     const query = location.search;
 
+    // Remove /km prefix if present
     if (currentPath.startsWith("/km")) {
       currentPath = currentPath.replace(/^\/km/, "") || "/";
     }
 
+    // Ensure no duplicate /km when switching to Khmer
     const newPath = newLang === 2 ? `/km${currentPath === "/" ? "" : currentPath}` : currentPath || "/";
     navigate(`${newPath}${query}`);
     setCurrentLang(newLang);
@@ -108,7 +161,9 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
 
   const getMenuUrl = (menu) => {
     const basePath = currentLang === 2 ? "/km" : "";
-    return menu.p_alias ? `${basePath}/${menu.p_alias}` : `${basePath}/${menu.title.toLowerCase().replace(/\s+/g, "-")}`;
+    // Use p_alias if available, otherwise fallback to "/"
+    const aliasPath = menu.p_alias ? `/${menu.p_alias}` : "/";
+    return `${basePath}${aliasPath}`;
   };
 
   return (
@@ -156,9 +211,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
                 }}
               />
               <h2
-                className={`lg:text-lg  text-sm uppercase hidden sm:block ${
-                  currentLang === 2 ? "font-khmer leading-8" : "font-bold"
-                }`}
+                className={`lg:text-lg text-sm uppercase hidden sm:block ${currentLang === 2 ? "font-khmer leading-8" : "font-bold"}`}
               >
                 {settings.facultyTitle} <br /> {settings.departmentTitle}
               </h2>
@@ -250,62 +303,54 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
             </button>
 
             <div className="flex flex-col space-y-4 mt-10">
-              {menus
-                .filter((menu) => menu.menup_id === null)
-                .map((menu) => {
-                  const isActive = location.pathname === getMenuUrl(menu);
-                  const children = (menu.children || []).filter((child) => child.display === 1);
-                  const hasChildren = children.length > 0;
+              {menusWithAlias.map((menu) => {
+                const isActive = location.pathname === getMenuUrl(menu);
+                const children = menu.children || [];
+                const hasChildren = children.length > 0;
 
-                  return (
-                    <div key={menu.menu_id}>
-                      <div
-                        onClick={() => hasChildren && toggleMobileDropdown(menu.menu_id)}
-                        className="flex items-center justify-between"
+                return (
+                  <div key={menu.menu_id}>
+                    <div
+                      onClick={() => hasChildren && toggleMobileDropdown(menu.menu_id)}
+                      className="flex items-center justify-between"
+                    >
+                      <Link
+                        to={getMenuUrl(menu)}
+                        className={`uppercase hover:text-red-800 ${currentLang === 2 ? "font-khmer" : "font-sans"} ${
+                          isActive ? "text-red-900 font-bold" : ""
+                        }`}
+                        onClick={toggleMobileMenu}
                       >
-                        <Link
-
-                          className={`uppercase hover:text-red-800 ${
-                            currentLang === 2 ? "fonts-khmer" : "font-sans"
-                          } ${isActive ? "text-red-900 font-bold" : ""}`}
-                          onClick={toggleMobileMenu}
-                        >
-                          {menu.title}
-                        </Link>
-                        {hasChildren && (
-                          <button aria-label={`Toggle ${menu.title} submenu`}>
-                            <FiChevronDown
-                              className={`transition-transform ${
-                                mobileDropdowns[menu.menu_id] ? "rotate-180" : ""
-                              }`}
-                            />
-                          </button>
-                        )}
-                      </div>
-
-                      {hasChildren && mobileDropdowns[menu.menu_id] && (
-                        <div className="ml-4 mt-2 space-y-2">
-                          {children.map((child) => (
-                            <Link
-                              key={child.menu_id}
-                              to={getMenuUrl(child)}
-                              className={`block hover:text-red-800 ${
-                                currentLang === 2 ? "fonts-khmer" : "font-sans"
-                              } ${
-                                location.pathname === getMenuUrl(child)
-                                  ? "text-red-900 font-bold"
-                                  : ""
-                              }`}
-                              onClick={toggleMobileMenu}
-                            >
-                              {child.title}
-                            </Link>
-                          ))}
-                        </div>
+                        {menu.title}
+                      </Link>
+                      {hasChildren && (
+                        <button aria-label={`Toggle ${menu.title} submenu`}>
+                          <FiChevronDown
+                            className={`transition-transform ${mobileDropdowns[menu.menu_id] ? "rotate-180" : ""}`}
+                          />
+                        </button>
                       )}
                     </div>
-                  );
-                })}
+
+                    {hasChildren && mobileDropdowns[menu.menu_id] && (
+                      <div className="ml-4 mt-2 space-y-2">
+                        {children.map((child) => (
+                          <Link
+                            key={child.menu_id}
+                            to={getMenuUrl(child)}
+                            className={`block hover:text-red-800 ${currentLang === 2 ? "font-khmer" : "font-sans"} ${
+                              location.pathname === getMenuUrl(child) ? "text-red-900 font-bold" : ""
+                            }`}
+                            onClick={toggleMobileMenu}
+                          >
+                            {child.title}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
