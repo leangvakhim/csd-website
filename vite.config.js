@@ -8,4 +8,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/storage/uploads': {
+        target: 'https://aimostore.shop',
+        changeOrigin: true,
+      },
+    },
+  },
 })
+

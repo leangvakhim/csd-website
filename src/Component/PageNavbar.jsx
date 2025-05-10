@@ -80,7 +80,7 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
                             key={child.menu_id}
                             to={childUrl}
                             className={`block px-4 py-2 text-[18px] hover:text-red-900 ${
-                              currentLang === 2 ? "font-khmer" : "font-semibold"
+                              currentLang === 2 ? "fonts-khmer" : "font-sans"
                             } ${
                               location.pathname === childUrl
                                 ? "text-red-900 font-bold"
