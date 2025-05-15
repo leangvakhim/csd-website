@@ -11,6 +11,7 @@ const DeputyHeadofDepartment = () => {
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
 
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
     useEffect(() => {
         const fetchDeputies = async () => {
             try {
@@ -61,26 +62,27 @@ const DeputyHeadofDepartment = () => {
     }, [currentLang]);
 
     return (
-        <div className='my-16'>
-            <div className='container mx-auto px-4'>
-                <div className='space-y-10'>
+        <div className='my-8 sm:my-12 md:my-16'>
+            <div className='container mx-auto px-4 sm:px-6 md:px-8'>
+                <div className='space-y-6 sm:space-y-8 md:space-y-10'>
                     <div>
-                        <h1 className={`text-2xl font-normal mb-4 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>{currentLang === 1 ? "Deputy Head of Department:" : "អនុប្រធានដេប៉ាតឺម៉ង់"}</h1>
+                        <h1 className={`text-lg sm:text-xl md:text-2xl font-normal mb-4 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
+                            {currentLang === 1 ? "Deputy Head of Department:" : "អនុប្រធានដេប៉ាតឺម៉ង់"}
+                        </h1>
                     </div>
-                    <div className='flex flex-col xl:flex-row xl:flex-wrap gap-8 justify-center'>
+                    <div className='flex flex-col lg:flex-row lg:flex-wrap gap-6 sm:gap-8 justify-center'>
                         {deputyData.map((deputy, index) => (
                             <div
                                 key={deputy.ref_id}
                                 className={`
-                                    shadow-lg rounded-2xl p-4
-                                    xl:w-[calc(50%-1rem)]
-                                    ${index === deputyData.length - 1 && deputyData.length % 2 !== 0 ?
-                                        'xl:mx-auto' : ''}
+                                    shadow-lg rounded-2xl p-4 sm:p-6
+                                    w-full lg:w-[calc(50%-1rem)]
+                                    ${index === deputyData.length - 1 && deputyData.length % 2 !== 0 ? 'lg:mx-auto' : ''}
                                 `}
                             >
-                                <div className="flex flex-col lg:flex-row gap-4 items-center">
+                                <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-center">
                                     {/* Image Container */}
-                                    <div className="relative w-80 h-72 mb-4 group">
+                                    <div className="relative w-full max-w-xs h-56 sm:h-64 md:h-72 mb-4 group">
                                         <img
                                             src={deputy.image}
                                             alt={deputy.name}
@@ -89,7 +91,6 @@ const DeputyHeadofDepartment = () => {
                                                 e.target.src = "/placeholder-icon.png";
                                             }}
                                         />
-
                                         {/* Social Media Overlay */}
                                         <motion.div
                                             initial={{ opacity: 0 }}
@@ -97,7 +98,7 @@ const DeputyHeadofDepartment = () => {
                                             className="absolute inset-0 bg-black/20 rounded-2xl flex items-center justify-center"
                                         >
                                             {/* Social Icons Container */}
-                                            <div className="absolute top-4 right-4 group-hover:bg-black/10 p-2 transition-all duration-300 rounded-2xl">
+                                            <div className="absolute top-2 right-2 sm:top-4 sm:right-4 group-hover:bg-black/10 p-2 transition-all duration-300 rounded-2xl">
                                                 <motion.div
                                                     initial={{ y: 20 }}
                                                     animate={{ y: 0 }}
@@ -108,7 +109,7 @@ const DeputyHeadofDepartment = () => {
                                                             <motion.div
                                                                 key={social.social_id}
                                                                 whileHover={{ scale: 1.1 }}
-                                                                className="bg-white p-2.5 rounded-full shadow-lg"
+                                                                className="bg-white p-2 sm:p-2.5 rounded-full shadow-lg"
                                                             >
                                                                 <Link
                                                                     to={social.social_link || "#"}
@@ -123,7 +124,7 @@ const DeputyHeadofDepartment = () => {
                                                                                 : "/placeholder-icon.png"
                                                                         }
                                                                         alt={social.social_name || "Social Icon"}
-                                                                        className="w-5 h-5 object-contain items-center"
+                                                                        className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
                                                                         onError={(e) => {
                                                                             e.target.src = "/placeholder-icon.png";
                                                                         }}
@@ -134,7 +135,7 @@ const DeputyHeadofDepartment = () => {
                                                     ) : (
                                                         <motion.div
                                                             whileHover={{ scale: 1.1 }}
-                                                            className="bg-white p-3 rounded-full shadow-lg"
+                                                            className="bg-white p-2 sm:p-3 rounded-full shadow-lg"
                                                         >
                                                             <Link
                                                                 to="#"
@@ -143,7 +144,7 @@ const DeputyHeadofDepartment = () => {
                                                                 <img
                                                                     src="/placeholder-icon.png"
                                                                     alt="Default Social Icon"
-                                                                    className="w-6 h-6 rounded-full object-cover"
+                                                                    className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover"
                                                                 />
                                                             </Link>
                                                         </motion.div>
@@ -152,18 +153,20 @@ const DeputyHeadofDepartment = () => {
                                             </div>
                                         </motion.div>
                                     </div>
-                                    <div className='space-y-6 max-w-md relative'>
-                                        <div className='flex justify-between items-center'>
-                                            <h1 className={`text-2xl font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{deputy.name}</h1>
-                                            <div className='text-right'>
-                                                <RiDoubleQuotesR className='text-7xl text-red-900' />
+                                    <div className='w-full space-y-4 sm:space-y-6 max-w-md relative'>
+                                        <div className='flex  justify-between items-center'>
+                                            <h1 className={`text-lg sm:text-xl md:text-2xl font-semibold ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                                                {deputy.name}
+                                            </h1>
+                                            <div className='text-right mt-2 sm:mt-0'>
+                                                <RiDoubleQuotesR className='text-5xl sm:text-6xl md:text-7xl text-red-900' />
                                             </div>
                                         </div>
-                                        <p className={`text-left ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{deputy.bio}</p>
+                                        <p className={`text-sm sm:text-base text-left ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>{deputy.bio}</p>
                                         <Link
                                             to={`${prefix}/faculty/${deputy.ref_id}`}
                                         >
-                                            <button className={`bg-red-900 px-6 py-2 text-gray-50 rounded-2xl ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
+                                            <button className={`bg-red-900 px-4 sm:px-6 py-2 text-gray-50 rounded-2xl text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
                                                 {currentLang === 1 ? "View" : "មើលបន្ថែម"}
                                             </button>
                                         </Link>
@@ -176,6 +179,6 @@ const DeputyHeadofDepartment = () => {
             </div>
         </div>
     );
-}
+};
 
 export default DeputyHeadofDepartment;
