@@ -29,7 +29,7 @@ const HeadofDepartment = () => {
                         id: headData.f_id,
                         ref_id: headData.ref_id,
                         name: headData.f_name,
-                        bio: headData.f_portfolio || 'No bio available.',
+                        position: headData.f_position,
                         image: headData.img?.img
                             ? `${API}/storage/uploads/${headData.img.img}`
                             : "/placeholder-icon.png",
@@ -147,14 +147,12 @@ const HeadofDepartment = () => {
                                 {/* Profile Info */}
                                 <div className='w-full space-y-4 sm:space-y-6 max-w-xl relative' id="profile-info">
                                     <div className='flex justify-between items-center'>
-                                        <h1 className={`text-xl sm:text-2xl md:text-3xl font-semibold ${currentLang === 2 ? "font-khmer" : "font-sans"}`} id="professor-name">
-                                            {head.name}
-                                        </h1>
-                                        <div className='text-right mt-2 sm:mt-0'>
-                                            <RiDoubleQuotesR className='text-5xl sm:text-6xl md:text-7xl text-red-900' />
+                                        <h1 className={`text-3xl font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} id="professor-name">{head.name}</h1>
+                                        <div className='text-right'>
+                                            <RiDoubleQuotesR className='text-7xl text-red-900' />
                                         </div>
                                     </div>
-                                    <p className={`text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>{head.bio}</p>
+                                    <p className={`!text-xl ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{head.position}</p>
                                     <Link
                                         to={`${prefix}/faculty/${head.ref_id}`}
                                     >

@@ -30,7 +30,7 @@ const DeputyHeadofDepartment = () => {
                     id: deputy.f_id,
                     ref_id: deputy.ref_id,
                     name: deputy.f_name,
-                    bio: deputy.f_portfolio || 'No bio available.',
+                    position: deputy.f_position,
                     image: deputy.img?.img
                         ? `${API}/storage/uploads/${deputy.img.img}`
                         : "/placeholder-icon.png",
@@ -162,7 +162,7 @@ const DeputyHeadofDepartment = () => {
                                                 <RiDoubleQuotesR className='text-5xl sm:text-6xl md:text-7xl text-red-900' />
                                             </div>
                                         </div>
-                                        <p className={`text-sm sm:text-base text-left ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>{deputy.bio}</p>
+                                        <p className={`text-left ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{deputy.position}</p>
                                         <Link
                                             to={`${prefix}/faculty/${deputy.ref_id}`}
                                         >
