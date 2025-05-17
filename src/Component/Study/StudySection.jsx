@@ -155,7 +155,9 @@ const StudySection = ({key, section, menuLang}) => {
                 >
                     {studyInfo.subtitle}
                 </motion.p>
-                <div className="w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className={`w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 ${
+                          menuLang === 2 ? "!fonts-khmer leading-8 " : "font-sans"
+                        }`}>
                   {yearCards.map((card, index) => (
                     <motion.div
                         key={index}
@@ -164,7 +166,7 @@ const StudySection = ({key, section, menuLang}) => {
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true, amount: 0.5 }}
                         className={`bg-white rounded-lg shadow-md ${
-                          menuLang === 2 ? "fonts-khmer leading-8 " : "font-sans"
+                          menuLang === 2 ? "!fonts-khmer leading-8 " : "font-sans"
                         }`}
                         dangerouslySetInnerHTML={{ __html: card?.y_detail || '' }}
                     />
