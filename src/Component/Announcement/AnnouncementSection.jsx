@@ -17,7 +17,6 @@ const useDebounce = (value, delay) => {
 const AnnouncementSection = ({ section, menuLang }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  // const isHomePage = location.pathname === "/home";
   const [newsItems, setNewsItems] = useState([]);
   const [headerData, setHeaderData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,14 +32,13 @@ const AnnouncementSection = ({ section, menuLang }) => {
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   const filteredNews = newsItems
-    .slice(0, headerData.hsec_amount)
+    .slice(0, headerData.hsec_amount || 4)
     .filter(item => {
-    const matchesSearch =
-      item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()
-    .slice(0, headerData.hsec_amount) );
-    return matchesSearch;
-  });
+      const matchesSearch =
+        item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      return matchesSearch;
+    });
 
   const handleClearSearch = () => setSearchTerm('');
 
@@ -59,11 +57,11 @@ const AnnouncementSection = ({ section, menuLang }) => {
             item.section?.active === 1
         );
         setHeaderData({
-          hsec_title: matchedHeader.hsec_title || "Announcements",
-          hsec_amount: matchedHeader.hsec_amount,
-          hsec_subtitle: matchedHeader.hsec_subtitle || "",
-          hsec_btntitle: matchedHeader.hsec_btntitle || "",
-          hsec_routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
+          hsec_title: matchedHeader?.hsec_title || "Announcements",
+          hsec_amount: matchedHeader?.hsec_amount || 4,
+          hsec_subtitle: matchedHeader?.hsec_subtitle || "",
+          hsec_btntitle: matchedHeader?.hsec_btntitle || "",
+          hsec_routepage: await resolvePageAlias(matchedHeader?.hsec_routepage) || "",
         });
       } catch (error) {
         console.error('Failed to fetch header data:', error);
@@ -83,9 +81,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
         const response = await axios.get(API_ENDPOINTS.getAnnouncement);
         const transformed = response.data.data
           .filter((announcement) => {
-            // Ensure announcement exists and has required properties
             if (!announcement) return false;
-
             return (
               announcement.display === 1 &&
               announcement.active === 1 &&
@@ -93,9 +89,8 @@ const AnnouncementSection = ({ section, menuLang }) => {
             );
           })
           .sort((a, b) => b.am_orders - a.am_orders)
-          .slice(0, headerData.hsec_amount)
+          .slice(0, headerData.hsec_amount || 4)
           .map((announcement) => {
-            // Safely handle date conversion
             let formattedDate = 'TBD';
             try {
               if (announcement.am_postdate) {
@@ -131,20 +126,19 @@ const AnnouncementSection = ({ section, menuLang }) => {
     };
 
     fetchHeaderData().then(fetchAnnouncements);
-  }, []);
+  }, [section.sec_id, currentLang]);
 
   const resolvePageAlias = async (routePage) => {
     try {
       const res = await axios.get(API_ENDPOINTS.getPage);
       const pages = Array.isArray(res.data?.data) ? res.data.data : [];
-
       const matched = pages.find((page) => page.p_title === routePage);
       return matched?.p_alias || null;
     } catch (error) {
       console.error("Failed to fetch page alias:", error);
       return null;
     }
-  }
+  };
 
   if (headerLoading || loading) {
     return (
@@ -170,153 +164,148 @@ const AnnouncementSection = ({ section, menuLang }) => {
   }
 
   return (
-    <div className="my-16">
-      <div className="container mx-auto px-4">
+    <div className="my-8 sm:my-12 md:my-16">
+      <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="flex flex-col sm:flex-row justify-between items-center mb-8"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8"
         >
-          <div className='pr-8'>
-            <h1 className={`text-3xl font-semibold mb-3 sm:mb-4 ${currentLang === 2 ? "font-khmer" : "font-sans"
-                }`}>
-                {headerData.hsec_title || 'Events'}
+          <div className="mb-4 sm:mb-0">
+            <h1 className={`text-2xl sm:text-3xl font-semibold mb-2 sm:mb-3 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+              {headerData.hsec_title || 'Events'}
             </h1>
             {headerData.hsec_subtitle && (
-                <p className={`text-xs sm:text-sm text-gray-500 ${currentLang === 2 ? "fonts-khmer " : "font-sans"
-                }`}>
-                    {headerData.hsec_subtitle}
-                </p>
+              <p className={`text-xs sm:text-sm text-gray-500 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                {headerData.hsec_subtitle}
+              </p>
             )}
           </div>
-            <motion.div
-              initial={{ opacity: 0, y: -50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              viewport={{ once: true }}
-              className="w-full md:w-auto mt-4 md:mt-0"
-            >
-              {headerData.hsec_routepage ? (
-                  <button
-                      onClick={() => navigate(headerData.hsec_routepage)}
-                      className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1`}
-                    >
-                    <span className={`mr-2 lg:text-sm text-[12px] ${currentLang === 2 ? "fonts-khmer" : "font-sans"
-                      }`}>{headerData.hsec_btntitle}</span>
-                    <FaArrowRight className="text-red-800" />
-                  </button>
-                ) : (
-                  <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                    <div className="relative w-full">
-                        <input
-                            type="text"
-                            placeholder="Search announcement"
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-red-300 w-full"
-                            aria-label="Search announcement"
-                        />
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <FaSearch className="text-gray-400" />
-                        </div>
-                        {searchTerm && (
-                            <button
-                                onClick={handleClearSearch}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                                aria-label="Clear search"
-                            >
-                                <FaTimes className="text-sm" />
-                            </button>
-                        )}
-                    </div>
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            viewport={{ once: true }}
+            className="w-full sm:w-auto"
+          >
+            {headerData.hsec_routepage ? (
+              <button
+                onClick={() => navigate(headerData.hsec_routepage)}
+                className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1 text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`}
+              >
+                <span className="mr-2">{headerData.hsec_btntitle}</span>
+                <FaArrowRight className="text-red-800" />
+              </button>
+            ) : (
+              <div className="relative w-full sm:w-64">
+                <input
+                  type="text"
+                  placeholder="Search announcement"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-red-300 w-full text-sm"
+                  aria-label="Search announcement"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaSearch className="text-gray-400 text-sm" />
                 </div>
+                {searchTerm && (
+                  <button
+                    onClick={handleClearSearch}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    aria-label="Clear search"
+                  >
+                    <FaTimes className="text-sm" />
+                  </button>
                 )}
-            </motion.div>
+              </div>
+            )}
+          </motion.div>
         </motion.div>
 
-        {filteredNews.length < 5 ? (
+        {filteredNews.length < 3 ? (
           <div>
             {filteredNews.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {filteredNews.map(item => (
-                    <div
-                      key={item.ref_id}
-                      className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
-                      onClick={() => {
-                        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                        navigate(`${prefix}/announcement/${item.ref_id}`);
-                      }}
-                      >
-                      <div className="p-3 w-full lg:w-1/2 h-full">
-                        <img
-                          src={item.imageUrl}
-                          alt={item.title}
-                          className="w-full h-full object-cover rounded-lg"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = DEFAULT_IMAGE;
-                          }}
-                        />
-                      </div>
-                      <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
-                        <h2 className={`text-lg font-semibold mb-4 line-clamp-2 overflow-hidden ${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
-                          }`}>{item.title}</h2>
-                        <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"
-                          } text-gray-600 line-clamp-3 overflow-hidden`}>{item.description}</p>
-                        <p className={`text-gray-500 text-sm mt-2 ${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
-                          }`}>{item.date}</p>
-                      </div>
+                  <div
+                    key={item.ref_id}
+                    className="bg-white rounded-lg flex flex-col sm:flex-row shadow-md overflow-hidden cursor-pointer"
+                    onClick={() => {
+                      const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+                      navigate(`${prefix}/announcement/${item.ref_id}`);
+                    }}
+                  >
+                    <div className="p-3 w-full sm:w-1/2 h-48 sm:h-64">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = DEFAULT_IMAGE;
+                        }}
+                      />
                     </div>
-                  ))}
+                    <div className="p-4 sm:p-6 flex w-full sm:w-1/2 flex-col justify-center">
+                      <h2 className={`text-base sm:text-lg font-semibold mb-3 line-clamp-2 overflow-hidden ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                        {item.title}
+                      </h2>
+                      <p className={`text-sm sm:text-base text-gray-600 line-clamp-3 overflow-hidden ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                        {item.description}
+                      </p>
+                      <p className={`text-xs sm:text-sm text-gray-500 mt-2 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                        {item.date}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ): (
-              <p className="text-center text-gray-500">
-                No announcemnt found.
+            ) : (
+              <p className="text-center text-gray-500 text-sm sm:text-base">
+                No announcements found.
               </p>
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto overflow-y-hidden px-4 scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-transparent">
-            {filteredNews.length > 0 ? (
-              <div className="grid grid-flow-col auto-cols-[calc(50%-0.75rem)] gap-4 snap-x snap-mandatory scroll-smooth">
-                {filteredNews.map(item => (
-                    <div
-                      key={item.ref_id}
-                      className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
-                      onClick={() => {
-                        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                        navigate(`${prefix}/announcement/${item.ref_id}`);
+          <div className="overflow-x-auto px-2 sm:px-4 scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-transparent">
+            <div className="grid grid-flow-col auto-cols-[min(100%,20rem)] sm:auto-cols-[min(50%,22rem)] gap-4 snap-x snap-mandatory scroll-smooth">
+              {filteredNews.map(item => (
+                <div
+                  key={item.ref_id}
+                  className="bg-white rounded-lg flex flex-col sm:flex-row shadow-md overflow-hidden cursor-pointer snap-start"
+                  onClick={() => {
+                    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+                    navigate(`${prefix}/announcement/${item.ref_id}`);
+                  }}
+                >
+                  <div className="p-3 w-full sm:w-1/2 h-48 sm:h-64">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = DEFAULT_IMAGE;
                       }}
-                      >
-                      <div className="p-3 w-full lg:w-1/2 h-full">
-                        <img
-                          src={item.imageUrl}
-                          alt={item.title}
-                          className="w-full h-full object-cover rounded-lg"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = DEFAULT_IMAGE;
-                          }}
-                        />
-                      </div>
-                      <div className="p-6 flex  w-full lg:w-1/2 flex-col justify-center">
-                        <h2 className={`text-lg font-semibold mb-4 line-clamp-2 overflow-hidden ${currentLang === 2 ? "fonts-khmer text-[20px]" : "font-sans"
-                          }`}>{item.title}</h2>
-                        <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"
-                          } text-gray-600 line-clamp-3 overflow-hidden`}>{item.description}</p>
-                        <p className={`text-gray-500 text-sm mt-2 ${currentLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
-                          }`}>{item.date}</p>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            ): (
-              <p className="text-center text-gray-500">
-                No announcemnt found.
-              </p>
-            )}
+                    />
+                  </div>
+                  <div className="p-4 sm:p-6 flex w-full sm:w-1/2 flex-col justify-center">
+                    <h2 className={`text-base sm:text-lg font-semibold mb-3 line-clamp-2 overflow-hidden ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                      {item.title}
+                    </h2>
+                    <p className={`text-sm sm:text-base text-gray-600 line-clamp-3 overflow-hidden ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                      {item.description}
+                    </p>
+                    <p className={`text-xs sm:text-sm text-gray-500 mt-2 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                      {item.date}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

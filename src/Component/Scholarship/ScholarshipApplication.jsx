@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import jsPDF from "jspdf";
 import { API_ENDPOINTS, API } from "../../Service/APIconfig";
 
 // Animation variants
@@ -112,65 +111,6 @@ const ScholarshipApplication = ({ scholarshipId }) => {
     fetchApplicationDetails();
   }, [fetchApplicationDetails, currentLang]);
 
-  const viewPdfFromAPI = async () => {
-    try {
-      const response = await axios.get(`${API_ENDPOINTS.getScholarship}`);
-      const allScholarships = response.data?.data || [];
-
-      const data = allScholarships.find(
-        item => item.ref_id === Number(scholarshipId) && item.lang === currentLang
-      );
-
-      if (!data || !data.letter?.img) {
-        alert("PDF not available");
-        return;
-      }
-
-      // If the img is a real PDF file (not an image pretending to be one)
-      const fileUrl = `${API}/storage/uploads/${data.letter.img}`;
-      const extension = fileUrl.split('.').pop().toLowerCase();
-
-      if (extension === 'pdf') {
-        window.open(fileUrl, "_blank");
-      } else {
-        // If it's an image (like .jpg/.png), convert to PDF
-        const img = new Image();
-        img.crossOrigin = "Anonymous";
-
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-
-          const dataURL = canvas.toDataURL("image/png");
-          const doc = new jsPDF({
-            orientation: img.width > img.height ? "landscape" : "portrait",
-            unit: "px",
-            format: [img.width, img.height],
-          });
-
-          doc.addImage(dataURL, "PNG", 0, 0, img.width, img.height);
-          const pdfBlob = doc.output("blob");
-          const pdfUrl = URL.createObjectURL(pdfBlob);
-          window.open(pdfUrl, "_blank");
-        };
-
-        img.onerror = () => {
-          alert("Failed to load image for PDF.");
-        };
-
-        img.src = fileUrl;
-      }
-    } catch (error) {
-      alert("Error loading PDF/image.");
-      console.error("PDF Load Error:", error);
-    }
-  };
-
-
-
   if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
@@ -191,17 +131,18 @@ const ScholarshipApplication = ({ scholarshipId }) => {
             className="w-full lg:w-1/2"
           >
             {applicationData.bannerImage ? (
-              <img
-                src={applicationData.bannerImage}
-                alt="Scholarship Application"
-                // onClick={() => viewPdfFromAPI(applicationData.bannerImage)}
-                onClick={viewPdfFromAPI}
-                className="w-full h-auto max-h-[575px] object-contain rounded-lg shadow-md cursor-pointer"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/placeholder-image.jpg";
-                }}
-              />
+              <a href={applicationData.bannerImage} download target="_blank" rel="noopener noreferrer">
+                <img
+                  src={applicationData.bannerImage}
+                  alt="Scholarship Application"
+                  className="w-full h-auto max-h-[575px] object-contain rounded-lg shadow-md hover:opacity-90 transition"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/placeholder-image.jpg";
+                  }}
+                />
+              </a>
+
             ) : (
               <div className="w-full h-64 bg-gray-200 rounded-lg" aria-hidden="true"></div>
             )}

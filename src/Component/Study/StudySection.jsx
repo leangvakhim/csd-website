@@ -149,13 +149,13 @@ const StudySection = ({key, section, menuLang}) => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
                     viewport={{ once: true, amount: 0.5 }}
-                    className={`text-gray-600 xl:text-lg text-[12px] mb-12 sm:text-justify ${
+                    className={`text-gray-600 lg:text-lg text-[12px] mb-12 sm:text-justify ${
                       menuLang === 2 ? "fonts-khmer" : "font-sans"
                     }`}
                 >
                     {studyInfo.subtitle}
                 </motion.p>
-                <div className="max-w-[1330px] mx-auto grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
                   {yearCards.map((card, index) => (
                     <motion.div
                         key={index}
@@ -163,7 +163,7 @@ const StudySection = ({key, section, menuLang}) => {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true, amount: 0.5 }}
-                        className={`bg-white p-6 rounded-lg shadow-md ${
+                        className={`bg-white rounded-lg shadow-md ${
                           menuLang === 2 ? "fonts-khmer leading-8 " : "font-sans"
                         }`}
                         dangerouslySetInnerHTML={{ __html: card?.y_detail || '' }}

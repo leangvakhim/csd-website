@@ -32,21 +32,61 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
           axios.get(API_ENDPOINTS.getMenu),
           axios.get(API_ENDPOINTS.getPage),
         ]);
-
         const menuData = menuRes.data?.data || [];
+        const pageData = pageRes.data?.data || [];
+        // Filter menus by language and display status, sort by menu_order
         const filteredMenus = menuData
           .filter((menu) => menu.lang === currentLang && menu.display === 1)
           .sort((a, b) => b.menu_order - a.menu_order);
-        setMenus(filteredMenus);
-
-        const pageData = pageRes.data?.data || [];
-        const combinedMenus = filteredMenus.map((menu) => {
-          const matchedPage = pageData.find((page) => page.p_menu === menu.menu_id);
-          return {
-            ...menu,
-            p_alias: matchedPage ? matchedPage.p_alias : null,
-          };
+        // Build a menu tree with children and sanitized p_alias
+        const menuMap = new Map();
+        filteredMenus.forEach((menu) => {
+          menu.children = [];
+          menuMap.set(menu.menu_id, { ...menu });
         });
+        filteredMenus.forEach((menu) => {
+          if (menu.menup_id) {
+            const parent = menuMap.get(menu.menup_id);
+            if (parent) {
+              parent.children.push(menuMap.get(menu.menu_id));
+            }
+          }
+        });
+
+        menuMap.forEach((menu) => {
+          if (menu.children && menu.children.length > 0) {
+            menu.children.sort((a, b) => a.menu_order - b.menu_order);
+          }
+        });
+
+        // Combine menus with page aliases, sanitizing p_alias
+        const combinedMenus = Array.from(menuMap.values())
+          .filter((menu) => !menu.menup_id) // Top-level menus only
+          .map((menu) => {
+            const matchedPage = pageData.find((page) => page.p_menu === menu.menu_id);
+            let p_alias = matchedPage ? matchedPage.p_alias : null;
+            if (p_alias) {
+              p_alias = p_alias.replace(/^\/?(km\/)?/, "").replace(/\/$/, "");
+              if (p_alias === "home") p_alias = "";
+            }
+            return {
+              ...menu,
+              p_alias,
+              children: menu.children.map((child) => {
+                const childPage = pageData.find((page) => page.p_menu === child.menu_id);
+                let childAlias = childPage ? childPage.p_alias : null;
+                if (childAlias) {
+                  childAlias = childAlias.replace(/^\/?(km\/)?/, "").replace(/\/$/, "");
+                  if (childAlias === "home") childAlias = "";
+                }
+                return {
+                  ...child,
+                  p_alias: childAlias,
+                };
+              }),
+            };
+          });
+        setMenus(filteredMenus);
         setMenusWithAlias(combinedMenus);
       } catch (err) {
         console.error("Error fetching menus or pages:", err);
@@ -55,11 +95,19 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
           ...prev,
           logoUrl: "/placeholder-icon.png",
         }));
+        // Fallback menu structure
+        setMenusWithAlias([
+          {
+            menu_id: "fallback",
+            title: currentLang === 2 ? "ទំព័រដើម" : "Home",
+            p_alias: "",
+            children: [],
+          },
+        ]);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchData();
   }, [currentLang, setSettings]);
 
@@ -84,11 +132,11 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
     const newLang = currentLang === 1 ? 2 : 1;
     let currentPath = location.pathname;
     const query = location.search;
-
+    // Remove /km prefix if present
     if (currentPath.startsWith("/km")) {
       currentPath = currentPath.replace(/^\/km/, "") || "/";
     }
-
+    // Ensure no duplicate /km when switching to Khmer
     const newPath = newLang === 2 ? `/km${currentPath === "/" ? "" : currentPath}` : currentPath || "/";
     navigate(`${newPath}${query}`);
     setCurrentLang(newLang);
@@ -108,7 +156,9 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
 
   const getMenuUrl = (menu) => {
     const basePath = currentLang === 2 ? "/km" : "";
-    return menu.p_alias ? `${basePath}/${menu.p_alias}` : `${basePath}/${menu.title.toLowerCase().replace(/\s+/g, "-")}`;
+    // Use p_alias if available, otherwise fallback to "/"
+    const aliasPath = menu.p_alias ? `/${menu.p_alias}` : "/";
+    return `${basePath}${aliasPath}`;
   };
 
   return (
@@ -140,7 +190,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
       )}
 
       {/* Main Header */}
-      <div className={`p-4 ${isSearchOpen ? "pt-26" : ""}`}>
+      <div className={`p-4 ${isSearchOpen ? "pt-20 md:pt-26" : ""}`}>
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center py-2">
             {/* Logo */}
@@ -148,7 +198,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
               <img
                 src={settings.logoUrl}
                 alt="Logo"
-                className="w-14 h-14 object-contain"
+                className="w-10 h-10 md:w-14 md:h-14 object-contain"
                 onError={(e) => {
                   if (e.target.src !== "/placeholder-icon.png") {
                     e.target.src = "/placeholder-icon.png";
@@ -156,11 +206,12 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
                 }}
               />
               <h2
-                className={`lg:text-lg  text-sm uppercase hidden sm:block ${
-                  currentLang === 2 ? "font-khmer leading-8" : "font-bold"
-                }`}
+                className={`lg:text-lg text-sm uppercase hidden sm:block ${currentLang === 2
+                  ? "font-khmer leading-5 md:leading-8"
+                  : "font-bold leading-5 md:leading-normal"
+                  }`}
               >
-                {settings.facultyTitle} <br /> {settings.departmentTitle}
+                {settings.facultyTitle} <br className="hidden lg:block" /> {settings.departmentTitle}
               </h2>
             </Link>
 
@@ -198,7 +249,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
                     aria-label="Toggle search"
                     className="p-2 text-gray-600 hover:text-red-800"
                   >
-                    <IoMdSearch className="text-3xl" />
+                    <IoMdSearch className="text-2xl md:text-3xl" />
                   </button>
                 )}
                 <button
@@ -206,7 +257,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
                   aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                   className="lg:hidden text-gray-600 hover:text-red-800 p-2"
                 >
-                  {isMobileMenuOpen ? <FaTimes className="text-3xl" /> : <FaBars className="text-3xl" />}
+                  {isMobileMenuOpen ? <FaTimes className="text-2xl md:text-3xl" /> : <FaBars className="text-2xl md:text-3xl" />}
                 </button>
               </div>
             </div>
@@ -223,89 +274,82 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
           aria-label="Mobile navigation"
         >
           <div className="p-6">
-            <Link to={settings.baseUrl || "/"} className="flex items-center space-x-2">
-              <img
-                src={settings.logoUrl}
-                alt="Logo"
-                className="w-14 h-14 object-contain"
-                onError={(e) => {
-                  if (e.target.src !== "/placeholder-icon.png") {
-                    e.target.src = "/placeholder-icon.png";
-                  }
-                }}
-              />
-              <h2
-                className={`text-sm font-normal uppercase ${currentLang === 2 ? "font-khmer" : "font-sans"}`}
+            <div className="flex justify-between items-center mb-6">
+              <Link to={settings.baseUrl || "/"} className="flex items-center space-x-2">
+                <img
+                  src={settings.logoUrl}
+                  alt="Logo"
+                  className="w-10 h-10 object-contain"
+                  onError={(e) => {
+                    if (e.target.src !== "/placeholder-icon.png") {
+                      e.target.src = "/placeholder-icon.png";
+                    }
+                  }}
+                />
+                <h2
+                  className={`text-sm font-normal uppercase ${currentLang === 2 ? "font-khmer" : "font-sans"}`}
+                >
+                  {settings.facultyTitle} <br /> {settings.departmentTitle}
+                </h2>
+              </Link>
+
+              <button
+                onClick={toggleMobileMenu}
+                aria-label="Close mobile menu"
+                className="text-gray-600 hover:text-red-800"
               >
-                {settings.facultyTitle} <br /> {settings.departmentTitle}
-              </h2>
-            </Link>
+                <FaTimes className="text-3xl" />
+              </button>
+            </div>
 
-            <button
-              onClick={toggleMobileMenu}
-              aria-label="Close mobile menu"
-              className="absolute right-6 top-4 text-gray-600 hover:text-red-800"
-            >
-              <FaTimes className="text-3xl" />
-            </button>
+            <div className="flex flex-col space-y-4">
+              {menusWithAlias.map((menu) => {
+                const isActive = location.pathname === getMenuUrl(menu);
+                const children = menu.children || [];
+                const hasChildren = children.length > 0;
 
-            <div className="flex flex-col space-y-4 mt-10">
-              {menus
-                .filter((menu) => menu.menup_id === null)
-                .map((menu) => {
-                  const isActive = location.pathname === getMenuUrl(menu);
-                  const children = (menu.children || []).filter((child) => child.display === 1);
-                  const hasChildren = children.length > 0;
-
-                  return (
-                    <div key={menu.menu_id}>
-                      <div
-                        onClick={() => hasChildren && toggleMobileDropdown(menu.menu_id)}
-                        className="flex items-center justify-between"
-                      >
-                        <Link
-
-                          className={`uppercase hover:text-red-800 ${
-                            currentLang === 2 ? "fonts-khmer" : "font-sans"
+                return (
+                  <div key={menu.menu_id}>
+                    <div
+                      onClick={() => hasChildren && toggleMobileDropdown(menu.menu_id)}
+                      className="flex items-center justify-between"
+                    >
+                      <Link
+                        to={getMenuUrl(menu)}
+                        className={`uppercase hover:text-red-800 ${currentLang === 2 ? "fonts-khmer" : "font-sans"
                           } ${isActive ? "text-red-900 font-bold" : ""}`}
-                          onClick={toggleMobileMenu}
-                        >
-                          {menu.title}
-                        </Link>
-                        {hasChildren && (
-                          <button aria-label={`Toggle ${menu.title} submenu`}>
-                            <FiChevronDown
-                              className={`transition-transform ${
-                                mobileDropdowns[menu.menu_id] ? "rotate-180" : ""
+                        onClick={toggleMobileMenu}
+                      >
+                        {menu.title}
+                      </Link>
+                      {hasChildren && (
+                        <button aria-label={`Toggle ${menu.title} submenu`}>
+                          <FiChevronDown
+                            className={`transition-transform ${mobileDropdowns[menu.menu_id] ? "rotate-180" : ""
                               }`}
-                            />
-                          </button>
-                        )}
-                      </div>
-
-                      {hasChildren && mobileDropdowns[menu.menu_id] && (
-                        <div className="ml-4 mt-2 space-y-2">
-                          {children.map((child) => (
-                            <Link
-                              key={child.menu_id}
-                              to={getMenuUrl(child)}
-                              className={`block hover:text-red-800 ${
-                                currentLang === 2 ? "fonts-khmer" : "font-sans"
-                              } ${
-                                location.pathname === getMenuUrl(child)
-                                  ? "text-red-900 font-bold"
-                                  : ""
-                              }`}
-                              onClick={toggleMobileMenu}
-                            >
-                              {child.title}
-                            </Link>
-                          ))}
-                        </div>
+                          />
+                        </button>
                       )}
                     </div>
-                  );
-                })}
+
+                    {hasChildren && mobileDropdowns[menu.menu_id] && (
+                      <div className="ml-4 mt-2 space-y-2">
+                        {children.map((child) => (
+                          <Link
+                            key={child.menu_id}
+                            to={getMenuUrl(child)}
+                            className={`block hover:text-red-800 ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                              } ${location.pathname === getMenuUrl(child) ? "text-red-900 font-bold" : ""}`}
+                            onClick={toggleMobileMenu}
+                          >
+                            {child.title}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -315,3 +359,4 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
 };
 
 export default PageHeader;
+

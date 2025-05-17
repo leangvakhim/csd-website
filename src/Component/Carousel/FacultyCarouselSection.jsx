@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { FaArrowRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -24,7 +24,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const FacultyCarouselSection = ({key, section, menuLang}) => {
+const FacultyCarouselSection = ({ key, section, menuLang }) => {
   const [headerSection, setHeaderSection] = useState({
     title: "",
     subtitle: "",
@@ -34,21 +34,22 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const location = useLocation();
-  const currentLang = location.pathname.includes('/km') ? 2 : 1;
-  const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+  const currentLang = location.pathname.includes("/km") ? 2 : 1;
+  const prefix = window.location.pathname.startsWith("/km") ? "/km" : "";
+  const scrollContainerRef = useRef(null); // Reference to the scrollable container
+  const [isHovered, setIsHovered] = useState(false); // Track hover state
 
   const resolvePageAlias = async (routePage) => {
     try {
       const res = await axios.get(API_ENDPOINTS.getPage);
       const pages = Array.isArray(res.data?.data) ? res.data.data : [];
-
       const matched = pages.find((page) => page.p_title === routePage);
       return matched?.p_alias || null;
     } catch (error) {
       console.error("Failed to fetch page alias:", error);
       return null;
     }
-  }
+  };
 
   const fetchFacultyData = useCallback(async () => {
     try {
@@ -121,11 +122,38 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [section.sec_id, currentLang]);
 
   useEffect(() => {
     fetchFacultyData();
   }, [fetchFacultyData]);
+
+  // Auto-scroll logic
+  useEffect(() => {
+    if (!scrollContainerRef.current || isHovered) return;
+
+    const scrollContainer = scrollContainerRef.current;
+    const scrollWidth = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+    const scrollStep = 300; // Adjust scroll distance per step
+    const scrollInterval = 3000; // Time between scrolls (in milliseconds)
+
+    const autoScroll = setInterval(() => {
+      const currentScroll = scrollContainer.scrollLeft;
+
+      if (currentScroll >= scrollWidth) {
+        // Reset to start when reaching the end
+        scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        // Scroll to the next step
+        scrollContainer.scrollTo({
+          left: currentScroll + scrollStep,
+          behavior: "smooth",
+        });
+      }
+    }, scrollInterval);
+
+    return () => clearInterval(autoScroll); // Cleanup on unmount
+  }, [isHovered]);
 
   if (isLoading) {
     return (
@@ -167,11 +195,19 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
             variants={cardVariants}
             className="w-full md:w-2/3 text-center md:text-left"
           >
-            <h2 className={`text-3xl xl:text-4xl font-extrabold text-gray-900 ${currentLang === 2 ? "font-khmer" : "font-semibold"}`}>
+            <h2
+              className={`text-3xl xl:text-4xl font-extrabold text-gray-900 ${
+                currentLang === 2 ? "font-khmer" : "font-semibold"
+              }`}
+            >
               {headerSection.title}
             </h2>
             {headerSection.subtitle && (
-              <p className={`text-gray-600 mt-4 text-lg ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
+              <p
+                className={`text-gray-600 mt-4 text-lg ${
+                  currentLang === 2 ? "fonts-khmer" : "font-sans"
+                }`}
+              >
                 {headerSection.subtitle}
               </p>
             )}
@@ -182,11 +218,17 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
           >
             <Link
               to={headerSection.routepage}
-              className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1  ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}
+              className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1 ${
+                currentLang === 2 ? "fonts-khmer" : "font-sans"
+              }`}
             >
-              <span className={`mr-2 lg:text-sm text-[12px] ${
-                      menuLang === 2 ? "fonts-khmer" : "font-sans"
-                    }`}>{headerSection.btntitle}</span>
+              <span
+                className={`mr-2 lg:text-sm text-[12px] ${
+                  menuLang === 2 ? "fonts-khmer" : "font-sans"
+                }`}
+              >
+                {headerSection.btntitle}
+              </span>
               <FaArrowRight className="text-red-800" />
             </Link>
           </motion.div>
@@ -194,7 +236,12 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
 
         {/* Faculty Cards */}
         <motion.div variants={sectionVariants} className="overflow-hidden">
-          <div className="flex snap-x snap-mandatory overflow-x-auto py-6 px-4 scroll-smooth gap-4 md:gap-8">
+          <div
+            ref={scrollContainerRef}
+            className="flex snap-x snap-mandatory overflow-x-auto py-6 px-4 scroll-smooth gap-4 md:gap-8"
+            onMouseEnter={() => setIsHovered(true)} // Pause on hover
+            onMouseLeave={() => setIsHovered(false)} // Resume on leave
+          >
             {facultyMembers.map((faculty) => (
               <motion.div
                 key={faculty.ref_id}
@@ -254,10 +301,18 @@ const FacultyCarouselSection = ({key, section, menuLang}) => {
                     </div>
                   </motion.div>
                 </Link>
-                <h3 className={`text-xl font-semibold text-gray-800 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
+                <h3
+                  className={`text-xl font-semibold text-gray-800 ${
+                    currentLang === 2 ? "fonts-khmer" : "font-sans"
+                  }`}
+                >
                   {faculty.name}
                 </h3>
-                <p className={`text-sm text-gray-600 font-normal mb-4 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
+                <p
+                  className={`text-sm text-gray-600 font-normal mb-4 ${
+                    currentLang === 2 ? "fonts-khmer" : "font-sans"
+                  }`}
+                >
                   {faculty.position}
                 </p>
               </motion.div>

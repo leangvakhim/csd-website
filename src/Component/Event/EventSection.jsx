@@ -170,63 +170,64 @@ const EventSection = ({ section, menuLang }) => {
         <div className="my-16">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: -50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    viewport={{ once: true }}
-                    className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8"
-                >
-                    <div>
-                        <h1 className={`text-3xl  font-semibold mb-3 sm:mb-4 ${currentLang === 2 ? "font-khmer" : "font-sans"
-                            }`}>
-                            {headerData.hsec_title || 'Events'}
-                        </h1>
-                        {headerData.hsec_subtitle && (
-                            <p className={`text-xs sm:text-sm text-gray-500 ${currentLang === 2 ? "fonts-khmer " : "font-sans"
-                            }`}>
-                                {headerData.hsec_subtitle}
-                            </p>
-                        )}
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-4 items-center  lg:mt-0">
-                        {headerData.hsec_routepage ? (
-                            <button
-                                onClick={() => navigate(headerData.hsec_routepage)}
-                                className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1`}
-                                >
-                                <span className={`mr-2 lg:text-sm text-[12px] ${currentLang === 2 ? "fonts-khmer" : "font-sans"
-                                    }`}>{headerData.hsec_btntitle}</span>
-                                <FaArrowRight className="text-red-800" />
-                            </button>
-                        ) : (
-                            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                            <div className="relative w-full">
-                                <input
-                                    type="text"
-                                    placeholder="Search events"
-                                    value={searchTerm}
-                                    onChange={e => setSearchTerm(e.target.value)}
-                                    className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-red-300 w-full"
-                                    aria-label="Search events"
-                                />
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <FaSearch className="text-gray-400" />
-                                </div>
-                                {searchTerm && (
-                                    <button
-                                        onClick={handleClearSearch}
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                                        aria-label="Clear search"
-                                    >
-                                        <FaTimes className="text-sm" />
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                        )}
-                    </div>
-                </motion.div>
+              <motion.div
+                       initial={{ opacity: 0, y: -50 }}
+                       whileInView={{ opacity: 1, y: 0 }}
+                       transition={{ duration: 0.5 }}
+                       viewport={{ once: true }}
+                       className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8"
+                     >
+                       <div className="mb-4 sm:mb-0">
+                         <h1 className={`text-2xl sm:text-3xl font-semibold mb-2 sm:mb-3 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                           {headerData.hsec_title || 'Events'}
+                         </h1>
+                         {headerData.hsec_subtitle && (
+                           <p className={`text-xs sm:text-sm text-gray-500 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                             {headerData.hsec_subtitle}
+                           </p>
+                         )}
+                       </div>
+                       <motion.div
+                         initial={{ opacity: 0, y: -50 }}
+                         whileInView={{ opacity: 1, y: 0 }}
+                         transition={{ duration: 0.5, delay: 0.6 }}
+                         viewport={{ once: true }}
+                         className="w-full sm:w-auto"
+                       >
+                         {headerData.hsec_routepage ? (
+                           <button
+                             onClick={() => navigate(headerData.hsec_routepage)}
+                             className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1 text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`}
+                           >
+                             <span className="mr-2">{headerData.hsec_btntitle}</span>
+                             <FaArrowRight className="text-red-800" />
+                           </button>
+                         ) : (
+                           <div className="relative w-full sm:w-64">
+                             <input
+                               type="text"
+                               placeholder="Search events"
+                               value={searchTerm}
+                               onChange={e => setSearchTerm(e.target.value)}
+                               className="border rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring focus:border-red-300 w-full text-sm"
+                               aria-label="Search events"
+                             />
+                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                               <FaSearch className="text-gray-400 text-sm" />
+                             </div>
+                             {searchTerm && (
+                               <button
+                                 onClick={handleClearSearch}
+                                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                 aria-label="Clear search"
+                               >
+                                 <FaTimes className="text-sm" />
+                               </button>
+                             )}
+                           </div>
+                         )}
+                       </motion.div>
+                     </motion.div>
 
                 {/* Events List */}
                 {filteredEvents.length < 5 ? (
