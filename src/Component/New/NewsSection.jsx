@@ -188,11 +188,11 @@ const NewsSection = ({ section, menuLang }) => {
           className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8"
         >
           <div className="mb-4 sm:mb-0">
-            <h1 className={`text-2xl sm:text-3xl font-semibold mb-2 sm:mb-3 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
-              {headerData.hsec_title || 'Events'}
+            <h1 className={`text-2xl sm:text-3xl font-semibold mb-2 sm:mb-3 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
+              {headerData.hsec_title}
             </h1>
             {headerData.hsec_subtitle && (
-              <p className={`text-xs sm:text-sm text-gray-500 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+              <p className={`text-xs sm:text-sm text-gray-500 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                 {headerData.hsec_subtitle}
               </p>
             )}

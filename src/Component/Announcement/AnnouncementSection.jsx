@@ -193,7 +193,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
             {headerData.hsec_routepage ? (
               <button
                 onClick={() => navigate(headerData.hsec_routepage)}
-                className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1 text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`}
+                className={`flex text-red-800 hover:text-red-900 items-center border-b border-red-800 pb-1 text-sm sm:text-base ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}
               >
                 <span className="mr-2">{headerData.hsec_btntitle}</span>
                 <FaArrowRight className="text-red-800" />
@@ -253,7 +253,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
                       <h2 className={`text-base sm:text-lg font-semibold mb-3 line-clamp-2 overflow-hidden ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
                         {item.title}
                       </h2>
-                      <p className={`text-sm sm:text-base text-gray-600 line-clamp-3 overflow-hidden ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                      <p className={`text-sm sm:text-base text-gray-600 line-clamp-3 overflow-hidden ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                         {item.description}
                       </p>
                       <p className={`text-xs sm:text-sm text-gray-500 mt-2 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
@@ -296,7 +296,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
                     <h2 className={`text-base sm:text-lg font-semibold mb-3 line-clamp-2 overflow-hidden ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
                       {item.title}
                     </h2>
-                    <p className={`text-sm sm:text-base text-gray-600 line-clamp-3 overflow-hidden ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                    <p className={`text-sm sm:text-base text-gray-600 line-clamp-3 overflow-hidden ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
                       {item.description}
                     </p>
                     <p className={`text-xs sm:text-sm text-gray-500 mt-2 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
