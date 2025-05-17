@@ -35,7 +35,7 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
     >
       <div
         className={`md:flex space-x-6 uppercase ${
-                    currentLang === 2 ? "font-khmer" : "font-sans"
+                    currentLang === 2 ? "fonts-khmer" : "font-sans"
                   }`}
         >
         {menus
