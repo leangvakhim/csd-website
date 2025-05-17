@@ -33,7 +33,11 @@ const PageNavbar = ({ menus, activeMenu, onMenuClick, isMobileMenuOpen, currentL
       }`}
       ref={navbarRef}
     >
-      <div className="md:flex space-x-6 uppercase">
+      <div
+        className={`md:flex space-x-6 uppercase ${
+                    currentLang === 2 ? "font-khmer" : "font-sans"
+                  }`}
+        >
         {menus
           .filter((menu) => menu.menup_id === null)
           .map((menu) => {
