@@ -187,8 +187,7 @@ const ResearchSection = ({section, menuLang}) => {
               </div>
             </div>
             <p className={`text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base max-w-2xl ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-              {headerData?.subtitle ||
-                'A Deep Dive into Computer Science Research: From Fundamentals to Future Innovations'}
+              {headerData?.subtitle }
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 items-center lg:mt-0 ">
