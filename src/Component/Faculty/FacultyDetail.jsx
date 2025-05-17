@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS, API } from '../../Service/APIconfig';
 import { BsViewStacked } from "react-icons/bs";
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { FaExternalLinkAlt } from 'react-icons/fa';
 
 const FacultyDetail = ({ facultyId }) => {
     const location = useLocation();
@@ -78,6 +79,7 @@ const FacultyDetail = ({ facultyId }) => {
                 console.error("Error fetching faculty info:", error);
             }
         };
+
         const fetchFacultyContact = async () => {
             try {
                 const contactRes = await axios.get(API_ENDPOINTS.getFacultyContact);
@@ -92,6 +94,7 @@ const FacultyDetail = ({ facultyId }) => {
                 console.error("Error fetching faculty contacts:", error);
             }
         };
+
         const fetchFacultyBackground = async () => {
             try {
                 const bgRes = await axios.get(API_ENDPOINTS.getFacultyBG);
@@ -106,6 +109,7 @@ const FacultyDetail = ({ facultyId }) => {
                 console.error("Error fetching faculty backgrounds:", error);
             }
         };
+
         const fetchFacultyResearchProjects = async () => {
             try {
                 const projectRes = await axios.get(API_ENDPOINTS.getFacultyInfo);
@@ -245,14 +249,14 @@ const FacultyDetail = ({ facultyId }) => {
             </section>
 
             {/* Main Content */}
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-6 py-8">
+            <div className=" container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-6 py-8">
                 {/* Main Section */}
-                <div className="flex-1">
-                    <section className="my-8 sm:my-12">
-                        <div className="max-w-3xl mx-auto space-y-6 px-4 sm:px-0">
+                <div className="max-w-4xl w-full flex-1">
+                    <section className="my-8 sm:my-12 ">
+                        <div className=" mx-auto space-y-6 px-4 sm:px-0">
                             {/* About Section */}
                             {facultyInfo && (
-                                <section className="space-y-4">
+                                <section className="space-y-4 px-6">
                                     <h2 className={`text-2xl sm:text-3xl font-bold text-gray-900 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                                         {facultyInfo.finfo_title}
                                     </h2>
@@ -267,8 +271,8 @@ const FacultyDetail = ({ facultyId }) => {
 
                             {/* Contact Section */}
                             {contacts.length > 0 && (
-                                <div className="space-y-4">
-                                    <h3 className={`text-xl sm:text-2xl font-bold text-gray-900 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
+                                <div className="space-y-4 px-6">
+                                    <h3 className={`text-2xl sm:text-3xl font-bold text-gray-900 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                                         {currentLang === 1 ? "Contact Info" : "ព័ត៌មានទំនាក់ទំនង"}
                                     </h3>
                                     <div className={`flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>
@@ -283,40 +287,46 @@ const FacultyDetail = ({ facultyId }) => {
                                     </div>
                                 </div>
                             )}
-                        </div>
-                    </section>
 
-                    {/* Research Projects Section */}
-                    <section className="my-8 sm:my-12">
-                        <div className="bg-white rounded-xl shadow-md">
-                            <div className="max-w-3xl mx-auto p-4 sm:p-6">
-                                {researchProjects && researchProjects.map((project) => (
-                                    <div key={project.finfo_id || `${project.finfo_f}-${project.finfo_order}`} className="py-4">
-                                        <section className="space-y-4">
-                                            <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-bold text-gray-900`}>
-                                                {project.finfo_title}
-                                            </h2>
-                                            <div
-                                                className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base`}
-                                                dangerouslySetInnerHTML={{ __html: project.finfo_detail }}
-                                            ></div>
+                            {/* Research Projects Section in left side */}
+                            {researchProjects.length >= 1 && researchProjects.some((project, index) => {
+                                return project.finfo_side === 1;
+                            }) && (
+                                <div>
+                                    {researchProjects.filter(project => project.finfo_side === 1).map((project) => (
+                                        <section key={project.finfo_id || `${project.finfo_f}-${project.finfo_order}`} className="my-8 sm:my-12 ">
+                                            <div className="bg-white rounded-xl shadow-md ">
+                                                <div className=" mx-auto p-4 sm:p-6">
+                                                    <div className="py-4">
+                                                        <section className="space-y-4">
+                                                            <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-bold text-gray-900`}>
+                                                                {project.finfo_title}
+                                                            </h2>
+                                                            <div
+                                                                className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base`}
+                                                                dangerouslySetInnerHTML={{ __html: project.finfo_detail }}
+                                                            ></div>
+                                                        </section>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </section>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </section>
                 </div>
 
                 {/* Sidebar */}
-                <div className="w-full md:w-80 lg:w-96">
+                <div className="max-w-xl w-full px-4">
                     <div className="my-8 sm:my-12">
-                        <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
+                        <div className=" bg-white rounded-xl shadow-md p-4 sm:p-6">
                             <h2 className={`text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6 text-gray-800 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
                                 {currentLang === 1 ? "Background" : "ប្រវត្តិនៃការសិក្សា"}
                             </h2>
                             {backgrounds.length > 0 && backgrounds.map((bg) => (
-                                <div key={bg.fbg_id} className="flex items-center mb-4">
+                                <div key={bg.fbg_id} className=" flex items-center mb-4">
                                     <img
                                         src={bg.img?.img ? `${API}/storage/uploads/${bg.img.img}` : "/placeholder-icon.png"}
                                         alt={bg.fbg_name}
@@ -329,6 +339,31 @@ const FacultyDetail = ({ facultyId }) => {
                             ))}
                         </div>
                     </div>
+
+                    {researchProjects.length >= 1 && researchProjects.some((project, index) => {
+                        return project.finfo_side === 2;
+                    }) && (
+                        <div>
+                            {researchProjects.filter(project => project.finfo_side === 2).map((project) => (
+                                <div key={project.finfo_id || `${project.finfo_f}-${project.finfo_order}`} className=" my-8 sm:my-12">
+                                    <div className="bg-red-800 rounded-xl p-6  text-white">
+                                        <div className="py-4">
+                                        <section className="space-y-4">
+                                            <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-semibold `}>
+                                            {project.finfo_title}
+                                            </h2>
+                                            <div
+                                            className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} space-y-4 text-gray-50 leading-relaxed text-sm sm:text-base`}
+                                            dangerouslySetInnerHTML={{ __html: project.finfo_detail }}
+                                            ></div>
+                                        </section>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </>
