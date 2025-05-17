@@ -28,7 +28,7 @@ const HeadofDepartment = () => {
                         id: headData.f_id,
                         ref_id: headData.ref_id,
                         name: headData.f_name,
-                        bio: headData.f_portfolio || 'No bio available.',
+                        position: headData.f_position,
                         image: headData.img?.img
                             ? `${API}/storage/uploads/${headData.img.img}`
                             : "/placeholder-icon.png",
@@ -143,12 +143,12 @@ const HeadofDepartment = () => {
                                 </div>
                                 <div className='space-y-6 max-w-xl relative' id="profile-info">
                                     <div className='flex justify-between items-center'>
-                                        <h1 className={`text-2xl font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} id="professor-name">{head.name}</h1>
+                                        <h1 className={`text-3xl font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} id="professor-name">{head.name}</h1>
                                         <div className='text-right'>
                                             <RiDoubleQuotesR className='text-7xl text-red-900' />
                                         </div>
                                     </div>
-                                    <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{head.bio}</p>
+                                    <p className={`!text-xl ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{head.position}</p>
                                     <Link
                                         to={`${prefix}/faculty/${head.ref_id}`}
                                     >
