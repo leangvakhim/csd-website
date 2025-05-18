@@ -40,7 +40,7 @@ const GallerySection = ({ section, menuLang }) => {
     }
 
     setIsLoading(true);
-    axiosInstance.get(`${API_ENDPOINTS.getGallery}`)
+      axiosInstance.get(`${API_ENDPOINTS.getGallery}`)
       .then((res) => {
         if (!res.data?.data || !Array.isArray(res.data.data)) {
           setError("No gallery data found");
