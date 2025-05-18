@@ -4,7 +4,7 @@ import { IoMdSearch } from "react-icons/io";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { FiChevronDown } from "react-icons/fi";
 import PageSearch from "./PageSearch";
-import { API_ENDPOINTS } from "../Service/APIconfig";
+import { API_ENDPOINTS, axiosInstance } from "../Service/APIconfig";
 import PageNavbar from "./PageNavbar";
 import axios from "axios";
 import Flag from "react-world-flags";
@@ -29,8 +29,8 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
       setError(null);
       try {
         const [menuRes, pageRes] = await Promise.all([
-          axios.get(API_ENDPOINTS.getMenu),
-          axios.get(API_ENDPOINTS.getPage),
+          axiosInstance.get(API_ENDPOINTS.getMenu),
+          axiosInstance.get(API_ENDPOINTS.getPage),
         ]);
         const menuData = menuRes.data?.data || [];
         const pageData = pageRes.data?.data || [];
