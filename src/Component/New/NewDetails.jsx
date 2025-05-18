@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import NewsBanner from './NewsBanner';
@@ -17,7 +16,7 @@ const NewDetails = ({ sectionId, menuLang, newId }) => {
         const fetchNews = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(
+                const response = await axiosInstance.get(
                     `${API_ENDPOINTS.getNews}`
                 );
                 const data = response.data?.data || [];

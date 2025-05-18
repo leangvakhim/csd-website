@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaArrowRight, FaSpinner } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const OverFlowScholarshipSection = ({sectionData}) => {
   const navigate = useNavigate();
@@ -32,7 +31,7 @@ const OverFlowScholarshipSection = ({sectionData}) => {
   useEffect(() => {
     const fetchHeaderData = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.getHeaderSection);
+        const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
         const headerList = response.data?.data || [];
 
         const matchedHeader = headerList.find(
@@ -77,7 +76,7 @@ const OverFlowScholarshipSection = ({sectionData}) => {
 
   const resolvePageAlias = async (routePage) => {
     try {
-      const res = await axios.get(API_ENDPOINTS.getPage);
+      const res = await axiosInstance.get(API_ENDPOINTS.getPage);
       const pages = Array.isArray(res.data?.data) ? res.data.data : [];
 
       const matched = pages.find((page) => page.p_title === routePage);
@@ -93,7 +92,7 @@ const OverFlowScholarshipSection = ({sectionData}) => {
     const fetchScholarships = async () => {
       try {
         setLoading(true);
-        const scRes = await axios.get(API_ENDPOINTS.getScholarship);
+        const scRes = await axiosInstance.get(API_ENDPOINTS.getScholarship);
         const formattedScholarships = (scRes.data?.data || [])
           .filter((item) => {
             if (!item) return false;

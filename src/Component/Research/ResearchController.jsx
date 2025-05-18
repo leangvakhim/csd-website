@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import { API_ENDPOINTS } from '../../Service/APIconfig';
+import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
 import ResearchInnovations from './ResearcInnovation';
 import ResearchSection from './ResearchSection';
 import ColController from '../Col/FourCol';
@@ -37,7 +36,7 @@ const ResearchController = ({ section }) => {
       }
 
       try {
-        const res = await axios.get(`${API_ENDPOINTS.getPage}?section_id=${section.sec_id}`);
+        const res = await axiosInstance.get(`${API_ENDPOINTS.getPage}?section_id=${section.sec_id}`);
         const fetchedSections = res.data?.data?.sections || [];
 
         const matchedSection = fetchedSections.find(sec => sec.page?.p_alias === section.page?.p_alias);

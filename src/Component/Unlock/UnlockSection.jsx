@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS,API } from "../../Service/APIconfig";
+import { API_ENDPOINTS,API, axiosInstance } from "../../Service/APIconfig";
 import { Link } from "react-router-dom";
 
 const UnlockSection = ({key, section, menuLang}) => {
@@ -16,7 +15,7 @@ const UnlockSection = ({key, section, menuLang}) => {
 
     const resolvePageAlias = async (routePage) => {
         try {
-            const res = await axios.get(API_ENDPOINTS.getPage);
+            const res = await axiosInstance.get(API_ENDPOINTS.getPage);
             const pages = Array.isArray(res.data?.data) ? res.data.data : [];
 
             const matched = pages.find((page) => page.p_title === routePage);
@@ -30,7 +29,7 @@ const UnlockSection = ({key, section, menuLang}) => {
     useEffect(() => {
         const fetchUnlock = async () => {
             try {
-                const res = await axios.get(API_ENDPOINTS.getUnlock);
+                const res = await axiosInstance.get(API_ENDPOINTS.getUnlock);
                 const dataList = Array.isArray(res.data?.data) ? res.data.data : [];
                 const matched = dataList.find(item => item.umd_sec === section?.sec_id);
                 if (matched) {

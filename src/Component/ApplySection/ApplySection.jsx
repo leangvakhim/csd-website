@@ -6,8 +6,7 @@ import {
   FaArrowRight,
   FaCalendarAlt,
 } from 'react-icons/fa';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 import { useLocation } from 'react-router-dom';
 
 const ApplySection = ({key, section, menuLang}) => {
@@ -21,7 +20,7 @@ const ApplySection = ({key, section, menuLang}) => {
   useEffect(() => {
     const fetchApplyInfo = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getApply);
+        const res = await axiosInstance.get(API_ENDPOINTS.getApply);
         const data = res.data?.data || [];
 
         const filtered = data.find(item =>
@@ -40,7 +39,7 @@ const ApplySection = ({key, section, menuLang}) => {
     // Fetch steps from subha endpoint
     const fetchSteps = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getSubApply);
+        const res = await axiosInstance.get(API_ENDPOINTS.getSubApply);
         const subhaData = res.data?.data || [];
 
         const filteredSteps = subhaData
@@ -62,7 +61,7 @@ const ApplySection = ({key, section, menuLang}) => {
     const fetchContactInfo = async () => {
       try {
         const langId = window.location.pathname.includes('/km') ? 2 : 1;
-        const res = await axios.get(`${API_ENDPOINTS.getContactByLang}/${langId}`);
+        const res = await axiosInstance.get(`${API_ENDPOINTS.getContactByLang}/${langId}`);
         const data = res.data?.data || {};
         const subcontact2 = data.subcontact2;
         const subcontact3 = data.subcontact3;
@@ -79,7 +78,7 @@ const ApplySection = ({key, section, menuLang}) => {
 
     const fetchSocialLinks = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getSocialSetting);
+        const res = await axiosInstance.get(API_ENDPOINTS.getSocialSetting);
         const data = Array.isArray(res.data?.data) ? res.data.data : [];
 
         const filtered = data

@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { FaArrowRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 import { useLocation } from "react-router-dom";
 
 // Animation variants
@@ -41,7 +40,7 @@ const FacultyCarouselSection = ({ key, section, menuLang }) => {
 
   const resolvePageAlias = async (routePage) => {
     try {
-      const res = await axios.get(API_ENDPOINTS.getPage);
+      const res = await axiosInstance.get(API_ENDPOINTS.getPage);
       const pages = Array.isArray(res.data?.data) ? res.data.data : [];
       const matched = pages.find((page) => page.p_title === routePage);
       return matched?.p_alias || null;
@@ -57,7 +56,7 @@ const FacultyCarouselSection = ({ key, section, menuLang }) => {
       setError(null);
 
       // Fetch header section
-      const headerRes = await axios.get(API_ENDPOINTS.getHeaderSection);
+      const headerRes = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
       const headerData = headerRes.data?.data || [];
       const matchedHeader = headerData.find(
         (item) =>
@@ -80,7 +79,7 @@ const FacultyCarouselSection = ({ key, section, menuLang }) => {
       });
 
       // Fetch faculty members
-      const facultyRes = await axios.get(API_ENDPOINTS.getFaculty);
+      const facultyRes = await axiosInstance.get(API_ENDPOINTS.getFaculty);
       const facultyData = facultyRes.data?.data || [];
 
       if (!facultyData.length) {
@@ -102,7 +101,7 @@ const FacultyCarouselSection = ({ key, section, menuLang }) => {
       setFacultyMembers(filteredFaculty);
 
       // Fetch social media for each faculty
-      const socialRes = await axios.get(API_ENDPOINTS.getSocial);
+      const socialRes = await axiosInstance.get(API_ENDPOINTS.getSocial);
       const allSocials = socialRes.data?.data || [];
       const socialsByFaculty = {};
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import { MdComputer } from 'react-icons/md';
 import { useLocation } from 'react-router-dom';
@@ -14,7 +13,7 @@ const ResearchBanner = ({ researchId }) => {
 
   useEffect(() => {
     setIsLoading(true);
-    axios
+    axiosInstance
       .get(`${API_ENDPOINTS.getResearch}/${researchId}`)
       .then((res) => {
         const data = res.data?.data;

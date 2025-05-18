@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import CareerBanner from './CareerBanner';
 import SocialSection from '../Social/SocialSection';
 import DOMPurify from 'dompurify';
@@ -16,7 +15,7 @@ const CareerDetails = ({ sectionId, menuLang, careerId }) => {
 
     useEffect(() => {
         if (careerId) {
-            axios.get(`${API_ENDPOINTS.getCareer}`)
+            axiosInstance.get(`${API_ENDPOINTS.getCareer}`)
                 .then((res) => {
                     const allCareers = res.data?.data || [];
                     const selectedCareer = allCareers.find(

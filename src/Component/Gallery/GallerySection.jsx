@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 // Animation variants for the section
 const sectionVariants = {
@@ -41,7 +40,7 @@ const GallerySection = ({ section, menuLang }) => {
     }
 
     setIsLoading(true);
-    axios.get(`${API_ENDPOINTS.getGallery}`)
+    axiosInstance.get(`${API_ENDPOINTS.getGallery}`)
       .then((res) => {
         if (!res.data?.data || !Array.isArray(res.data.data)) {
           setError("No gallery data found");

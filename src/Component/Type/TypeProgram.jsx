@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { RiDoubleQuotesR } from 'react-icons/ri';
-import { API_ENDPOINTS } from '../../Service/APIconfig';
+import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
 
 const TypeProgram = ({ section }) => {
   const [reasons, setReasons] = useState([]);
@@ -12,7 +12,7 @@ const TypeProgram = ({ section }) => {
   useEffect(() => {
     if (section && section.sec_id) {
       // Fetch child items (reasons)
-      fetch(`${API_ENDPOINTS.getSubType}?section_id=${section.sec_id}`)
+      axiosInstance.get(`${API_ENDPOINTS.getSubType}?section_id=${section.sec_id}`)
         .then((res) => res.json())
         .then((data) => {
           const items = data?.data?.filter((item) => item.lang === section.lang);
@@ -21,7 +21,7 @@ const TypeProgram = ({ section }) => {
         .catch((err) => console.error('Error fetching reasons:', err));
 
       // Fetch section title and description
-      fetch(`${API_ENDPOINTS.getType}?section_id=${section.sec_id}`)
+      axiosInstance.get(`${API_ENDPOINTS.getType}?section_id=${section.sec_id}`)
         .then((res) => res.json())
         .then((data) => {
           const mainData = data?.data?.find((item) => item.lang === currentLang) || data?.data?.[0];

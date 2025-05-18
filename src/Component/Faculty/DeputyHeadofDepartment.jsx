@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { RiDoubleQuotesR } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const DeputyHeadofDepartment = () => {
     const [deputyData, setDeputyData] = useState([]);
@@ -16,7 +15,7 @@ const DeputyHeadofDepartment = () => {
         const fetchDeputies = async () => {
             try {
                 // Fetch faculty data
-                const facultyRes = await axios.get(API_ENDPOINTS.getFaculty);
+                const facultyRes = await axiosInstance.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = facultyRes.data?.data || [];
                 const deputies = allFaculty
                     .filter(item =>
@@ -39,7 +38,7 @@ const DeputyHeadofDepartment = () => {
                 setDeputyData(formattedDeputies);
 
                 // Fetch social media data
-                const socialRes = await axios.get(API_ENDPOINTS.getSocial);
+                const socialRes = await axiosInstance.get(API_ENDPOINTS.getSocial);
                 const allSocials = socialRes.data?.data || [];
                 const socialsByDeputy = {};
 

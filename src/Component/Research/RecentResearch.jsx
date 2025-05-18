@@ -3,8 +3,7 @@ import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { MdExplore, MdComputer } from 'react-icons/md';
 import { AiOutlineRobot } from 'react-icons/ai';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const RecentResearch = () => {
   const navigate = useNavigate();
@@ -23,7 +22,7 @@ const RecentResearch = () => {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        const researchResponse = await axios.get(API_ENDPOINTS.getResearchlab);
+        const researchResponse = await axiosInstance.get(API_ENDPOINTS.getResearchlab);
         const researchData = researchResponse.data?.data || [];
 
         const formattedResearchData = researchData
@@ -71,7 +70,7 @@ const RecentResearch = () => {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const tagRes = await axios.get(API_ENDPOINTS.getResearchlabTag);
+        const tagRes = await axiosInstance.get(API_ENDPOINTS.getResearchlabTag);
         const allTags = tagRes.data?.data || [];
 
         const rsdlId = researchData[0]?.id;

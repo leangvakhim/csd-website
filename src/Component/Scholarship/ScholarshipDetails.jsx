@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import ScholarshipBanner from './ScholarshipBanner';
 import ScholarshipApplication from './ScholarshipApplication';
 import ScholarshipOverview from './ScholarshipOverview';
@@ -14,7 +13,7 @@ const ScholarshipDetails = ({ scholarshipId }) => {
     useEffect(() => {
         const fetchSections = async () => {
             try {
-                const response = await axios.get(API_ENDPOINTS.getScholarship);
+                const response = await axiosInstance.get(API_ENDPOINTS.getScholarship);
                 const sorted = response.data.data
                     .filter(
                         (item) =>

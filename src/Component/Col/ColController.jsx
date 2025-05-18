@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import { API_ENDPOINTS } from '../../Service/APIconfig';
+import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
 import OneCol from './OneCol';
 import TwoCol from './TwoCol';
 import FourCol from './FourCol';
@@ -38,7 +37,7 @@ const ColController = ({ sections = [] }) => {
   useEffect(() => {
     const fetchAllSections = async () => {
       try {
-        const headerRes = await axios.get(API_ENDPOINTS.getHeaderSection);
+        const headerRes = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
         const headers = headerRes.data?.data || [];
 
         const results = await Promise.all(
@@ -47,7 +46,7 @@ const ColController = ({ sections = [] }) => {
             const hsecAmount = header.hsec_amount ?? 4;
 
             const endpoint = DATA_ENDPOINTS[section.sec_type] || `${API_ENDPOINTS.getHeaderSection}?section_id=`;
-            const res = await axios.get(`${endpoint}${section.sec_id}`);
+            const res = await axiosInstance.get(`${endpoint}${section.sec_id}`);
             const rawData = res.data?.data?.sections || res.data?.data || [];
 
             const items = Array.isArray(rawData)

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 // Animation variants for the banner section
 const bannerVariants = {
@@ -41,7 +40,7 @@ const BannerSection = ({ section, menuLang }) => {
     }
 
     setIsLoading(true);
-    axios
+    axiosInstance
       .get(`${API_ENDPOINTS.getBanner}?section_id=${section.sec_id}&lang=${menuLang}`)
       .then((res) => {
         const banners = res.data?.data || [];

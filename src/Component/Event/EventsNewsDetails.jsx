@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import EventBanner from './EventBanner';
@@ -21,7 +20,7 @@ const EventsNewsDetails = ({ eventId, menuLang }) => {
         const fetchNews = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`${API_ENDPOINTS.getEvent}`);
+                const response = await axiosInstance.get(`${API_ENDPOINTS.getEvent}`);
                 const data = response.data?.data || [];
 
                 const selectedItem = data.find(item =>

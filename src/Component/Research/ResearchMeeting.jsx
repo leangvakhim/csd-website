@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 
 const ResearchMeeting = ({rsdtId}) => {
@@ -10,7 +9,7 @@ const ResearchMeeting = ({rsdtId}) => {
     useEffect(() => {
         const fetchMeetingData = async () => {
             try {
-                const response = await axios.get(API_ENDPOINTS.getRsdMeeting);
+                const response = await axiosInstance.get(API_ENDPOINTS.getRsdMeeting);
                 const matched = response.data.data.find(item => item.title.rsdt_id === rsdtId);
                 setProfessorData(matched);
             } catch (error) {

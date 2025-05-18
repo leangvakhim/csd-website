@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaCheck } from "react-icons/fa";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 const CriteriaSection = ({section, menuLang}) => {
     const [criteriaData, setCriteriaData] = useState(null);
@@ -11,7 +10,7 @@ const CriteriaSection = ({section, menuLang}) => {
       const fetchCriteriaData = async () => {
         if (!section?.sec_id) return;
         try {
-            const res = await axios.get(API_ENDPOINTS.getCriteria);
+            const res = await axiosInstance.get(API_ENDPOINTS.getCriteria);
             const data = res.data.data;
             const filtered = data.find(
             (item) =>
@@ -55,7 +54,7 @@ const CriteriaSection = ({section, menuLang}) => {
                viewport={{ once: true, amount: 0.5 }}
               className="w-full xl:w-1/2 px-4 xl:px-0"
             >
-                <h2 className={`text-2xl xl:text-3xl font-bold mb-4 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}> 
+                <h2 className={`text-2xl xl:text-3xl font-bold mb-4 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>
                     {criteriaData.gc_title}
                 </h2>
 

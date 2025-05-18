@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
@@ -13,7 +12,7 @@ const FacultyMemeber = () => {
         const fetchFacultyMembers = async () => {
             try {
                 // Fetch faculty data
-                const res = await axios.get(API_ENDPOINTS.getFaculty);
+                const res = await axiosInstance.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = res.data?.data || [];
 
                 const filteredMembers = allFaculty
@@ -34,7 +33,7 @@ const FacultyMemeber = () => {
                 setFacultyMembers(formattedMembers);
 
                 // Fetch social media data
-                const socialRes = await axios.get(API_ENDPOINTS.getSocial);
+                const socialRes = await axiosInstance.get(API_ENDPOINTS.getSocial);
                 const allSocials = socialRes.data?.data || [];
                 const socialsByMember = {};
 

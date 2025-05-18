@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Papa from "papaparse";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
 
@@ -23,7 +22,7 @@ const AnnouncementDetails = ({announcementID, menuLang}) => {
   const displayedData = students.slice(indexOfFirstStudent, indexOfLastStudent);
 
   useEffect(() => {
-    axios.get(API_ENDPOINTS.getAnnouncementStudent)
+    axiosInstance.get(API_ENDPOINTS.getAnnouncementStudent)
       .then(response => {
         const rawData = Array.isArray(response.data) ? response.data : [];
         const formatted = rawData.map((item, index) => {
@@ -46,7 +45,7 @@ const AnnouncementDetails = ({announcementID, menuLang}) => {
         console.error("Error fetching data:", error);
       });
 
-    axios.get(API_ENDPOINTS.getAnnouncement)
+    axiosInstance.get(API_ENDPOINTS.getAnnouncement)
       .then(response => {
         const allAnnouncements = response.data?.data || [];
         const matched = allAnnouncements.find(

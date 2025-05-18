@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FaCalendarAlt } from 'react-icons/fa';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const ScholarshipBanner = ({ scholarshipId }) => {
   const [bannerSection, setBannerSection] = useState(null);
@@ -14,7 +13,7 @@ const ScholarshipBanner = ({ scholarshipId }) => {
     if (scholarshipId) {
       const fetchBanner = async () => {
         try {
-          const response = await axios.get(`${API_ENDPOINTS.getScholarship}`);
+          const response = await axiosInstance.get(`${API_ENDPOINTS.getScholarship}`);
           const allScholarships = response.data?.data || [];
           const selectedItem = allScholarships.find(item =>
             item.ref_id === Number(scholarshipId) && item.lang === currentLang

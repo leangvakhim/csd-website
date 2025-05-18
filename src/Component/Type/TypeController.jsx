@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TypeProgram from './TypeProgram';
 import TypeScholar from './TypeScholar';
-import { API_ENDPOINTS } from '../../Service/APIconfig';
+import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
 
 const TypeController = () => {
   const [data, setData] = useState([]);
@@ -9,7 +9,7 @@ const TypeController = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(API_ENDPOINTS.getType);
+        const response = await axiosInstance.get(API_ENDPOINTS.getType);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }

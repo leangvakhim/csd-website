@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
 import { FaChevronDown } from "react-icons/fa";
-import { API_ENDPOINTS } from "../../Service/APIconfig";
+import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
 
 // Animation variants
 const sectionVariants = {
@@ -43,7 +42,7 @@ const FAQSection = ({section}) => {
     setIsLoading(true);
     setError(null);
 
-    Promise.all([axios.get(API_ENDPOINTS.getFAQ), axios.get(API_ENDPOINTS.getSubFAQ)])
+    Promise.all([axiosInstance.get(API_ENDPOINTS.getFAQ), axiosInstance.get(API_ENDPOINTS.getSubFAQ)])
       .then(([faqRes, subFaqRes]) => {
 
         if (!faqRes.data?.data || !subFaqRes.data?.data) {

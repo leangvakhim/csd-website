@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaCalendarAlt } from 'react-icons/fa';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { useLocation } from 'react-router-dom';
 
 const EventBanner = ({ eventId, menuLang}) => {
@@ -16,7 +15,7 @@ const EventBanner = ({ eventId, menuLang}) => {
         if (eventId) {
             const fetchBanner = async () => {
                 try {
-                    const response = await axios.get(`${API_ENDPOINTS.getEvent}`);
+                    const response = await axiosInstance.get(`${API_ENDPOINTS.getEvent}`);
                     const allEvents = response.data?.data || [];
                     const selectedEvent = allEvents.find(
                         item => item.ref_id === Number(eventId) && item.lang === currentLang

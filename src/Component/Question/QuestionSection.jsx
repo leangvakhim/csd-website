@@ -1,8 +1,7 @@
 import React, {useState} from "react";
 import { motion } from "framer-motion";
 import contactImage from "../../assets/web-sample-1(3).jpg";
-import axios from "axios";
-import { API_ENDPOINTS } from "../../Service/APIconfig";
+import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
 import Swal from 'sweetalert2';
 
 const QuestionSection = () => {
@@ -20,7 +19,7 @@ const QuestionSection = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(API_ENDPOINTS.createEmail, formData);
+      await axiosInstance.post(API_ENDPOINTS.createEmail, formData);
 
       Swal.fire({
         icon: 'success',

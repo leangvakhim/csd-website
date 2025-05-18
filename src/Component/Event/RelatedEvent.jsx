@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { useLocation } from 'react-router-dom';
 
 const RelatedEvent = ({ eventId, sectionId, menuLang }) => {
@@ -17,7 +16,7 @@ const RelatedEvent = ({ eventId, sectionId, menuLang }) => {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const response = await axios.get(
+                const response = await axiosInstance.get(
                     `${API_ENDPOINTS.getEvent}`
                 );
                 const data = response.data?.data || [];

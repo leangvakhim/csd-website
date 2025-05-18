@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { MdComputer } from "react-icons/md";
@@ -11,7 +10,7 @@ const CareerBanner = ({careerId, menuLang}) => {
 
     useEffect(() => {
         if (careerId) {
-            axios.get(`${API_ENDPOINTS.getCareer}`)
+            axiosInstance.get(`${API_ENDPOINTS.getCareer}`)
                 .then((res) => {
                     const allCareers = res.data?.data || [];
                     const selected = allCareers.find(

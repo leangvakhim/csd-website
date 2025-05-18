@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { RiDoubleQuotesR } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const DeveloperSection = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +37,7 @@ const DeveloperSection = () => {
     const fetchDevelopers = async () => {
       try {
         // Fetch developer data
-        const devRes = await axios.get(API_ENDPOINTS.getDevelopers);
+        const devRes = await axiosInstance.get(API_ENDPOINTS.getDevelopers);
         const allDevelopers = devRes.data?.data || [];
 
         // Filter for lang: currentLang, display: 1, active: 1, ensuring numbers
@@ -82,7 +81,7 @@ const DeveloperSection = () => {
         setDevelopers(uniqueDevelopers);
 
         // Fetch social media data
-        const socialRes = await axios.get(API_ENDPOINTS.getSocialDeveloper);
+        const socialRes = await axiosInstance.get(API_ENDPOINTS.getSocialDeveloper);
         const allSocials = socialRes.data?.data || [];
         const socialsByDeveloper = {};
 

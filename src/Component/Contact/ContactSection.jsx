@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 const ContactSection = ({ section, menuLang }) => {
   const [contactData, setContactData] = useState(null); // No static fallback
@@ -16,7 +15,7 @@ const ContactSection = ({ section, menuLang }) => {
     }
 
     setIsLoading(true);
-    axios
+    axiosInstance
       .get(`${API_ENDPOINTS.getContactByLang}/${menuLang}`)
       .then((res) => {
         const data = res.data?.data;

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
 import { Link } from "react-router-dom";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 // Animation variants
 const sectionVariants = {
@@ -60,7 +59,7 @@ const ScholarshipApplication = ({ scholarshipId }) => {
       setIsLoading(true);
       setError(null);
 
-      const response = await axios.get(`${API_ENDPOINTS.getScholarship}`);
+      const response = await axiosInstance.get(`${API_ENDPOINTS.getScholarship}`);
       const allScholarships = response.data?.data || [];
 
       const data = allScholarships.find(

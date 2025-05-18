@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FourColScholarshipSection from './FourColScholarshipSection';
 import OverFlowScholarshipSection from './OverFlowScholarshipSection';
-import axios from 'axios';
-import { API_ENDPOINTS } from '../../Service/APIconfig';
+import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
 
 const ScholarshipSection = ({ section }) => {
   const [sectionData, setSectionData] = useState(null);
@@ -10,7 +9,7 @@ const ScholarshipSection = ({ section }) => {
   useEffect(() => {
     const fetchHeaderSection = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.getHeaderSection);
+        const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
         const data = response.data.data || [];
 
         const matched = data.find(
