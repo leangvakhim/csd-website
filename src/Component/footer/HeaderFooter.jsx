@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
-import axios from 'axios';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
@@ -15,7 +14,7 @@ const HeaderFooter = () => {
     const langFromUrl = location.pathname.includes('/km') ? 2 : 1;
     setCurrentLang(langFromUrl);
 
-    axios.get(`${API_ENDPOINTS.getSetting}/lang/${langFromUrl}`)
+    axiosInstance.get(`${API_ENDPOINTS.getSetting}/lang/${langFromUrl}`)
         .then(res => {
             const settingData = res.data?.data || [];
             const langSetting = Array.isArray(settingData)
@@ -36,7 +35,7 @@ const HeaderFooter = () => {
     }, [location.pathname]);
 
     useEffect(() => {
-      axios.get(API_ENDPOINTS.getSocialSetting)
+      axiosInstance.get(API_ENDPOINTS.getSocialSetting)
         .then(res => {
           const socialData = res.data?.data || res.data || [];
           const filtered = Array.isArray(socialData)

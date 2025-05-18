@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import PageHeader from './PageHeader';
 import Footer from '../Component/footer/Footer'
-import { API_ENDPOINTS } from '../Service/APIconfig';
+import { API_ENDPOINTS, axiosInstance } from '../Service/APIconfig';
 import Slideshow from './Slideshow/Slideshow';
 import ServiceSection from './Services/ServiceSection';
 import ProgramSection from './Program/ProgramSection';
@@ -73,7 +73,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
     useEffect(() => {
         if (page?.p_id) {
             console.log("PageRenderer: Fetching sections for page_id:", page);
-            axios
+            axiosInstance
                 .get(`${API_ENDPOINTS.getSection}?page_id=${page.p_id}`)
                 .then((res) => {
                     const pageSections = res.data.data
