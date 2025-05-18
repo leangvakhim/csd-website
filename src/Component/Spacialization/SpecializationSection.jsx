@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
 import { FaCheck } from "react-icons/fa";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 const sectionVariants = {
   hidden: { opacity: 0 },
@@ -33,7 +32,7 @@ const SpecializationSection = ({ section, menuLang }) => {
       }
 
       try {
-        const res = await axios.get(
+        const res = await axiosInstance.get(
           `${API_ENDPOINTS.getSpecialization}`
         );
         const data = res.data?.data || [];
@@ -69,7 +68,7 @@ const SpecializationSection = ({ section, menuLang }) => {
           hasRas: !!item.ras,
         });
 
-        const subserviceRes = await axios.get(
+        const subserviceRes = await axiosInstance.get(
           `${API_ENDPOINTS.getSubserviceAF}?af_id=${item.af_id}`
         );
 

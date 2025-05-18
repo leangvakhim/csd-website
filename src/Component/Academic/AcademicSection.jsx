@@ -3,8 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { MdExplore } from "react-icons/md";
 import { PiGraduationCapDuotone } from "react-icons/pi";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 // Section animation
 const sectionVariants = {
@@ -28,7 +27,7 @@ const AcademicSection = ({ section, menuLang }) => {
 
   const resolvePageAlias = async (routePage) => {
     try {
-      const res = await axios.get(API_ENDPOINTS.getPage);
+      const res = await axiosInstance.get(API_ENDPOINTS.getPage);
       const pages = Array.isArray(res.data?.data) ? res.data.data : [];
 
       const matched = pages.find((page) => page.p_title === routePage);
@@ -43,7 +42,7 @@ const AcademicSection = ({ section, menuLang }) => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getAcademic);
+        const res = await axiosInstance.get(API_ENDPOINTS.getAcademic);
         const items = Array.isArray(res.data?.data) ? res.data.data : [];
         const item = items.find((entry) => entry.acad_sec === section.sec_id);
         if (item) {

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaArrowRight, FaCalendarAlt, FaSpinner } from 'react-icons/fa';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const CareerSection = ({ section, menuLang }) => {
     const navigate = useNavigate();
@@ -26,7 +25,7 @@ const CareerSection = ({ section, menuLang }) => {
     useEffect(() => {
         const fetchCareerData = async () => {
             try {
-                const response = await axios.get(API_ENDPOINTS.getHeaderSection);
+                const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
                 const data = response.data;
                 if (Array.isArray(data.data)) {
                     const filtered = data.data.find(
@@ -42,7 +41,7 @@ const CareerSection = ({ section, menuLang }) => {
                     }
                 }
 
-                const careerRes = await axios.get(API_ENDPOINTS.getCareer);
+                const careerRes = await axiosInstance.get(API_ENDPOINTS.getCareer);
                 const formattedCareers = careerRes.data?.data
                     .filter(
                         (item) =>

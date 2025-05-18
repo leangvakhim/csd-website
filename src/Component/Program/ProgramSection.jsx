@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaCheck } from "react-icons/fa";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 // Animation variants for the section
 const sectionVariants = {
@@ -42,7 +41,7 @@ const ProgramSection = ({ section, menuLang }) => {
     }
 
     setIsLoading(true);
-    axios
+    axiosInstance
       .get(`${API_ENDPOINTS.getDepartment}?lang=${menuLang}`)
       .then((res) => {
         const data = res.data?.data || [];

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 // Animation variants
 const sectionVariants = {
@@ -44,7 +43,7 @@ const FacilitiesSection = ({ section, menuLang }) => {
       setError(null);
 
       // Fetch facilities data
-      const facilitiesRes = await axios.get(
+      const facilitiesRes = await axiosInstance.get(
         `${API_ENDPOINTS.getAcadFacilities}`
       );
 
@@ -78,7 +77,7 @@ const FacilitiesSection = ({ section, menuLang }) => {
       setFacilityData(newFacilityData);
 
       // Fetch subservices for this facility
-      const subserviceRes = await axios.get(
+      const subserviceRes = await axiosInstance.get(
         `${API_ENDPOINTS.getSubserviceAF}?af_id=${facilityItem.af_id}`
       );
 

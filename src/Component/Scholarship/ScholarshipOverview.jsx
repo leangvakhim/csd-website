@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { FaCalendarAlt, FaListUl } from 'react-icons/fa';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const ScholarshipOverview = ({ scholarshipId }) => {
   const [scholarshipDetails, setScholarshipDetails] = useState({
@@ -22,7 +21,7 @@ const ScholarshipOverview = ({ scholarshipId }) => {
     if (scholarshipId) {
       const fetchScholarshipDetails = async () => {
         try {
-          const response = await axios.get(`${API_ENDPOINTS.getScholarship}`);
+          const response = await axiosInstance.get(`${API_ENDPOINTS.getScholarship}`);
           const allScholarships = response.data?.data || [];
           const data = allScholarships.find(item =>
             item.ref_id === Number(scholarshipId) && item.lang === currentLang

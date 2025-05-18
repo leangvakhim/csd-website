@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const FeedbackSection = ({ menuLang }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -15,7 +14,7 @@ const FeedbackSection = ({ menuLang }) => {
     const fetchFeedback = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_ENDPOINTS.getFeedback}?lang=${menuLang}`);
+        const response = await axiosInstance.get(`${API_ENDPOINTS.getFeedback}?lang=${menuLang}`);
         const data = Array.isArray(response.data?.data) ? response.data.data : [];
 
         const formattedData = data

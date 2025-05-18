@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import { API_ENDPOINTS } from "../../Service/APIconfig";
+import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
 import { PiGraduationCapDuotone } from "react-icons/pi";
 
 const StudySection = ({key, section, menuLang}) => {
@@ -11,7 +10,7 @@ const StudySection = ({key, section, menuLang}) => {
     useEffect(() => {
         const fetchStudyInfo = async () => {
             try {
-                const res = await axios.get(API_ENDPOINTS.getStudy);
+                const res = await axiosInstance.get(API_ENDPOINTS.getStudy);
                 const data = Array.isArray(res.data?.data) ? res.data.data : [];
 
                 const matched = data.find(
@@ -37,7 +36,7 @@ const StudySection = ({key, section, menuLang}) => {
 
         const fetchYears = async () => {
             try {
-                const res = await axios.get(API_ENDPOINTS.getSubStudyDegree);
+                const res = await axiosInstance.get(API_ENDPOINTS.getSubStudyDegree);
                 const allYears = Array.isArray(res.data?.data) ? res.data.data : [];
 
                 const filteredYears = allYears

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 
 const ResearchProject = ({rsdtId}) => {
@@ -9,7 +8,7 @@ const ResearchProject = ({rsdtId}) => {
 
     useEffect(() => {
         if (rsdtId) {
-            axios.get(API_ENDPOINTS.getRsdProject)
+            axiosInstance.get(API_ENDPOINTS.getRsdProject)
                 .then((res) => {
                     const allProjects = res.data?.data;
                     const match = allProjects.find(item => item.rsdp_rsdtile === rsdtId);

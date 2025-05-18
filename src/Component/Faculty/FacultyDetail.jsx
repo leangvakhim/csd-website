@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { BsViewStacked } from "react-icons/bs";
 import { Link, useLocation } from 'react-router-dom';
 import { FaExternalLinkAlt } from 'react-icons/fa';
@@ -25,7 +24,7 @@ const FacultyDetail = ({ facultyId }) => {
     useEffect(() => {
         const fetchFacultyDetail = async () => {
             try {
-                const facultyRes = await axios.get(API_ENDPOINTS.getFaculty);
+                const facultyRes = await axiosInstance.get(API_ENDPOINTS.getFaculty);
                 const allFaculty = facultyRes.data?.data || [];
                 const selectedFaculty = allFaculty.find(item => item.ref_id === Number(facultyId) && item.lang === currentLang);
 
@@ -43,7 +42,7 @@ const FacultyDetail = ({ facultyId }) => {
 
                 // Fetch social icons
                 // Note: faculty may not be set yet, so we use selectedFaculty
-                const socialRes = await axios.get(API_ENDPOINTS.getSocial);
+                const socialRes = await axiosInstance.get(API_ENDPOINTS.getSocial);
                 const allSocials = socialRes.data?.data || [];
                 const filteredSocials = allSocials.filter(social =>
                     social.social_faculty === parseInt(selectedFaculty?.f_id) &&
@@ -63,7 +62,7 @@ const FacultyDetail = ({ facultyId }) => {
 
         const fetchFacultyInfo = async () => {
             try {
-                const infoRes = await axios.get(API_ENDPOINTS.getFacultyInfo);
+                const infoRes = await axiosInstance.get(API_ENDPOINTS.getFacultyInfo);
                 const allInfo = infoRes.data?.data || [];
                 const selectedInfo = allInfo.find(info =>
                     info.finfo_f === parseInt(faculty.f_id) &&
@@ -82,7 +81,7 @@ const FacultyDetail = ({ facultyId }) => {
 
         const fetchFacultyContact = async () => {
             try {
-                const contactRes = await axios.get(API_ENDPOINTS.getFacultyContact);
+                const contactRes = await axiosInstance.get(API_ENDPOINTS.getFacultyContact);
                 const allContacts = contactRes.data?.data || [];
                 const filteredContacts = allContacts.filter(contact =>
                     contact.fc_f === parseInt(faculty.f_id) &&
@@ -97,7 +96,7 @@ const FacultyDetail = ({ facultyId }) => {
 
         const fetchFacultyBackground = async () => {
             try {
-                const bgRes = await axios.get(API_ENDPOINTS.getFacultyBG);
+                const bgRes = await axiosInstance.get(API_ENDPOINTS.getFacultyBG);
                 const allBackgrounds = bgRes.data?.data || [];
                 const filteredBackgrounds = allBackgrounds.filter(bg =>
                     bg.fbg_f === parseInt(faculty.f_id) &&
@@ -112,7 +111,7 @@ const FacultyDetail = ({ facultyId }) => {
 
         const fetchFacultyResearchProjects = async () => {
             try {
-                const projectRes = await axios.get(API_ENDPOINTS.getFacultyInfo);
+                const projectRes = await axiosInstance.get(API_ENDPOINTS.getFacultyInfo);
                 const allProjects = projectRes.data?.data || [];
                 const filteredProjects = allProjects.filter(project =>
                     project.finfo_f === parseInt(faculty.f_id) &&

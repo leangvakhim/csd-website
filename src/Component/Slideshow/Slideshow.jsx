@@ -4,8 +4,7 @@ import { motion } from "framer-motion";
 import { BsFillInfoCircleFill } from "react-icons/bs";
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
 import { MdExplore } from "react-icons/md";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
-import axios from 'axios';
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 // import { useTranslation } from "react-i18next";
 
 
@@ -15,7 +14,7 @@ const Slideshow = ({key, section, menuLang}) => {
 
     const resolvePageAlias = async (routePage) => {
         try {
-            const res = await axios.get(API_ENDPOINTS.getPage);
+            const res = await axiosInstance.get(API_ENDPOINTS.getPage);
             const pages = Array.isArray(res.data?.data) ? res.data.data : [];
 
             const matched = pages.find((page) => page.p_title === routePage);
@@ -28,7 +27,7 @@ const Slideshow = ({key, section, menuLang}) => {
 
     useEffect(() => {
         if (section?.sec_id) {
-            axios.get(`${API_ENDPOINTS.getSlideshow}`)
+            axiosInstance.get(`${API_ENDPOINTS.getSlideshow}`)
                 .then(res => {
                     const resolveLinks = async () => {
                         const data = res.data?.data || [];

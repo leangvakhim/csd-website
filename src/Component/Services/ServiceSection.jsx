@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 // Animation variants for the section
 const sectionVariants = {
@@ -29,7 +28,7 @@ const ServiceSection = ({ section, menuLang }) => {
   // Fetch services data based on section.sec_id
   useEffect(() => {
     if (section?.sec_id) {
-      axios
+      axiosInstance
         .get(`${API_ENDPOINTS.getService}`)
         .then((res) => {
           const data = res.data?.data || [];

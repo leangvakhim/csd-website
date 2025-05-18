@@ -3,8 +3,7 @@ import { FaChevronLeft, FaChevronRight, FaArrowRight } from 'react-icons/fa';
 import { MdExplore, MdComputer } from 'react-icons/md';
 import { AiOutlineRobot } from 'react-icons/ai';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const LabSection = ({section}) => {
     const navigate = useNavigate();
@@ -26,7 +25,7 @@ const LabSection = ({section}) => {
             return;
         }
         try {
-            const researchResponse = await axios.get(API_ENDPOINTS.getResearchlab);
+            const researchResponse = await axiosInstance.get(API_ENDPOINTS.getResearchlab);
             const researchData = researchResponse.data?.data || [];
             const formattedResearchData = researchData
             .filter((item) =>
@@ -45,7 +44,7 @@ const LabSection = ({section}) => {
                 : '/placeholder-image.jpg',
             }))
 
-            const headerResponse = await axios.get(API_ENDPOINTS.getHeaderSection);
+            const headerResponse = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
             const headerList = headerResponse.data?.data || [];
 
             const matchedHeader = headerList.find(
@@ -85,7 +84,7 @@ const LabSection = ({section}) => {
 
     const resolvePageAlias = async (routePage) => {
         try {
-        const res = await axios.get(API_ENDPOINTS.getPage);
+        const res = await axiosInstance.get(API_ENDPOINTS.getPage);
         const pages = Array.isArray(res.data?.data) ? res.data.data : [];
 
         const matched = pages.find((page) => page.p_title === routePage);
@@ -99,7 +98,7 @@ const LabSection = ({section}) => {
     useEffect(() => {
         const fetchTags = async () => {
         try {
-            const tagRes = await axios.get(API_ENDPOINTS.getResearchlabTag);
+            const tagRes = await axiosInstance.get(API_ENDPOINTS.getResearchlabTag);
             const allTags = tagRes.data?.data || [];
 
             const rsdlId = researchData[0]?.id;

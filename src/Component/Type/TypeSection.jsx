@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS } from "../../Service/APIconfig";
+import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
 import { RiDoubleQuotesR } from "react-icons/ri";
 
 const TypeSection = ({ section, menuLang }) => {
@@ -12,7 +12,7 @@ const TypeSection = ({ section, menuLang }) => {
   useEffect(() => {
     if (section && section.sec_id) {
       // Fetch data for both API endpoints
-      fetch(API_ENDPOINTS.getSubType)
+      axiosInstance.get(API_ENDPOINTS.getSubType)
         .then((response) => response.json())
         .then((data) => {
           const allScholarships = data?.data || [];
@@ -21,7 +21,7 @@ const TypeSection = ({ section, menuLang }) => {
         })
         .catch((error) => console.error("Error fetching scholarships from getSubType:", error));
 
-      fetch(API_ENDPOINTS.getType)
+      axiosInstance.get(API_ENDPOINTS.getType)
         .then((response) => response.json())
         .then((data) => {
           const tseData = data?.data || [];

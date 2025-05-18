@@ -6,7 +6,6 @@ import { FiChevronDown } from "react-icons/fi";
 import PageSearch from "./PageSearch";
 import { API_ENDPOINTS, axiosInstance } from "../Service/APIconfig";
 import PageNavbar from "./PageNavbar";
-import axios from "axios";
 import Flag from "react-world-flags";
 
 const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {

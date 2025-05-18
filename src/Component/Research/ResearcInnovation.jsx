@@ -3,8 +3,7 @@ import { MdComputer, MdExplore } from "react-icons/md";
 import { AiOutlineRobot } from "react-icons/ai";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 const ResearchInnovations = ({section, menuLang}) => {
   const navigate = useNavigate();
@@ -17,7 +16,7 @@ const ResearchInnovations = ({section, menuLang}) => {
   useEffect(() => {
     const fetchResearch = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getResearch);
+        const res = await axiosInstance.get(API_ENDPOINTS.getResearch);
         const data = res.data?.data || [];
 
         const filtered = data

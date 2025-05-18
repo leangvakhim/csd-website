@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { PiGraduationCapDuotone } from "react-icons/pi";
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const AvailableSection = ({key, section, menuLang}) => {
 
@@ -17,7 +16,7 @@ const AvailableSection = ({key, section, menuLang}) => {
 
         const fetchTitle = async () => {
             try {
-                const res = await axios.get(API_ENDPOINTS.getAvailable);
+                const res = await axiosInstance.get(API_ENDPOINTS.getAvailable);
                 const dataList = Array.isArray(res.data?.data) ? res.data.data : [];
                 const match = dataList.find(item => item.apd_sec === section?.sec_id);
                 if (match) {
@@ -30,7 +29,7 @@ const AvailableSection = ({key, section, menuLang}) => {
 
         const fetchPrograms = async () => {
             try {
-                const res = await axios.get(API_ENDPOINTS.getSubAvailable);
+                const res = await axiosInstance.get(API_ENDPOINTS.getSubAvailable);
                 const dataList = Array.isArray(res.data?.data) ? res.data.data : [];
                 const filtered = dataList.filter(item => item.apd?.apd_sec === section?.sec_id && item.display === 1);
                 const mapped = filtered.map(item => ({
@@ -46,7 +45,7 @@ const AvailableSection = ({key, section, menuLang}) => {
 
         const resolvePageAliases = async () => {
             try {
-                const res = await axios.get(API_ENDPOINTS.getPage);
+                const res = await axiosInstance.get(API_ENDPOINTS.getPage);
                 const pages = Array.isArray(res.data?.data) ? res.data.data : [];
 
                 setPrograms((prevPrograms) =>

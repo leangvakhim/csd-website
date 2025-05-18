@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const SocialSection = ({ sectionId, menuLang }) => {
     const [settings, setSettings] = useState(null);
@@ -11,7 +10,7 @@ const SocialSection = ({ sectionId, menuLang }) => {
     const [socialLinks, setSocialLinks] = useState([]);
 
     useEffect(() => {
-      axios.get(API_ENDPOINTS.getSocialSetting)
+      axiosInstance.get(API_ENDPOINTS.getSocialSetting)
         .then(res => {
           const socialData = res.data?.data || res.data || [];
           const filtered = Array.isArray(socialData)

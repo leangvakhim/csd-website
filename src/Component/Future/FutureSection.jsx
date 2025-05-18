@@ -1,6 +1,5 @@
 import React from 'react'
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
-import axios from 'axios';
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaCheck } from "react-icons/fa";
@@ -16,7 +15,7 @@ const FutureSection = ({key, section, menuLang}) => {
   useEffect(() => {
     const fetchFutureData = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.getFuture);
+        const response = await axiosInstance.get(API_ENDPOINTS.getFuture);
         const data = Array.isArray(response.data?.data) ? response.data.data : [];
 
         const filtered = data.find(
@@ -41,7 +40,7 @@ const FutureSection = ({key, section, menuLang}) => {
 
     const fetchAddonData = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.getSubFuture);
+        const response = await axiosInstance.get(API_ENDPOINTS.getSubFuture);
         const data = Array.isArray(response.data?.data) ? response.data.data : [];
 
         const filtered = data

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaCalendarAlt } from 'react-icons/fa';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const NewsBanner = ({menuLang, newId}) => {
   const [bannerSection, setBannerSection] = useState(null);
@@ -15,7 +14,7 @@ const NewsBanner = ({menuLang, newId}) => {
 
     const fetchBanner = async () => {
       try {
-          const response = await axios.get(API_ENDPOINTS.getNews);
+          const response = await axiosInstance.get(API_ENDPOINTS.getNews);
           const data = response.data?.data || [];
 
           const selectedItem = data.find(item =>

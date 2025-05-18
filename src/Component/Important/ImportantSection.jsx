@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from 'framer-motion';
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 const ImportantSection = ({ section, menuLang }) => {
   const [importantData, setImportantData] = useState(null);
@@ -10,7 +9,7 @@ const ImportantSection = ({ section, menuLang }) => {
   useEffect(() => {
     const fetchImportantData = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getImportant);
+        const res = await axiosInstance.get(API_ENDPOINTS.getImportant);
         const data = Array.isArray(res.data?.data) ? res.data.data : [];
         const filtered = data.filter(item =>
           item.section?.sec_id === section?.sec_id &&
@@ -29,7 +28,7 @@ const ImportantSection = ({ section, menuLang }) => {
   useEffect(() => {
     const fetchSubDates = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getSubImportant);
+        const res = await axiosInstance.get(API_ENDPOINTS.getSubImportant);
         const data = Array.isArray(res.data?.data) ? res.data.data : [];
 
         const filtered = data

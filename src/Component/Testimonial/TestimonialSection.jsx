@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
-import { API_ENDPOINTS } from "../../Service/APIconfig";
-import axios from 'axios';
+import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
 
 // Animation variants
 const quoteVariants = {
@@ -22,7 +21,7 @@ const TestimonialSection = ({ section, menuLang }) => {
   useEffect(() => {
     if (section?.sec_id) {
       // Fetch testimonial based on section.sec_id
-      axios.get(`${API_ENDPOINTS.getTestimonial}`)
+      axiosInstance.get(`${API_ENDPOINTS.getTestimonial}`)
         .then((response) => {
           const data = Array.isArray(response.data) ? response.data : response.data.data;
           const filtered = data.find(item =>

@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
 import PartnershipSection from './PartnershipSection';
 import UniPartnerships from './UniPartnershipSection';
-import { API_ENDPOINTS } from '../../Service/APIconfig';
+import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
 
 const PartnerControllSection = ({ section }) => {
     const [sectionData, setSectionData] = useState(section || null);
@@ -12,7 +11,7 @@ const PartnerControllSection = ({ section }) => {
     const [headerTitle, setHeaderTitle] = useState(null);
     const fetchHeaderSection = useCallback(async () => {
         try {
-            const response = await axios.get(API_ENDPOINTS.getHeaderSection);
+            const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
             const data = response.data;
             if (Array.isArray(data.data)) {
                 const filtered = data.data.find(item => item.hsec_sec === section?.sec_id && item.section?.sec_type === "Partner");
@@ -30,7 +29,7 @@ const PartnerControllSection = ({ section }) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get(
+            const response = await axiosInstance.get(
                 `${API_ENDPOINTS.getPage}?section_id=${sectionId}_`
             );
             const sections = response.data?.data?.sections || [];

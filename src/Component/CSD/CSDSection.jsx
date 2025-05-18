@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
 import { MdVerified } from 'react-icons/md';
 import { BsPeople } from "react-icons/bs";
 import { PiGraduationCapDuotone } from "react-icons/pi";
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const CSDSection = ({key, section, menuLang}) => {
   const [keyMetrics, setKeyMetrics] = useState({title: '', count: '', description: '' });
@@ -15,7 +14,7 @@ const CSDSection = ({key, section, menuLang}) => {
 
     const fetchKeyMetrics = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getAddOnCSD);
+        const res = await axiosInstance.get(API_ENDPOINTS.getAddOnCSD);
         const dataList = Array.isArray(res.data?.data) ? res.data.data : [];
         const item = dataList.find(item => item.ras?.ras_sec === section?.sec_id);
         if (item) {
@@ -32,7 +31,7 @@ const CSDSection = ({key, section, menuLang}) => {
 
     const fetchProgramData = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getSpecialization);
+        const res = await axiosInstance.get(API_ENDPOINTS.getSpecialization);
         const dataList = Array.isArray(res.data?.data) ? res.data.data : [];
         const item = dataList.find(item => item.section?.sec_id === section?.sec_id && item.text?.text_sec === section?.sec_id);
         if (item) {
@@ -45,7 +44,7 @@ const CSDSection = ({key, section, menuLang}) => {
             ]
           });
 
-          const resSub = await axios.get(API_ENDPOINTS.getSubserviceAF);
+          const resSub = await axiosInstance.get(API_ENDPOINTS.getSubserviceAF);
           const subItems = Array.isArray(resSub.data?.data) ? resSub.data.data : [];
           const filteredObjectives = subItems
             .filter(obj => obj.ras?.ras_sec === section?.sec_id && obj.ss_ras === item.ras_id && obj.display === 1)

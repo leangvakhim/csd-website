@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { useLocation } from 'react-router-dom';
 
 const ResearchLabDetails = ({researchlabId}) => {
@@ -9,7 +8,7 @@ const ResearchLabDetails = ({researchlabId}) => {
     const currentLang = location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        axios.get(`${API_ENDPOINTS.getResearchlab}`)
+        axiosInstance.get(`${API_ENDPOINTS.getResearchlab}`)
             .then(response => {
                 const filtered = response.data.data
                     .filter(item =>

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import 'swiper/css';
 import 'swiper/css/autoplay';
 
@@ -33,7 +32,7 @@ const UniPartnerships = ({ section, headerTitle, menuLang }) => {
   useEffect(() => {
     const fetchPartners = async () => {
       try {
-        const res = await axios.get(`${API_ENDPOINTS.getPartnership}?section_id=${section.sec_id}`);
+        const res = await axiosInstance.get(`${API_ENDPOINTS.getPartnership}?section_id=${section.sec_id}`);
         let data = res.data?.data ?? [];
 
         // Ensure data is an array

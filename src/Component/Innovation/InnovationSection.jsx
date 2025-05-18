@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
 import { FaCheck } from "react-icons/fa";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 const sectionVariants = {
   hidden: { opacity: 0 },
@@ -29,7 +28,7 @@ const InnovationSection = ({ section, menuLang }) => {
     const fetchData = async () => {
       if (section?.sec_id) {
         try {
-          const res = await axios.get(
+          const res = await axiosInstance.get(
             `${API_ENDPOINTS.getSpecialization}?section_id=${section.sec_id}`
           );
           const data = res.data?.data || [];
@@ -70,7 +69,7 @@ const InnovationSection = ({ section, menuLang }) => {
 
 
             // Fetch subservices
-            const subserviceRes = await axios.get(
+            const subserviceRes = await axiosInstance.get(
               `${API_ENDPOINTS.getSubserviceAF}?af_id=${item.af_id}`
             );
 

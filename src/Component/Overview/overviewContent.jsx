@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
-import axios from "axios";
-import { API_ENDPOINTS } from "../../Service/APIconfig";
+import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
 
 // Animation variants
 const sectionVariants = {
@@ -38,7 +37,7 @@ const Overview = ({section, menuLang}) => {
     setIsLoading(true);
     setError(null);
 
-    axios.get(API_ENDPOINTS.getText)
+    axiosInstance.get(API_ENDPOINTS.getText)
       .then((res) => {
         if (!res.data?.data) {
           throw new Error("Invalid API response structure");
@@ -135,7 +134,7 @@ const Overview = ({section, menuLang}) => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
-                className={`text-3xl font-extrabold text-gray-900 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`} 
+                className={`text-3xl font-extrabold text-gray-900 ${menuLang === 2 ? 'font-khmer' : 'font-semibold'}`}
               >
                 {content.title}
               </motion.h2>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { useLocation } from 'react-router-dom';
 
 // Animation variants for the section
@@ -38,7 +37,7 @@ const PartnershipSection = ({ section, headerTitle, menuLang }) => {
     const fetchPartners = async () => {
       try {
         setIsLoading(true);
-        const res = await axios.get(`${API_ENDPOINTS.getPartnership}`);
+        const res = await axiosInstance.get(`${API_ENDPOINTS.getPartnership}`);
         const data = Array.isArray(res.data?.data) ? res.data.data : [];
         const formatted = data
           .filter(

@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import { FaSearch, FaFilter, FaTimes, FaSpinner, FaArrowRight } from 'react-icons/fa';
 import { PiCalendarDots } from 'react-icons/pi';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -36,7 +35,7 @@ const EventSection = ({ section, menuLang }) => {
 
     const resolvePageAlias = async (routePage) => {
         try {
-            const res = await axios.get(API_ENDPOINTS.getPage);
+            const res = await axiosInstance.get(API_ENDPOINTS.getPage);
             const pages = Array.isArray(res.data?.data) ? res.data.data : [];
 
             const matched = pages.find((page) => page.p_title === routePage);
@@ -51,7 +50,7 @@ const EventSection = ({ section, menuLang }) => {
         const fetchData = async () => {
             try {
                 setHeaderLoading(true);
-                const response = await axios.get(API_ENDPOINTS.getHeaderSection);
+                const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
                 const headerList = response.data?.data || [];
                 const matchedHeader = headerList.find(
                     (item) =>
@@ -89,7 +88,7 @@ const EventSection = ({ section, menuLang }) => {
 
             try {
                 setLoading(true);
-                const response = await axios.get(API_ENDPOINTS.getEvent);
+                const response = await axiosInstance.get(API_ENDPOINTS.getEvent);
 
                 const data = Array.isArray(response.data.data)
                     ? response.data.data

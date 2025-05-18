@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS } from "../../Service/APIconfig";
+import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
 
 // Animation variants
 const sectionVariants = {
@@ -42,7 +41,7 @@ const AboutSection = ({ section }) => {
 
     useEffect(() => {
         setIsLoading(true);
-        axios
+        axiosInstance
             .get(API_ENDPOINTS.getSetting)
             .then((res) => {
                 const settings = res.data?.data || [];

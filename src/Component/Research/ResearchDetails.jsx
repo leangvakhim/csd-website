@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import ResearchDescription from './ResearchDescription';
 import ResearchMeeting from './ResearchMeeting';
@@ -20,7 +19,7 @@ const ResearchDetails = ({ refId }) => {
     useEffect(() => {
         const fetchResearchs = async () => {
             try {
-                const response = await axios.get(API_ENDPOINTS.getResearch);
+                const response = await axiosInstance.get(API_ENDPOINTS.getResearch);
 
                 const filtered = response.data.data
                     .filter(item =>
@@ -44,7 +43,7 @@ const ResearchDetails = ({ refId }) => {
             if (!researchs.length || !researchs[0].rsd_id) return;
 
             try {
-                const response = await axios.get(API_ENDPOINTS.getResearchTitle);
+                const response = await axiosInstance.get(API_ENDPOINTS.getResearchTitle);
                 const sorted = response.data.data
                     .filter(item =>
                         item.display === 1 &&

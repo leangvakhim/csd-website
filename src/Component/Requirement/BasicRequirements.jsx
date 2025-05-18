@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { API_ENDPOINTS, API } from "../../Service/APIconfig";
+import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 
 const BasicRequirements = ({ key, section, menuLang}) => {
   const [gcAddon, setGcAddon] = useState(null);
@@ -10,7 +9,7 @@ const BasicRequirements = ({ key, section, menuLang}) => {
   useEffect(() => {
     const fetchGcAddon = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getSubRequirement);
+        const res = await axiosInstance.get(API_ENDPOINTS.getSubRequirement);
         const data = res.data?.data;
         const filtered = data.find(
           (item) =>
@@ -25,7 +24,7 @@ const BasicRequirements = ({ key, section, menuLang}) => {
 
     const fetchGcData = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.getCriteria);
+        const res = await axiosInstance.get(API_ENDPOINTS.getCriteria);
         const data = res.data?.data || [];
         const filtered = data.find(
           (item) =>

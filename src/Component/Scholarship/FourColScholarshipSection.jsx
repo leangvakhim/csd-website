@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaFilter, FaCalendarAlt, FaTimes, FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { API_ENDPOINTS, API } from '../../Service/APIconfig';
+import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -37,7 +36,7 @@ const FourColScholarshipSection = ({sectionData}) => {
       try {
         setHeaderLoading(true);
         // Assuming API_ENDPOINTS.getHeaderSection is the endpoint for header data
-        const response = await axios.get(API_ENDPOINTS.getHeaderSection);
+        const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
         const data = Array.isArray(response.data) ? response.data : response.data.data;
         const filtered = data.find(
           item =>
@@ -63,7 +62,7 @@ const FourColScholarshipSection = ({sectionData}) => {
     const fetchScholarships = async () => {
       try {
         setLoading(true);
-        const scRes = await axios.get(API_ENDPOINTS.getScholarship);
+        const scRes = await axiosInstance.get(API_ENDPOINTS.getScholarship);
         const formattedScholarships = (scRes.data?.data || [])
           .filter((item) => {
             if (!item) return false;
