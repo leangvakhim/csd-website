@@ -1,10 +1,11 @@
-import React, {useState} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import { motion } from "framer-motion";
 import contactImage from "../../assets/web-sample-1(3).jpg";
 import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
 import Swal from 'sweetalert2';
 
 const QuestionSection = () => {
+  const captchaCanvasRef = useRef(null);
   const [formData, setFormData] = useState({
     m_firstname: '',
     m_lastname: '',
@@ -12,15 +13,90 @@ const QuestionSection = () => {
     m_description: ''
   });
 
+  const [captcha, setCaptcha] = useState('');
+  const [userCaptcha, setUserCaptcha] = useState('');
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
+  const generateCaptcha = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setCaptcha(result);
+
+    const canvas = captchaCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // Fill background
+    ctx.fillStyle = "#f0f0f0";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw lines
+    for (let i = 0; i < 5; i++) {
+      ctx.strokeStyle = `rgba(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},0.8)`;
+      ctx.beginPath();
+      ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+      ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+      ctx.stroke();
+    }
+
+    // Draw captcha text
+    ctx.font = ' 24px sans-serif';
+    for (let i = 0; i < result.length; i++) {
+      const angle = (Math.random() - 0.5) * 0.5;
+      ctx.save();
+      ctx.translate(20 * i + 5, 25);
+      ctx.rotate(angle);
+      ctx.fillStyle = `rgba(${Math.floor(Math.random()*150)},${Math.floor(Math.random()*150)},${Math.floor(Math.random()*150)},1)`;
+      ctx.fillText(result[i], 0, 0);
+      ctx.restore();
+    }
+
+    // Optional noise dots
+    for (let i = 0; i < 30; i++) {
+      ctx.fillStyle = `rgba(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},0.6)`;
+      ctx.beginPath();
+      ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, 1, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await axiosInstance.post(API_ENDPOINTS.createEmail, formData);
+    if (userCaptcha !== captcha) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid CAPTCHA',
+        text: 'Please enter the correct CAPTCHA.'
+      });
 
+      setUserCaptcha('');
+      generateCaptcha();
+
+      return;
+    }
+    Swal.fire({
+      title: 'Sending...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    try {
+      await axiosInstance.post(API_ENDPOINTS.createEmail, {
+        ...formData,
+        captcha: userCaptcha
+      });
+      Swal.close();
       Swal.fire({
         icon: 'success',
         title: 'Success',
@@ -33,7 +109,10 @@ const QuestionSection = () => {
         m_email: "",
         m_description: ""
       });
+      setUserCaptcha('');
+      generateCaptcha();
     } catch (err) {
+      Swal.close();
       console.error(err);
 
       Swal.fire({
@@ -71,7 +150,7 @@ const QuestionSection = () => {
             <motion.div
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="xl:w-[836px] xl:h-[568px] w-full xl:p-6 p-4 bg-white shadow-md rounded-2xl xl:mr-[-100px] z-0 order-2 xl:order-1"
+              className="xl:w-[836px] xl:h-[618px] w-full xl:p-6 p-4 bg-white shadow-md rounded-2xl xl:mr-[-100px] z-0 order-2 xl:order-1"
             >
               <div>
                 <motion.h1
@@ -161,6 +240,27 @@ const QuestionSection = () => {
                       className="mt-1 block w-full px-3 py-2 border bg-gray-300 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     ></textarea>
                   </motion.div>
+                  <div className="flex flex-col items-start w-full">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {currentLang === 1 ? "Verification code*" : "កូដសុវត្ថិភាព*"}
+                    </label>
+                    <div className="flex items-center gap-2 w-full mb-2">
+                      <canvas ref={captchaCanvasRef} width="120" height="40" className="border rounded-md bg-white" />
+                      <button type="button" onClick={generateCaptcha} className="text-sm text-red-800 underline">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2 w-full">
+                      <input
+                        type="text"
+                        name="captcha_input"
+                        value={userCaptcha}
+                        onChange={(e) => setUserCaptcha(e.target.value)}
+                        required
+                        className="flex-1 px-3 py-2 border bg-gray-300 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
