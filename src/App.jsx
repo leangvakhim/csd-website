@@ -12,16 +12,6 @@ function AppRoutes() {
   const [settings, setSettings] = useState(null);
   const [currentLang, setCurrentLang] = useState(1);
 
-  // useEffect(() => {
-
-  //   axiosInstance.get(API_ENDPOINTS.getPage)
-  //     .then(res => {
-  //       const pageData = res.data?.data || [];
-  //       setPages(pageData);
-  //     })
-  //     .catch(err => console.error('Error fetching pages:', err));
-  // }, []);
-
   useEffect(() => {
     const fetchData = async () => {
       let token = localStorage.getItem('token');
@@ -45,38 +35,6 @@ function AppRoutes() {
 
     fetchData();
   }, []);
-
-  // useEffect(() => {
-  //   const langFromUrl = location.pathname.includes('/km') ? 2 : 1;
-  //   setCurrentLang(langFromUrl);
-
-  //   axiosInstance.get(`${API_ENDPOINTS.getSetting}/lang/${langFromUrl}`)
-  //     .then(res => {
-  //       const settingData = res.data?.data || [];
-  //       const langSetting = Array.isArray(settingData)
-  //         ? settingData.find(item => item.lang === langFromUrl)
-  //         : settingData;
-
-  //       if (langSetting) {
-  //         setSettings({
-  //           facultyTitle: langSetting.set_facultytitle || "",
-  //           departmentTitle: langSetting.set_facultydep || "",
-  //           baseUrl: langSetting.set_baseurl || "",
-  //           logoUrl: langSetting.logo?.img
-  //             ? `${API}/storage/uploads/${langSetting.logo.img}`
-  //             : "/placeholder-icon.png"
-  //         });
-
-  //         if (langSetting.logo?.img) {
-  //           const favicon = document.querySelector("link[rel='icon']");
-  //           if (favicon) {
-  //             favicon.href = `${API}/storage/uploads/${langSetting.logo.img}`;
-  //           }
-  //         }
-  //       }
-  //     })
-  //     .catch(err => console.error("Error fetching settings:", err));
-  // }, [location.pathname]);
 
   useEffect(() => {
     const fetchSettings = async () => {
