@@ -157,7 +157,7 @@ const QuestionSection = () => {
                   initial={{ opacity: 0, y: -20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                  className={`${currentLang === 2 ? "font-khmer" : "font-sans"
                       } text-3xl text-center mb-4 font-semibold`}
                 >
                   {currentLang === 1 ? "Contact Us If You Have Any Questions" : "សូមទាក់ទងមកយើង ប្រសិនបើអ្នកមានចម្ងល់"}
