@@ -15,12 +15,33 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      const isValidToken = token.startsWith('ey'); // Basic format check
+      if (isValidToken) {
+        config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        localStorage.removeItem('token');
+        // Optionally, force a page reload if token is bad
+        window.location.reload();
+      }
     }
+
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Response interceptor to catch 401 errors and handle token expiration
+axiosInstance.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      window.location.reload();
+    }
+    return Promise.reject(error);
+  }
 );
 
 const API_ENDPOINTS = {
