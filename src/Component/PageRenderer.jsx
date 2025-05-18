@@ -72,7 +72,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
 
     useEffect(() => {
         if (page?.p_id) {
-            console.log("PageRenderer: Fetching sections for page_id:", page);
+            // console.log("PageRenderer: Fetching sections for page_id:", page);
             axiosInstance
                 .get(`${API_ENDPOINTS.getSection}?page_id=${page.p_id}`)
                 .then((res) => {
