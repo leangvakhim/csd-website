@@ -13,18 +13,16 @@ const TypeSection = ({ section, menuLang }) => {
     if (section && section.sec_id) {
       // Fetch data for both API endpoints
       axiosInstance.get(API_ENDPOINTS.getSubType)
-        .then((response) => response.json())
-        .then((data) => {
-          const allScholarships = data?.data || [];
+        .then((response) => {
+          const allScholarships = response.data?.data || [];
           const filtered = allScholarships.filter(item => item?.tse?.tse_sec === section.sec_id);
           setScholarships(filtered);
         })
         .catch((error) => console.error("Error fetching scholarships from getSubType:", error));
 
       axiosInstance.get(API_ENDPOINTS.getType)
-        .then((response) => response.json())
-        .then((data) => {
-          const tseData = data?.data || [];
+        .then((response) => {
+          const tseData = response.data?.data || [];
           const filtered = tseData.find(t => t.tse_sec === section.sec_id);
           if (filtered && filtered.text) {
             setMainTitle(filtered.text.title || 'Default Title');

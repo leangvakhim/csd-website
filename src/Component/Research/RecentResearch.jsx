@@ -183,15 +183,17 @@ const RecentResearch = () => {
                         key={buttonIndex}
                         className="text-black xl:text-[12px] text-[10px] bg-gray-300/50 py-2 px-4 shadow-md rounded-4xl flex items-center mb-2"
                       >
-                        <img
-                          src={button.image}
-                          alt={button.title}
-                          className="w-4 h-4 mr-2 object-contain"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = '/placeholder-image.jpg';
-                          }}
-                        />
+                        {button.image && (
+                          <img
+                            src={button.image}
+                            alt={button.title}
+                            className="w-4 h-4 mr-2 object-contain"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/placeholder-image.jpg';
+                            }}
+                          />
+                        )}
                         <span className={`${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'} text-[10px] md:text-sm`}>
                           {button.title}
                         </span>

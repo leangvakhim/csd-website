@@ -163,7 +163,7 @@ const StudentResearch = () => {
                         key={buttonIndex}
                         className="text-black xl:text-[12px] text-[10px] bg-gray-300/50 py-2 px-4 shadow-md rounded-4xl flex items-center mb-2"
                       >
-                        {button.img && (
+                        {button.image && (
                           <img
                             src={button.image}
                             alt={button.title}
