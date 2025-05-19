@@ -6,39 +6,41 @@ const API_BASEURL = `${API}/api`;
 
 const axiosInstance = axios.create({
   baseURL: API_BASEURL,
+  withCredentials: true,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
   }
 });
 
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
+// axiosInstance.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem('token');
 
-    if (token) {
-      const isValidToken = token.startsWith('ey'); // Basic format check
-      if (isValidToken) {
-        config.headers.Authorization = `Bearer ${token}`;
-      } else {
-        localStorage.removeItem('token');
-        // Optionally, force a page reload if token is bad
-        window.location.reload();
-      }
-    }
+//     if (token) {
+//       const isValidToken = token.startsWith('ey'); // Basic format check
+//       if (isValidToken) {
+//         config.headers.Authorization = `Bearer ${token}`;
+//       } else {
+//         localStorage.removeItem('token');
+//         // Optionally, force a page reload if token is bad
+//         window.location.reload();
+//       }
+//     }
 
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
 
 // Response interceptor to catch 401 errors and handle token expiration
 axiosInstance.interceptors.response.use(
   response => response,
   error => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      window.location.reload();
+      // localStorage.removeItem('token');
+      // window.location.reload();
+      console.warn("🔒 Unauthorized request detected (401).");
     }
     return Promise.reject(error);
   }
