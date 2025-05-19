@@ -14,16 +14,18 @@ function AppRoutes() {
 
   useEffect(() => {
     const fetchData = async () => {
-      let token = localStorage.getItem('token');
+      await requestGuestToken();
+      localStorage.removeItem('token');
+      // let token = localStorage.getItem('token');
 
-      if (!token) {
-        await requestGuestToken();
-        token = localStorage.getItem('token');
-      }
+      // if (!token) {
+      //   await requestGuestToken();
+      //   token = localStorage.getItem('token');
+      // }
 
-      if (token) {
-        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      }
+      // if (token) {
+      //   axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // }
 
       try {
         const pageRes = await axiosInstance.get(API_ENDPOINTS.getPage);
@@ -40,16 +42,18 @@ function AppRoutes() {
     const fetchSettings = async () => {
       const langFromUrl = location.pathname.includes('/km') ? 2 : 1;
       setCurrentLang(langFromUrl);
+      localStorage.removeItem('token');
+      await requestGuestToken();
 
-      let token = localStorage.getItem('token');
-      if (!token) {
-        await requestGuestToken();
-        token = localStorage.getItem('token');
-      }
+      // let token = localStorage.getItem('token');
+      // if (!token) {
+      //   await requestGuestToken();
+      //   token = localStorage.getItem('token');
+      // }
 
-      if (token) {
-        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      }
+      // if (token) {
+      //   axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // }
 
       try {
         const res = await axiosInstance.get(`${API_ENDPOINTS.getSetting}/lang/${langFromUrl}`);
@@ -89,7 +93,7 @@ function AppRoutes() {
       const token = response.data?.token;
 
       if (token) {
-        localStorage.setItem('token', token);
+        // localStorage.setItem('token', token);
         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
     } catch (error) {
