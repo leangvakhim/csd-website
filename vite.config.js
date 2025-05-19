@@ -10,6 +10,12 @@ export default defineConfig({
   ],
   server: {
     proxy: {
+      '/api': {
+        target: 'https://aimostore.shop',
+        changeOrigin: true,
+        secure: false, // in case you use self-signed SSL on dev
+        rewrite: path => path.replace(/^\/api/, '/api'),
+      },
       '/storage/uploads': {
         target: 'https://aimostore.shop',
         changeOrigin: true,

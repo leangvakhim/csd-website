@@ -2,6 +2,8 @@ import axios from "axios";
 
 const API = "https://aimostore.shop";
 // const API = "http://127.0.0.1:8000";
+// const API = "https://18.136.196.218";
+
 const API_BASEURL = `${API}/api`;
 
 const axiosInstance = axios.create({
