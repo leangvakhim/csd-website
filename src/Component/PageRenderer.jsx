@@ -60,10 +60,19 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
     const menuLang = isKhmer ? 2 : 1;
 
     useEffect(() => {
-        if (page?.menu?.title) {
+        const path = location.pathname.toLowerCase();
+        if (path.includes("/km/news") || path.includes("/km/event") || path.includes("/km/announcement")) {
+            document.title = "ព័ត៌មាន & ព្រឹត្តិការណ៏ - Department of Computer Science";
+        } else if (path.includes("/news") || path.includes("/event") || path.includes("/announcement")) {
+            document.title = "News & Events - Department of Computer Science";
+        } else if (path.includes("/km/researchlab")) {
+            document.title = "ស្រាវជ្រាវ - Department of Computer Science";
+        } else if (path.includes("/researchlab")) {
+            document.title = "Research - Department of Computer Science";
+        } else if (page?.menu?.title) {
             document.title = `${page.menu.title} - Department of Computer Science`;
         }
-    }, [page]);
+    }, [page, page?.menu?.title, page?.p_id, location.pathname]);
 
     useEffect(() => {
         const timer = setTimeout(() => setShouldRender(true), 0);
