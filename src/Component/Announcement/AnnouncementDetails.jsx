@@ -11,11 +11,7 @@ const AnnouncementDetails = ({announcementID, menuLang}) => {
   const itemsPerPage = 10;
   const totalPages = Math.ceil(students.length / itemsPerPage);
   const location = useLocation();
-  const [currentLang, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
-
-  useEffect(() => {
-    setCurrentLang(location.pathname.startsWith('/km') ? 2 : 1);
-  }, [location.pathname]);
+  const currentLang = location.pathname.startsWith('/km') ? 2 : 1;
 
   const indexOfLastStudent = currentPage * itemsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - itemsPerPage;
