@@ -14,7 +14,7 @@ const AnnouncementDetails = ({announcementID, menuLang}) => {
   const [currentLang, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
 
   useEffect(() => {
-    setCurrentLang(location.pathname.startsWith('/km') ? 1 : 2);
+    setCurrentLang(location.pathname.startsWith('/km') ? 2 : 1);
   }, [location.pathname]);
 
   const indexOfLastStudent = currentPage * itemsPerPage;
@@ -87,10 +87,10 @@ const AnnouncementDetails = ({announcementID, menuLang}) => {
   return (
     <div className="my-10">
       <div className="container mx-auto px-4">
-        <h1 className={`${menuLang === 2 ? "font-khmer" : "font-sans"
-          } text-2xl font-bold mb-4`}>{announcement.title}</h1>
-        <p className={`${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"
-          } text-gray-600 mb-6`}>{announcement.detail}</p>
+        <h1 className={`${currentLang === 2 ? " font-khmer " : " font-sans "
+          } text-2xl font-bold mb-4 `}>{announcement.title}</h1>
+        <p className={`${currentLang === 2 ? " fonts-khmer text-[18px] " : " font-sans "
+          } text-gray-600 mb-6 `}>{announcement.detail}</p>
 
         <div className="overflow-x-auto bg-white rounded-lg shadow-md">
           <table className="w-full border-collapse">
