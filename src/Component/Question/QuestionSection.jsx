@@ -240,8 +240,14 @@ const QuestionSection = () => {
                       className="mt-1 block w-full px-3 py-2 border bg-gray-300 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     ></textarea>
                   </motion.div>
-                  <div className="flex flex-col items-start w-full">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.7, ease: "easeInOut" }}
+                    viewport={{ once: true }}
+                  >
+                    <label className={`block text-sm font-medium text-gray-700 mb-1 ${currentLang === 2 ? "fonts-khmer" : "font-sans"
+                        }`}>
                       {currentLang === 1 ? "Verification code*" : "កូដសុវត្ថិភាព*"}
                     </label>
                     <div className="flex items-center gap-2 w-full mb-2">
@@ -260,7 +266,7 @@ const QuestionSection = () => {
                         className="flex-1 px-3 py-2 border bg-gray-300 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
-                  </div>
+                  </motion.div>
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
