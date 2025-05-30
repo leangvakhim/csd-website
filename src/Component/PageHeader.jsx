@@ -17,6 +17,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
   const [menusWithAlias, setMenusWithAlias] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchData, setSearchData] = useState([]);
   const searchContainerRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const location = useLocation();
@@ -27,9 +28,28 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
       setIsLoading(true);
       setError(null);
       try {
-        const [menuRes, pageRes] = await Promise.all([
+        const [
+          menuRes,
+          pageRes,
+          facultyRes,
+          eventRes,
+          newsRes,
+          announcementRes,
+          scholarshipRes,
+          careerRes,
+          researchRes,
+          researchlabRes,
+        ] = await Promise.all([
           axiosInstance.get(API_ENDPOINTS.getMenu),
           axiosInstance.get(API_ENDPOINTS.getPage),
+          axiosInstance.get(API_ENDPOINTS.getFaculty),
+          axiosInstance.get(API_ENDPOINTS.getEvent),
+          axiosInstance.get(API_ENDPOINTS.getNews),
+          axiosInstance.get(API_ENDPOINTS.getAnnouncement),
+          axiosInstance.get(API_ENDPOINTS.getScholarship),
+          axiosInstance.get(API_ENDPOINTS.getCareer),
+          axiosInstance.get(API_ENDPOINTS.getResearch),
+          axiosInstance.get(API_ENDPOINTS.getResearchlab)
         ]);
         const menuData = menuRes.data?.data || [];
         const pageData = pageRes.data?.data || [];
@@ -87,6 +107,19 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
           });
         setMenus(filteredMenus);
         setMenusWithAlias(combinedMenus);
+
+        const allSearchData = [
+          ...(pageRes.data?.data || []),
+          ...(facultyRes.data?.data || []),
+          ...(eventRes.data?.data || []),
+          ...(newsRes.data?.data || []),
+          ...(announcementRes.data?.data || []),
+          ...(scholarshipRes.data?.data || []),
+          ...(careerRes.data?.data || []),
+          ...(researchRes.data?.data || []),
+          ...(researchlabRes.data?.data || []),
+        ];
+        setSearchData(allSearchData);
       } catch (err) {
         console.error("Error fetching menus or pages:", err);
         setError("Failed to load navigation. Please try again.");
@@ -183,7 +216,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
       {isSearchOpen && (
         <div className="absolute top-0 left-0 w-full bg-red-800 py-4 z-50">
           <div className="max-w-7xl mx-auto px-4" ref={searchContainerRef}>
-            <PageSearch onToggle={toggleSearchBar} currentLang={currentLang} />
+            <PageSearch data={searchData} onToggle={toggleSearchBar} currentLang={currentLang} />
           </div>
         </div>
       )}
@@ -358,4 +391,3 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
 };
 
 export default PageHeader;
-

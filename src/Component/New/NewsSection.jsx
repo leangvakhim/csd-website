@@ -96,7 +96,6 @@ const NewsSection = ({ section, menuLang }) => {
         setLoading(true);
         const response = await axiosInstance.get(API_ENDPOINTS.getNews);
         const newsList = Array.isArray(response.data?.data) ? response.data.data : [];
-
         const filteredList = newsList.filter(
           item => item.img &&
             item.img.img &&
