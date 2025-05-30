@@ -93,7 +93,6 @@ const EventSection = ({ section, menuLang }) => {
                 const data = Array.isArray(response.data.data)
                     ? response.data.data
                     : [response.data.data];
-
                 const transformed = data
                     .filter((item) =>
                         item.img && item.img.img && item.lang === currentLang

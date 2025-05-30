@@ -146,7 +146,7 @@ const HeadofDepartment = () => {
                                 {/* Profile Info */}
                                 <div className='w-full space-y-4 sm:space-y-6 max-w-xl relative' id="profile-info">
                                     <div className='flex justify-between items-center'>
-                                        <h1 className={`text-3xl font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} id="professor-name">{head.name}</h1>
+                                        <h1 className={`!text-3xl font-semibold ${currentLang === 2 ? "font-khmer" : "font-sans"}`} id="professor-name">{head.name}</h1>
                                         <div className='text-right'>
                                             <RiDoubleQuotesR className='text-7xl text-red-900' />
                                         </div>
