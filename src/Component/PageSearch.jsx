@@ -19,29 +19,109 @@ const PageSearch = ({ onToggle, data }) => {
         setTimeout(() => inputRef.current?.focus(), 10); // Focus the input when opened
     };
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-        if (containerRef.current && !containerRef.current.contains(event.target)) {
-            setQuery(""); // Clear the search input
-        }
-        };
+// Utility function for debouncing
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+};
 
-        const handleEscape = (e) => {
-        if (e.key === "Escape") {
-            setQuery(""); // Clear the search input
-        }
-        };
+const PageSearch = ({ onToggle, placeholder = 'Search pages...', debounceDelay = 300 }) => {
+  const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const inputRef = useRef(null);
+  const containerRef = useRef(null);
+  const resultsRef = useRef(null);
+  const prevQueryRef = useRef('');
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const navigate = useNavigate();
 
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleEscape);
+  const debouncedQuery = useDebounce(query, debounceDelay);
 
-        return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-        document.removeEventListener("keydown", handleEscape);
-        };
-    }, []);
+  const toggleSearch = useCallback(() => {
+    onToggle();
+    setQuery('');
+    setFocusedIndex(-1);
+    setSearchResults([]);
+    setError(null);
+    setTimeout(() => inputRef.current?.focus(), 100);
+  }, [onToggle]);
 
-    const [filteredData, setFilteredData] = useState([]);
+  useEffect(() => {
+    setSearchResults([]);
+  }, []);
+
+  const fetchData = async () => {
+    if (debouncedQuery.trim() === prevQueryRef.current) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      console.log('Token:', token ? 'Present' : 'Missing');
+      console.log('Fetching pages from:', `${API_ENDPOINTS.getPage}?query=${encodeURIComponent(debouncedQuery)}`);
+      const response = await axiosInstance.get(`${API_ENDPOINTS.getPage}?query=${encodeURIComponent(debouncedQuery)}`);
+      console.log('Response:', response.data);
+      setSearchResults(Array.isArray(response.data?.data) ? response.data.data : []);
+      prevQueryRef.current = debouncedQuery.trim();
+    } catch (err) {
+      console.error('Error fetching pages:', err.response?.data || err.message);
+      if (err.response?.status === 401) {
+        setError('Authentication failed: Please log in or try again.');
+      } else {
+        setError(err.response?.data?.message || 'Failed to fetch page results. Please try again.');
+      }
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRetry = async () => {
+    try {
+      console.log('Attempting to refresh token...');
+      const refreshResponse = await axiosInstance.post(API_ENDPOINTS.refreshToken, {
+        refreshToken: localStorage.getItem('refreshToken'),
+      });
+      localStorage.setItem('authToken', refreshResponse.data.token);
+      console.log('Token refreshed successfully');
+      prevQueryRef.current = '';
+      await fetchData();
+    } catch (refreshErr) {
+      console.error('Failed to refresh token:', refreshErr.response?.data || refreshErr.message);
+      setError('Unable to authenticate. Redirecting to login...');
+      setTimeout(() => navigate('/login'), 2000);
+    }
+  };
+
+  useEffect(() => {
+    if (!debouncedQuery.trim()) {
+      setSearchResults([]);
+      setError(null);
+      prevQueryRef.current = '';
+      return;
+    }
+
+    fetchData();
+  }, [debouncedQuery]);
+
+  useEffect(() => {
+    if (focusedIndex >= 0 && resultsRef.current) {
+      const focusedElement = resultsRef.current.querySelector(`#result-${focusedIndex}`);
+      if (focusedElement) {
+        focusedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [focusedIndex]);
 
     // Helper to normalize data from all content types
     const normalizeData = (data) => {
@@ -109,7 +189,10 @@ const PageSearch = ({ onToggle, data }) => {
             setFilteredData([]);
             return;
         }
-
+      }
+    },
+    [searchResults, focusedIndex, navigate, toggleSearch]
+  );
         const allData = normalizeData(data);
         const filtered = allData.filter(item =>
             item.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -147,7 +230,13 @@ const PageSearch = ({ onToggle, data }) => {
             </div>
             </motion.div>
         </motion.div>
-
+        <button
+          onClick={toggleSearch}
+          className="ml-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+        >
+          Cancel
+        </button>
+      </motion.div>
         {/* Search Results (Same width as input field) */}
         {query && (
             <div className="absolute top-14 w-full min-w-[300px] max-w-6xl bg-gray-50 border border-gray-300 rounded-lg shadow-md max-h-60 overflow-y-auto z-50">
@@ -200,4 +289,4 @@ const PageSearch = ({ onToggle, data }) => {
         );
     };
 
-export default PageSearch
+export default PageSearch;

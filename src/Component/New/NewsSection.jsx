@@ -150,7 +150,6 @@ const NewsSection = ({ section, menuLang }) => {
     });
 
   const handleClearSearch = () => setSearchTerm('');
-  const handleClearFilter = () => setSelectedTag('');
 
   if (headerLoading || loading) {
     return (
