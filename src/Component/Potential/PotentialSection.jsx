@@ -65,7 +65,7 @@ const PotentialSection = ({ section, menuLang }) => {
               .filter((p) => p);
 
             setResearchData({
-              title: item.text.title || "Research & Labs: Unlock Your Potential in Research & Technology",
+              title: item.text.title,
               description: item.text.desc || "",
               paragraphs,
               listItems,
@@ -87,8 +87,8 @@ const PotentialSection = ({ section, menuLang }) => {
             setSubservices(
               subserviceData.map((s, index) => ({
                 ss_id: s.ss_id,
-                title: s.ss_title || "Untitled Subservice",
-                description: s.ss_subtitle || "No description available",
+                title: s.ss_title,
+                description: s.ss_subtitle,
                 icon: s.image?.img
                   ? `${API}/storage/uploads/${s.image.img}`
                   : defaultIcons[index % defaultIcons.length], // Fallback to default icons
@@ -155,7 +155,7 @@ const PotentialSection = ({ section, menuLang }) => {
           >
             <motion.h2
               className={`text-3xl font-normal mb-8 text-gray-800 ${
-                menuLang === 2 ? "font-khmer" : "font-semibold"
+                menuLang === 2 ? "font-khmer leading-12" : "font-semibold"
               }`}
               variants={cardVariants}
               transition={{ delay: 0.2 }}
@@ -194,9 +194,9 @@ const PotentialSection = ({ section, menuLang }) => {
                     )}
                   </div>
                   <div>
-                    <h3 className={`text-lg lg:text-xl !font-semibold mb-1 text-gray-800 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>
+                    <h1 className={`text-lg lg:text-xl mb-1 text-gray-800 ${menuLang === 2 ? 'font-khmer !text-[18px] leading-8' : 'font-sans font-semibold'}`}>
                       {s.title}
-                    </h3>
+                    </h1>
                     <p className={`text-gray-800 lg:text-lg ${menuLang === 2 ? 'fonts-khmer text-[20]' : 'font-sans'}`}>{s.description}</p>
                   </div>
                 </motion.div>
