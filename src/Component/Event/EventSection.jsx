@@ -17,7 +17,7 @@ const useDebounce = (value, delay) => {
 const EventSection = ({ section, menuLang }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const isHomePage = location.pathname === '/home';
+    // const isHomePage = location.pathname === '/home';
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [headerLoading, setHeaderLoading] = useState(true);
@@ -125,7 +125,8 @@ const EventSection = ({ section, menuLang }) => {
         };
 
         fetchData();
-    }, [headerData.hsec_amount, isHomePage]); // Add dependencies to prevent infinite loop
+    }, [headerData.hsec_amount]); // Add dependencies to prevent infinite loop
+// }, [headerData.hsec_amount, isHomePage]); // Add dependencies to prevent infinite loop
 
     const tags = [...new Set(events.map(item => item.tag))];
 

@@ -171,7 +171,6 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <FacultyCarouselSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Research':
                                 return <ResearchSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                                // return <ResearchController key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Scholarship':
                                 return <ScholarshipSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Career':
@@ -196,10 +195,10 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
 
                             case 'Potential':
                                 return <PotentialSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                            case 'Announcement':
-                                return <AnnouncementSection key={section.sec_id} section={section} menuLang={menuLang} />;
-                            case 'Event':
-                                return <EventSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            // case 'Announcement':
+                            //     return <AnnouncementSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            // case 'Event':
+                            //     return <EventSection key={section.sec_id} section={section} menuLang={menuLang} />;
 
 
                             default:

@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import CareerDetails from './Career/CareerDetails';
 import AnnouncementDetails from './Announcement/AnnouncementDetails';
 import NewDetails from './New/NewDetails';
+import EventNewsInfo from './New/EventNewsInfo';
 
 const SectionInjector = ({ alias, setOnlyContentMode }) => {
   const { id, sec_page } = useParams(); // Added sec_page from useParams
@@ -80,6 +81,9 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
         return <NewDetails  newId={lastSegment} />;
       }
       return <div></div>; // Main page content
+
+    case '/news&events':
+      return <EventNewsInfo/>; // Main page content
 
     case '/career':
       if (lastSegment && lastSegment !== 'career') {

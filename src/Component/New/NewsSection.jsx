@@ -16,7 +16,7 @@ const useDebounce = (value, delay) => {
 const NewsSection = ({ section, menuLang }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isHomePage = location.pathname === '/home';
+  // const isHomePage = location.pathname === '/home';
   const [newsItems, setNewsItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [headerLoading, setHeaderLoading] = useState(true);
@@ -95,6 +95,7 @@ const NewsSection = ({ section, menuLang }) => {
       try {
         setLoading(true);
         const response = await axiosInstance.get(API_ENDPOINTS.getNews);
+        console.log("response is: ",response);
         const newsList = Array.isArray(response.data?.data) ? response.data.data : [];
         const filteredList = newsList.filter(
           item => item.img &&
@@ -123,9 +124,10 @@ const NewsSection = ({ section, menuLang }) => {
           }))
           .slice(0, headerData.hsec_amount);
 
-        setNewsItems(
-          isHomePage ? transformed.slice(0, headerData.hsec_amount) : transformed
-        );
+        setNewsItems(transformed);
+        // setNewsItems(
+        //   isHomePage ? transformed.slice(0, headerData.hsec_amount) : transformed
+        // );
       } catch (error) {
         console.error('Failed to fetch news:', error);
         setError('Failed to load news. Please try again later.');
@@ -135,7 +137,8 @@ const NewsSection = ({ section, menuLang }) => {
     };
 
     fetchAnnouncements();
-  }, [currentLang, headerData.hsec_amount, isHomePage]);
+  }, [currentLang, headerData.hsec_amount]);
+// }, [currentLang, headerData.hsec_amount, isHomePage]);
 
   const tags = [...new Set(newsItems.map(item => item.tag).filter(tag => tag))];
 

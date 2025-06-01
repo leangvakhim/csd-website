@@ -24,7 +24,7 @@ const AnnouncementDetails = ({announcementID, menuLang}) => {
         const formatted = rawData.map((item, index) => {
           const subjects = {};
           Object.keys(item).forEach(key => {
-            if (!["student_id", "student_identity", "result", "NO", "STUDENT_IDENTITY"].includes(key)) {
+            if (!["student_id", "student_identity", "result", "NO", "STUDENT_IDENTITY", 'student_am'].includes(key)) {
               subjects[key] = item[key];
             }
           });
