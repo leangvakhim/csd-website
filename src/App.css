@@ -20,7 +20,7 @@ button{
     src: url('/fonts/Moul-Regular.ttf') format('truetype');
 }
 
-/* 
+/*
 h1 {
     font-family: 'Moul', sans-serif;
     font-size: 20px;
@@ -28,12 +28,12 @@ h1 {
 h1.font-khmer{
     font-family: 'Moul', sans-serif;
     font-size: 25px;
-    font-weight: 50;   
+    font-weight: 50;
     font-style: normal;
 }
 h2.font-khmer{
-    font-family: 'Moul', sans-serif; 
-    font-weight: 50;   
+    font-family: 'Moul', sans-serif;
+    font-weight: 50;
     font-style: normal;
 }
 
@@ -44,6 +44,12 @@ h2.font-khmer{
 
 
 .fonts-khmer{
+    font-family: 'KhmerCustom', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+input.fonts-khmer {
     font-family: 'KhmerCustom', sans-serif;
     font-weight: 400;
     font-style: normal;
