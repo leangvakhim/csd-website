@@ -173,7 +173,8 @@ const EventNewsInfo = () => {
                 placeholder={currentLang === 2 ? 'ស្វែងរក' : 'Search'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 text-sm"
+                className={`w-full pl-10 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 text-sm ${currentLang === 2 ? '!fonts-khmer' : '!font-sans'}`}
+                // className="w-full pl-10 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 text-sm"
             />
             </div>
         </div>
