@@ -115,24 +115,26 @@ const AcademicSection = ({ section, menuLang }) => {
             ))}
 
             {/* Programs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6 text-base">
-              {programs.map((prog, i) => (
-                <motion.div
-                  key={i}
-                  className="flex items-center gap-4 border border-red-800 p-4 rounded-xl"
-                  variants={cardVariants}
-                  transition={{ delay: 0.3 * i }}
-                >
-                  <div className="border border-red-800 rounded-full p-2">
-                    <PiGraduationCapDuotone size={25} className="text-red-800" />
-                  </div>
-                  <p className={`text-sm md:text-base ${menuLang === 2 ? "fonts-khmer" : "font-sans"
-                    } text-red-800 font-medium`}>
-                    {prog}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
+            {programs.some(p => p?.trim()) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6 text-base">
+                {programs
+                  .map((prog, i) => prog?.trim() && (
+                    <motion.div
+                      key={i}
+                      className="flex items-center gap-4 border border-red-800 p-4 rounded-xl"
+                      variants={cardVariants}
+                      transition={{ delay: 0.3 * i }}
+                    >
+                      <div className="border border-red-800 rounded-full p-2">
+                        <PiGraduationCapDuotone size={25} className="text-red-800" />
+                      </div>
+                      <p className={`text-sm md:text-base ${menuLang === 2 ? "fonts-khmer" : "font-sans"} text-red-800 font-medium`}>
+                        {prog}
+                      </p>
+                    </motion.div>
+                  ))}
+              </div>
+            )}
 
             {/* Explore button */}
             <motion.div variants={cardVariants} transition={{ delay: 0.6 }}>
