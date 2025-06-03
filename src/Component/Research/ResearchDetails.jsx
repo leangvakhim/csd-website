@@ -87,7 +87,7 @@ const ResearchDetails = ({ refId }) => {
                 </div>
             ))}
             <StudentResearch />
-            <RecentResearch />
+            {/* <RecentResearch /> */}
         </div>
     );
 }
