@@ -163,7 +163,7 @@ const ResearchInfo = () => {
               <div className="mb-4 sm:mb-6 xl:mb-0">
                 <div className='flex justify-between'>
                   <h2 className={`text-2xl sm:text-3xl font-semibold mb-2 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
-                    Students Research
+                    {currentLang === 1 ? "Students Research" : "កិច្ចការស្រាវជ្រាវរបស់និស្សិត"}
                   </h2>
                   <div className='block xl:hidden'>
                     <div className=" flex flex-col sm:flex-row gap-3 sm:gap-4 items-center w-full sm:w-auto">
@@ -194,7 +194,8 @@ const ResearchInfo = () => {
 
                 </div>
                 <p className={`text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base max-w-2xl ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                  A Deep Dive into Computer Science Research: From Fundamentals to Future Innovations
+                  {currentLang === 1 ? "A Deep Dive into Computer Science Research: From Fundamentals to Future Innovations" : "ការស្រាវជ្រាវជ្រៅលើវិទ្យាសាស្ត្រកុំព្យូទ័រ៖ ពីមូលដ្ឋានដំបូង ដល់នវានុវត្តន៍នាពេលអនាគត"}
+
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 items-center lg:mt-0 ">
