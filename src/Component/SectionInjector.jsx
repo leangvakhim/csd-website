@@ -12,6 +12,7 @@ import CareerDetails from './Career/CareerDetails';
 import AnnouncementDetails from './Announcement/AnnouncementDetails';
 import NewDetails from './New/NewDetails';
 import EventNewsInfo from './New/EventNewsInfo';
+import ResearchInfo from './Research/ResearchInfo';
 
 const SectionInjector = ({ alias, setOnlyContentMode }) => {
   const { id, sec_page } = useParams(); // Added sec_page from useParams
@@ -56,7 +57,7 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
       if (lastSegment && lastSegment !== 'research') {
         return <ResearchDetails refId={lastSegment} />;
       }
-      return '';
+      return <ResearchInfo/>;
 
     case '/researchlab':
       if (lastSegment && lastSegment !== 'researchlab') {
