@@ -51,6 +51,7 @@ import LabSection from './Lab/LabSection';
 import FacultyDepartment from './Faculty/FacultyDepartment';
 import EventNewsInfo from './New/EventNewsInfo';
 import ResearchInfo from './Research/ResearchInfo';
+import DeveloperSection from './developer/DeveloperSection';
 
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
@@ -200,6 +201,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <FacultyDepartment key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'LoR':
                                 return <ResearchInfo key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'LoD':
+                                return <DeveloperSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Potential':
                                 return <PotentialSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             // case 'Announcement':

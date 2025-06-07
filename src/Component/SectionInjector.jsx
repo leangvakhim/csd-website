@@ -50,7 +50,7 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
         if (lastSegment && lastSegment !== 'developer') {
           return <DeveloperDetail developerId={lastSegment} />;
         }
-        return <DeveloperSection />;
+        return <div></div>;
       }
 
     case '/research':
