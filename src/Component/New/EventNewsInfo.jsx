@@ -7,24 +7,54 @@ import { PiCalendarDots } from 'react-icons/pi';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
-const EventNewsInfo = () => {
-    // const [currentPage, setCurrentPage] = useState(1);
+const EventNewsInfo = ({section}) => {
     const [searchQuery, setSearchQuery] = useState('');
-    // const itemsPerPage = 6;
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-
+    const [headerData, setHeaderData] = useState([]);
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     const [activeTab, setActiveTab] = useState(currentLang === 2 ? 'ទាំងអស់' : 'All');
-
-
-    // Current date for filtering
-    // const today = new Date('2025-06-01T18:04:00+07:00');
-
     const [newsItems, setNewsItems] = useState([]);
-
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
+    const itemsPerPage = headerData.hsec_amount;
+
+    useEffect(() => {
+        const fetchHeaderData = async () => {
+          try {
+            const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
+            const headerList = response.data?.data || [];
+
+            const matchedHeader = headerList.find(
+              (item) =>
+                item.hsec_sec === section.sec_id &&
+                item.section?.sec_type === "LoNE" &&
+                item.section?.display === 1 &&
+                item.section?.active === 1
+            );
+
+            if (matchedHeader) {
+              setHeaderData({
+                hsec_title: matchedHeader.hsec_title,
+                hsec_subtitle: matchedHeader.hsec_subtitle,
+                hsec_amount: matchedHeader.hsec_amount ,
+              });
+            } else {
+              setHeaderData({
+                hsec_title: 'News & Events',
+                hsec_amount: 8,
+              });
+            }
+          } catch (error) {
+            console.error('Failed to fetch header data:', error.message, error);
+            setHeaderData({
+              hsec_title: 'News & Events',
+              hsec_amount: 8,
+            });
+          }
+        };
+
+        fetchHeaderData();
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -153,12 +183,12 @@ const EventNewsInfo = () => {
             {/* Header */}
             <div className="mb-4 md:mb-0">
             <h1 className={`text-2xl sm:text-3xl font-bold text-gray-800 ${currentLang === 2 ? "font-khmer " : "font-bold"
-                            }`}>{currentLang === 2 ? 'ព័ត៌មាន និងសេចក្ដីប្រកាសចុងក្រោយ' : 'Latest News & Announcements'}</h1>
+                            }`}>
+                                {headerData.hsec_title}
+            </h1>
             <p className={`text-xs sm:text-sm text-gray-600 mt-2 ${currentLang === 2 ? "fonts-khmer leading-8" : "font-sans"
                             }`}>
-                {currentLang === 2 ?
-                'ចូលរួមក្នុងការពិភាក្សាដែលមានអត្ថន័យ ព្រមទាំងជួបជុំជាមួយអ្នកជំនាញគ្រប់ឧស្សាហកម្ម ថែមទាំងអាចទទួលបាននូវឱកាសក្នុងការទទួលបាននូវអាជីពការងារតាមរយៈព្រឹត្តិការណ៍នានា។' :
-                'Engage in insightful discussions, network with industry experts, and explore career opportunities through our upcoming academic and professional events'}
+                {headerData.hsec_subtitle}
 
             </p>
             </div>
@@ -174,7 +204,6 @@ const EventNewsInfo = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={`w-full pl-10 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 text-sm ${currentLang === 2 ? 'fonts-khmer' : 'font-sans'}`}
-                // className="w-full pl-10 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 text-sm"
             />
             </div>
         </div>

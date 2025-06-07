@@ -49,6 +49,7 @@ import CriteriaSection from './Criteria/CriteriaSection';
 import StudentResearch from './Research/StudentResearch';
 import LabSection from './Lab/LabSection';
 import FacultyDepartment from './Faculty/FacultyDepartment';
+import EventNewsInfo from './New/EventNewsInfo';
 
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
@@ -188,7 +189,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <FeedbackSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Partner':
                                 return <PartnerControllSection key={section.sec_id} section={section} menuLang={menuLang} />;
-
+                            case 'LoNE':
+                                return <EventNewsInfo key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'New':
                                 return <NewsSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Lab':
