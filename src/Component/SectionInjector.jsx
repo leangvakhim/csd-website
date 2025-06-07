@@ -57,7 +57,7 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
       if (lastSegment && lastSegment !== 'research') {
         return <ResearchDetails refId={lastSegment} />;
       }
-      return <ResearchInfo/>;
+      return <div></div>;
 
     case '/researchlab':
       if (lastSegment && lastSegment !== 'researchlab') {
