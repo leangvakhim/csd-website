@@ -48,6 +48,7 @@ import CSDSection from './CSD/CSDSection';
 import CriteriaSection from './Criteria/CriteriaSection';
 import StudentResearch from './Research/StudentResearch';
 import LabSection from './Lab/LabSection';
+import FacultyDepartment from './Faculty/FacultyDepartment';
 
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
@@ -192,7 +193,8 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                                 return <NewsSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Lab':
                                 return <LabSection key={section.sec_id} section={section} menuLang={menuLang} />;
-
+                            case 'LoF':
+                                return <FacultyDepartment key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Potential':
                                 return <PotentialSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             // case 'Announcement':
