@@ -23,88 +23,123 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-const ResearchInfo = () => {
+const ResearchInfo = ({section}) => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedFilter, setSelectedFilter] = useState('');
     const [researchData, setResearchData] = useState([]);
-    const [headerData, setHeaderData] = useState(null);
+    const [headerData, setHeaderData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
+    const itemsPerPage = headerData.hsec_amount;
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
-      // Debounce the search term
-      const debouncedSearchTerm = useDebounce(searchTerm, 300);
-      const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
-
-      useEffect(() => {
-        const fetchData = async () => {
+    useEffect(() => {
+        const fetchHeaderData = async () => {
           try {
-            const researchResponse = await axiosInstance.get(API_ENDPOINTS.getResearch);
-            const researchData = researchResponse.data?.data || [];
-            const formattedResearchData = researchData
-              .filter((item) => item.display === 1 && item.active === 1
-                && item.lang === currentLang)
-              .map((item) => ({
-                id: item.rsd_id,
-                ref_id: item.ref_id,
-                title: item.rsd_title || 'Untitled Research',
-                description: item.rsd_subtitle || 'No description available',
-                image: item.image?.img
-                  ? `${API}/storage/uploads/${item.image.img}`
-                  : '/placeholder-image.jpg',
-                lead: item.rsd_lead || 'Unknown Lead',
-              }));
+            const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
+            const headerList = response.data?.data || [];
 
-            setResearchData(formattedResearchData);
+            const matchedHeader = headerList.find(
+              (item) =>
+                item.hsec_sec === section.sec_id &&
+                item.section?.sec_type === "LoR" &&
+                item.section?.display === 1 &&
+                item.section?.active === 1
+            );
 
-            setLoading(false);
-          } catch (err) {
-            console.error('Error fetching data:', err);
-            setError('Failed to load data. Please try again later.');
-            setLoading(false);
+            if (matchedHeader) {
+              setHeaderData({
+                hsec_title: matchedHeader.hsec_title,
+                hsec_subtitle: matchedHeader.hsec_subtitle,
+                hsec_amount: matchedHeader.hsec_amount ,
+              });
+            } else {
+              setHeaderData({
+                hsec_title: 'Student Research',
+                hsec_amount: 8,
+              });
+            }
+          } catch (error) {
+            console.error('Failed to fetch header data:', error.message, error);
+            setHeaderData({
+              hsec_title: 'Student Research',
+              hsec_amount: 8,
+            });
           }
         };
 
-        fetchData();
-      }, []);
+        fetchHeaderData();
+    }, []);
 
-      const filteredSections = researchData
-        .filter((section) => {
-          const matchesSearch =
-            section.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-            section.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-            section.lead.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-          return matchesSearch;
-        })
-        .slice(0, headerData?.amount || researchData.length);
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const researchResponse = await axiosInstance.get(API_ENDPOINTS.getResearch);
+          const researchData = researchResponse.data?.data || [];
+          const formattedResearchData = researchData
+            .filter((item) => item.display === 1 && item.active === 1
+              && item.lang === currentLang)
+            .map((item) => ({
+              id: item.rsd_id,
+              ref_id: item.ref_id,
+              title: item.rsd_title || 'Untitled Research',
+              description: item.rsd_subtitle || 'No description available',
+              image: item.image?.img
+                ? `${API}/storage/uploads/${item.image.img}`
+                : '/placeholder-image.jpg',
+              lead: item.rsd_lead || 'Unknown Lead',
+            }));
 
-      const handleClearSearch = () => {
-        setSearchTerm('');
+          setResearchData(formattedResearchData);
+
+          setLoading(false);
+        } catch (err) {
+          console.error('Error fetching data:', err);
+          setError('Failed to load data. Please try again later.');
+          setLoading(false);
+        }
       };
 
-      if (loading) {
-        return (
-          <div className="my-8 text-center text-gray-600">
-            Loading research data...
-          </div>
-        );
-      }
+      fetchData();
+    }, []);
 
-      if (error) {
-        return (
-          <div className="my-8 text-center text-gray-600">
-            {error}
-          </div>
-        );
-      }
+    const filteredSections = researchData
+      .filter((section) => {
+        const matchesSearch =
+          section.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+          section.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+          section.lead.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+        return matchesSearch;
+      });
 
-    const totalPages = Math.ceil(filteredSections.length / itemsPerPage);
+    const totalItems = filteredSections.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-    const indexOfLastStudent = currentPage * itemsPerPage;
-    const indexOfFirstStudent = indexOfLastStudent - itemsPerPage;
-    const displayedData = filteredSections.slice(indexOfFirstStudent, indexOfLastStudent);
+    const displayedData = filteredSections.slice(indexOfFirstItem, indexOfLastItem).slice(0, headerData?.hsec_amount || itemsPerPage);
+
+    const handleClearSearch = () => {
+      setSearchTerm('');
+    };
+
+    if (loading) {
+      return (
+        <div className="my-8 text-center text-gray-600">
+          Loading research data...
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="my-8 text-center text-gray-600">
+          {error}
+        </div>
+      );
+    }
 
     const paginationRange = () => {
         if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -122,14 +157,9 @@ const ResearchInfo = () => {
         return range;
     };
 
-    // Reset to page 1 when tab or search query changes
-    // useEffect(() => {
-    //     setCurrentPage(1);
-    // }, [debouncedSearchTerm]);
-
     const maxPagesToShow = 5; // Show up to 5 page numbers (e.g., 1, 2, ..., 9, 10)
     let pageNumbers = [];
-    const totalItems = displayedData.length;
+    // const totalItems = displayedData.length;
 
     if (totalPages <= maxPagesToShow) {
         // If total pages are less than or equal to maxPagesToShow, show all pages
@@ -163,7 +193,7 @@ const ResearchInfo = () => {
               <div className="mb-4 sm:mb-6 xl:mb-0">
                 <div className='flex justify-between'>
                   <h2 className={`text-2xl sm:text-3xl font-semibold mb-2 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
-                    {currentLang === 1 ? "Students Research" : "កិច្ចការស្រាវជ្រាវរបស់និស្សិត"}
+                    {headerData.hsec_title}
                   </h2>
                   <div className='block xl:hidden'>
                     <div className=" flex flex-col sm:flex-row gap-3 sm:gap-4 items-center w-full sm:w-auto">
@@ -194,8 +224,7 @@ const ResearchInfo = () => {
 
                 </div>
                 <p className={`text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base max-w-2xl ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                  {currentLang === 1 ? "A Deep Dive into Computer Science Research: From Fundamentals to Future Innovations" : "ការស្រាវជ្រាវជ្រៅលើវិទ្យាសាស្ត្រកុំព្យូទ័រ៖ ពីមូលដ្ឋានដំបូង ដល់នវានុវត្តន៍នាពេលអនាគត"}
-
+                  {headerData.hsec_subtitle}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 items-center lg:mt-0 ">
@@ -228,7 +257,7 @@ const ResearchInfo = () => {
 
             <div className="mt-8 sm:mt-12">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
-                  {filteredSections?.length > 0 && filteredSections.map((section) => (
+                  {displayedData?.length > 0 && displayedData.map((section) => (
                     <motion.div
                       key={section.id}
                       initial={{ opacity: 0, y: 50 }}
