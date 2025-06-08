@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
-const RelatedNews = ({ sectionId, menuLang, newId }) => {
+const RelatedNews = ({ sectionId, menuLang, newId, newDetailPage }) => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -100,7 +100,7 @@ const RelatedNews = ({ sectionId, menuLang, newId }) => {
                         {events.map((event) => (
                             <Link
                                 key={event.ref_id}
-                                to={`${prefix}/news/${event.ref_id}`}
+                                to={`${prefix}${newDetailPage.p_alias}/${event.ref_id}`}
                                 className="text-start"
                             >
                                 <motion.div

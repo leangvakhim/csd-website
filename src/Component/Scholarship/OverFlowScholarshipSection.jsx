@@ -5,7 +5,7 @@ import { FaArrowRight, FaSpinner } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
-const OverFlowScholarshipSection = ({sectionData}) => {
+const OverFlowScholarshipSection = ({sectionData, scholarshipDetailPage}) => {
   const navigate = useNavigate();
   const scrollContainerRef = useRef(null);
   const [scholarships, setScholarships] = useState([]);
@@ -126,8 +126,7 @@ const OverFlowScholarshipSection = ({sectionData}) => {
               deadline: formattedDeadline,
               imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
             };
-          })
-          .slice(0, headerData.hsec_amount);
+          });
 
         setScholarships(formattedScholarships);
       } catch (err) {
@@ -275,7 +274,8 @@ const OverFlowScholarshipSection = ({sectionData}) => {
                       className={`bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl text-sm w-full sm:w-auto text-center transition-colors duration-200 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}
                       onClick={() => {
                         const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                        navigate(`${prefix}/scholarship/${scholarship.ref_id}`);
+                        navigate(`${prefix}${scholarshipDetailPage.p_alias}/${scholarship.ref_id}`);
+
                       }}
                     >
                       {currentLang === 1 ? "View Detail" : "មើលលម្អិត"}

@@ -11,27 +11,61 @@ function AppRoutes() {
   const [pages, setPages] = useState([]);
   const [settings, setSettings] = useState(null);
   const [currentLang, setCurrentLang] = useState(1);
+  const [facultyDetailPage, setFacultyDetailPage] = useState(null);
+  const [researchDetailPage, setResearchDetailPage] = useState(null);
+  const [researchlabDetailPage, setResearchlabDetailPage] = useState(null);
+  const [scholarshipDetailPage, setScholarshipDetailPage] = useState(null);
+  const [newDetailPage, setNewDetailPage] = useState(null);
+  const [eventDetailPage, setEventDetailPage] = useState(null);
+  const [announcementDetailPage, setAnnouncementDetailPage] = useState(null);
+  const [careerDetailPage, setCareerDetailPage] = useState(null);
+
+  const findPageBySectionType = (sections, pages, secType, currentLang) => {
+    const section = sections.find(sec => {
+      const page = pages.find(p => p.p_id === sec.sec_page);
+      return sec.sec_type === secType && page?.menu?.lang === currentLang;
+    });
+    return section ? pages.find(p => p.p_id === section.sec_page) : null;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       await requestGuestToken();
       localStorage.removeItem('token');
-      // let token = localStorage.getItem('token');
-
-      // if (!token) {
-      //   await requestGuestToken();
-      //   token = localStorage.getItem('token');
-      // }
-
-      // if (token) {
-      //   axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // }
-
       try {
         const pageRes = await axiosInstance.get(API_ENDPOINTS.getPage);
-        setPages(pageRes.data?.data || []);
+        const allPages = pageRes.data?.data || [];
+        setPages(allPages);
+
+        const sectionRes = await axiosInstance.get(API_ENDPOINTS.getSection);
+        const allSections = sectionRes.data?.data || [];
+
+        const facultyPage = findPageBySectionType(allSections, allPages, "FacultyDetail", currentLang);
+        if (facultyPage) setFacultyDetailPage(facultyPage);
+
+        const researchPage = findPageBySectionType(allSections, allPages, "ResearchDetail", currentLang);
+        if (researchPage) setResearchDetailPage(researchPage);
+
+        const researchlabPage = findPageBySectionType(allSections, allPages, "ResearchlabDetail", currentLang);
+        if (researchlabPage) setResearchlabDetailPage(researchlabPage);
+
+        const scholarshipPage = findPageBySectionType(allSections, allPages, "ScholarshipDetail", currentLang);
+        if (scholarshipPage) setScholarshipDetailPage(scholarshipPage);
+
+        const newPage = findPageBySectionType(allSections, allPages, "NewDetail", currentLang);
+        if (newPage) setNewDetailPage(newPage);
+
+        const eventPage = findPageBySectionType(allSections, allPages, "EventDetail", currentLang);
+        if (eventPage) setEventDetailPage(eventPage);
+
+        const announcementPage = findPageBySectionType(allSections, allPages, "AnnouncementDetail", currentLang);
+        if (announcementPage) setAnnouncementDetailPage(announcementPage);
+
+        const careerPage = findPageBySectionType(allSections, allPages, "CareerDetail", currentLang);
+        if (careerPage) setCareerDetailPage(careerPage);
+
       } catch (err) {
-        console.error('Error fetching pages:', err);
+        console.error('Error fetching pages or sections:', err);
       }
     };
 
@@ -108,7 +142,7 @@ function AppRoutes() {
       {pages.map(page => (
         <Route
           key={page.p_id}
-          path={`/:lang(km)?${page.p_alias}/*`}
+          path={`/:lang(km)?/${page.p_alias}/*`}
           element={
             <PageRenderer
               page={page}
@@ -116,6 +150,14 @@ function AppRoutes() {
               setCurrentLang={setCurrentLang}
               settings={settings}
               setSettings={setSettings}
+              facultyDetailPage={facultyDetailPage}
+              researchDetailPage={researchDetailPage}
+              researchlabDetailPage={researchlabDetailPage}
+              scholarshipDetailPage={scholarshipDetailPage}
+              newDetailPage={newDetailPage}
+              eventDetailPage={eventDetailPage}
+              announcementDetailPage={announcementDetailPage}
+              careerDetailPage={careerDetailPage}
             />
           }
         />

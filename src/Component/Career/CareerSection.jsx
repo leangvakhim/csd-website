@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { FaArrowRight, FaCalendarAlt, FaSpinner } from 'react-icons/fa';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
-const CareerSection = ({ section, menuLang }) => {
+const CareerSection = ({ section, menuLang, careerDetailPage }) => {
     const navigate = useNavigate();
     const [careers, setCareers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -133,7 +133,7 @@ const CareerSection = ({ section, menuLang }) => {
                                     key={career.ref_id}
                                     onClick={() => {
                                         const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                                        navigate(`${prefix}/career/${career.ref_id}`);
+                                        navigate(`${prefix}${careerDetailPage.p_alias}/${career.ref_id}`);
                                     }}
                                     className="snap-start cursor-pointer relative sm:w-80 w-70 flex-shrink-0 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
                                     variants={itemVariants}

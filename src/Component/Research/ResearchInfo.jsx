@@ -23,7 +23,7 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-const ResearchInfo = ({section}) => {
+const ResearchInfo = ({section, researchDetailPage}) => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [researchData, setResearchData] = useState([]);
@@ -295,7 +295,7 @@ const ResearchInfo = ({section}) => {
                           <button
                             onClick={() => {
                               const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                              navigate(`${prefix}/research/${section.ref_id}`);
+                              navigate(`${prefix}${researchDetailPage.p_alias}/${section.ref_id}`);
                             }}
                             className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
                               }`}

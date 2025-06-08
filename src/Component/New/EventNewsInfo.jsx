@@ -7,7 +7,7 @@ import { PiCalendarDots } from 'react-icons/pi';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
-const EventNewsInfo = ({section}) => {
+const EventNewsInfo = ({section, newDetailPage, eventDetailPage, announcementDetailPage}) => {
     const [searchQuery, setSearchQuery] = useState('');
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
     const [headerData, setHeaderData] = useState([]);
@@ -237,12 +237,12 @@ const EventNewsInfo = ({section}) => {
                 whileHover="hover"
                 >
                     <Link
-                        to={`${prefix}/${event.route_url && event.route_url.toLowerCase() === 'news'
-                            ? 'news'
+                        to={`${prefix}${event.route_url && event.route_url.toLowerCase() === 'news'
+                            ? `${newDetailPage.p_alias}`
                             : event.route_url && event.route_url.toLowerCase() === 'event'
-                            ? 'events'
+                            ? `${eventDetailPage.p_alias}`
                             : event.route_url && event.route_url.toLowerCase() === 'announcement'
-                            ? 'announcement'
+                            ? `${announcementDetailPage.p_alias}`
                             : ''
                         }/${event.ref_id}`}
                         className="block group"

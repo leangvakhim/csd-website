@@ -3,7 +3,7 @@ import FourColScholarshipSection from './FourColScholarshipSection';
 import OverFlowScholarshipSection from './OverFlowScholarshipSection';
 import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
 
-const ScholarshipSection = ({ section }) => {
+const ScholarshipSection = ({ section, scholarshipDetailPage }) => {
   const [sectionData, setSectionData] = useState(null);
 
   useEffect(() => {
@@ -39,9 +39,9 @@ const ScholarshipSection = ({ section }) => {
 
   return (
     <div>
-      {hsec_amount === 4 && <FourColScholarshipSection sectionData={sectionData} />}
+      {hsec_amount === 4 && <FourColScholarshipSection sectionData={sectionData} scholarshipDetailPage={scholarshipDetailPage}/>}
       {( hsec_amount === 5) && (
-        <OverFlowScholarshipSection sectionData={sectionData} />
+        <OverFlowScholarshipSection sectionData={sectionData} scholarshipDetailPage={scholarshipDetailPage}/>
       )}
     </div>
   );

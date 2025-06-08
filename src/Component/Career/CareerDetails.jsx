@@ -7,7 +7,7 @@ import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import RelatedCareer from './RelatedCareer';
 
-const CareerDetails = ({ sectionId, menuLang, careerId }) => {
+const CareerDetails = ({ sectionId, menuLang, careerId, careerDetailPage }) => {
     const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -88,7 +88,7 @@ const CareerDetails = ({ sectionId, menuLang, careerId }) => {
                             __html: DOMPurify.sanitize(sections.detail),
                         }}
                     />
-                    <RelatedCareer careerId={careerId}/>
+                    <RelatedCareer careerId={careerId} careerDetailPage={careerDetailPage}/>
                 </div>
             </div>
         </div>
