@@ -13,7 +13,7 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-const NewsSection = ({ section, menuLang }) => {
+const NewsSection = ({ section, menuLang, newDetailPage }) => {
   const navigate = useNavigate();
   const location = useLocation();
   // const isHomePage = location.pathname === '/home';
@@ -95,7 +95,6 @@ const NewsSection = ({ section, menuLang }) => {
       try {
         setLoading(true);
         const response = await axiosInstance.get(API_ENDPOINTS.getNews);
-        console.log("response is: ",response);
         const newsList = Array.isArray(response.data?.data) ? response.data.data : [];
         const filteredList = newsList.filter(
           item => item.img &&
@@ -248,7 +247,7 @@ const NewsSection = ({ section, menuLang }) => {
                     className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
                     onClick={() => {
                       const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                      navigate(`${prefix}/news/${item.ref_id}`);
+                      navigate(`${prefix}${newDetailPage.p_alias}/${item.ref_id}`);
                     }}
                   >
                     <div className="p-3 w-full lg:w-1/2 h-58">
@@ -289,7 +288,7 @@ const NewsSection = ({ section, menuLang }) => {
                     className=" min-w-[340px] bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer snap-start"
                     onClick={() => {
                       const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                      navigate(`${prefix}/news/${item.ref_id}`);
+                      navigate(`${prefix}${newDetailPage.p_alias}/${item.ref_id}`);
                     }}
                   >
                     <div className="p-3 w-full lg:w-1/2 h-58">

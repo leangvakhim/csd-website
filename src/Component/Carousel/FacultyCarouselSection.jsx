@@ -23,7 +23,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const FacultyCarouselSection = ({ key, section, menuLang }) => {
+const FacultyCarouselSection = ({ key, section, menuLang, facultyDetailPage }) => {
   const [headerSection, setHeaderSection] = useState({
     title: "",
     subtitle: "",
@@ -249,7 +249,7 @@ const FacultyCarouselSection = ({ key, section, menuLang }) => {
                 whileHover={{ scale: 1.05 }}
               >
                 <Link
-                  to={`${prefix}/faculty/${faculty.ref_id}`}
+                  to={`${prefix}${facultyDetailPage.p_alias}/${faculty.ref_id}`}
                   className="relative w-48 h-48 md:w-64 md:h-64 mb-4 group"
                 >
                   <img

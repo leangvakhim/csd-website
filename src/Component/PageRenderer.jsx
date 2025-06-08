@@ -52,28 +52,40 @@ import FacultyDepartment from './Faculty/FacultyDepartment';
 import EventNewsInfo from './New/EventNewsInfo';
 import ResearchInfo from './Research/ResearchInfo';
 import DeveloperSection from './developer/DeveloperSection';
+import FacultyDetail from './Faculty/FacultyDetail';
+import ResearchDetails from './Research/ResearchDetails';
+import ResearchLabDetails from './ResearchDetails/ResearchLabDetails';
+import ScholarshipDetails from './Scholarship/ScholarshipDetails';
+import EventsNewsDetails from './Event/EventsNewsDetails';
+import NewDetails from './New/NewDetails';
+import AnnouncementDetails from './Announcement/AnnouncementDetails';
+import CareerDetails from './Career/CareerDetails';
 
 
-const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings }) => {
+const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings, facultyDetailPage, researchDetailPage, researchlabDetailPage, scholarshipDetailPage, newDetailPage, eventDetailPage, announcementDetailPage, careerDetailPage }) => {
+    const location = useLocation();
     const [sections, setSections] = useState([]);
     const [error, setError] = useState(null);
     const [onlyContentMode, setOnlyContentMode] = useState(false);
     const [shouldRender, setShouldRender] = useState(false);
-    const location = useLocation();
     const isKhmer = location.pathname.startsWith("/km");
     const menuLang = isKhmer ? 2 : 1;
+    const path = window.location.pathname;
+    const lastSegment = path.split('/').pop();
 
     useEffect(() => {
-        const path = location.pathname.toLowerCase();
-        if (path.includes("/km/news") || path.includes("/km/event") || path.includes("/km/announcement")) {
-            document.title = "ព័ត៌មាន & ព្រឹត្តិការណ៏ - Department of Computer Science";
-        } else if (path.includes("/news") || path.includes("/event") || path.includes("/announcement")) {
-            document.title = "News & Events - Department of Computer Science";
-        } else if (path.includes("/km/researchlab")) {
-            document.title = "ស្រាវជ្រាវ - Department of Computer Science";
-        } else if (path.includes("/researchlab")) {
-            document.title = "Research - Department of Computer Science";
-        } else if (page?.menu?.title) {
+        // const path = location.pathname.toLowerCase();
+        // if (path.includes("/km/news") || path.includes("/km/event") || path.includes("/km/announcement")) {
+        //     document.title = "ព័ត៌មាន & ព្រឹត្តិការណ៏ - Department of Computer Science";
+        // } else if (path.includes("/news") || path.includes("/event") || path.includes("/announcement")) {
+        //     document.title = "News & Events - Department of Computer Science";
+        // } else if (path.includes("/km/researchlab")) {
+        //     document.title = "ស្រាវជ្រាវ - Department of Computer Science";
+        // } else if (path.includes("/researchlab")) {
+        //     document.title = "Research - Department of Computer Science";
+        // }
+        // else
+        if (page?.menu?.title) {
             document.title = `${page.menu.title} - Department of Computer Science`;
         }
     }, [page, page?.menu?.title, page?.p_id, location.pathname]);
@@ -172,13 +184,13 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'FAQ':
                                 return <FAQSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Faculty':
-                                return <FacultyCarouselSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <FacultyCarouselSection key={section.sec_id} section={section} menuLang={menuLang} facultyDetailPage={facultyDetailPage}/>;
                             case 'Research':
-                                return <ResearchSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <ResearchSection key={section.sec_id} section={section} menuLang={menuLang} researchDetailPage={researchDetailPage}/>;
                             case 'Scholarship':
-                                return <ScholarshipSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <ScholarshipSection key={section.sec_id} section={section} menuLang={menuLang} scholarshipDetailPage={scholarshipDetailPage}/>;
                             case 'Career':
-                                return <CareerSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <CareerSection key={section.sec_id} section={section} menuLang={menuLang} careerDetailPage={careerDetailPage}/>;
                             case 'Specialization':
                                 return <SpecializationSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'CSD':
@@ -192,19 +204,35 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                             case 'Partner':
                                 return <PartnerControllSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'LoNE':
-                                return <EventNewsInfo key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <EventNewsInfo key={section.sec_id} section={section} menuLang={menuLang} newDetailPage={newDetailPage} eventDetailPage={eventDetailPage} announcementDetailPage={announcementDetailPage}/>;
                             case 'New':
-                                return <NewsSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <NewsSection key={section.sec_id} section={section} menuLang={menuLang} newDetailPage={newDetailPage}/>;
                             case 'Lab':
-                                return <LabSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <LabSection key={section.sec_id} section={section} menuLang={menuLang} researchlabDetailPage={researchlabDetailPage}/>;
                             case 'LoF':
-                                return <FacultyDepartment key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <FacultyDepartment key={section.sec_id} section={section} menuLang={menuLang} facultyDetailPage={facultyDetailPage}/>;
                             case 'LoR':
-                                return <ResearchInfo key={section.sec_id} section={section} menuLang={menuLang} />;
+                                return <ResearchInfo key={section.sec_id} section={section} menuLang={menuLang} researchDetailPage={researchDetailPage}/>;
                             case 'LoD':
                                 return <DeveloperSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             case 'Potential':
                                 return <PotentialSection key={section.sec_id} section={section} menuLang={menuLang} />;
+                            case 'FacultyDetail':
+                                return <FacultyDetail key={section.sec_id} section={section} menuLang={menuLang} facultyId={lastSegment}/>;
+                            case 'ResearchDetail':
+                                return <ResearchDetails key={section.sec_id} section={section} menuLang={menuLang} refId={lastSegment} researchlabDetailPage={researchlabDetailPage}/>;
+                            case 'ResearchlabDetail':
+                                return <ResearchLabDetails key={section.sec_id} section={section} menuLang={menuLang} researchlabId={lastSegment}/>;
+                            case 'ScholarshipDetail':
+                                return <ScholarshipDetails key={section.sec_id} section={section} menuLang={menuLang} scholarshipId={lastSegment}/>;
+                            case 'EventDetail':
+                                return <EventsNewsDetails key={section.sec_id} section={section} menuLang={menuLang} eventId={lastSegment} eventDetailPage={eventDetailPage}/>;
+                            case 'NewDetail':
+                                return <NewDetails key={section.sec_id} section={section} menuLang={menuLang} newId={lastSegment} newDetailPage={newDetailPage}/>;
+                            case 'AnnouncementDetail':
+                                return <AnnouncementDetails key={section.sec_id} section={section} menuLang={menuLang} announcementID={lastSegment}/>;
+                            case 'CareerDetail':
+                                return <CareerDetails key={section.sec_id} section={section} menuLang={menuLang} careerId={lastSegment} careerDetailPage={careerDetailPage}/>;
                             // case 'Announcement':
                             //     return <AnnouncementSection key={section.sec_id} section={section} menuLang={menuLang} />;
                             // case 'Event':
@@ -223,7 +251,7 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
                 </>
             )}
 
-            <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} />
+            {/* <SectionInjector alias={page?.p_alias} setOnlyContentMode={setOnlyContentMode} /> */}
 
             {/* Footer */}
 

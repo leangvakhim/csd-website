@@ -5,7 +5,7 @@ import { AiOutlineRobot } from 'react-icons/ai';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
-const LabSection = ({section}) => {
+const LabSection = ({section, researchlabDetailPage}) => {
     const navigate = useNavigate();
     const [researchData, setResearchData] = useState([]);
     const [headerData, setHeaderData] = useState(null);
@@ -15,8 +15,6 @@ const LabSection = ({section}) => {
     const location = useLocation();
     const currentLang = location.pathname.startsWith('/km') ? 2 : 1;
     const [tags, setTags] = useState([]);
-
-    console.log("section is: ",section);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -312,7 +310,8 @@ const LabSection = ({section}) => {
                         <button
                         onClick={() => {
                             const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                            navigate(`${prefix}/researchlab/${section.ref_id}`);
+                            navigate(`${prefix}${researchlabDetailPage.p_alias}/${section.ref_id}`);
+
                         }}
                         className={`${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'} bg-red-900 hover:bg-red-800 xl:text-[14px] text-[12px] text-white py-2 px-6 rounded-4xl flex items-center`}
                         >

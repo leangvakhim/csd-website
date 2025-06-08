@@ -3,8 +3,11 @@ import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { BsViewStacked } from "react-icons/bs";
 import { Link, useLocation } from 'react-router-dom';
 import { FaExternalLinkAlt } from 'react-icons/fa';
+import { useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
-const FacultyDetail = ({ facultyId }) => {
+const FacultyDetail = ({ facultyId, section }) => {
+
     const location = useLocation();
     const [faculty, setFaculty] = useState(null);
     const [socials, setSocials] = useState([]);
@@ -136,7 +139,8 @@ const FacultyDetail = ({ facultyId }) => {
     return (
         <>
             {/* Faculty Profile */}
-            <section className="bg-gray-50">
+            <section className="bg-gray-50" >
+                {/* <div style={{ display: 'none' }}>FacultyDetail component mounted</div> */}
                 {/* Cover Photo Area */}
                 <div className="bg-red-900 h-48 sm:h-64 md:h-72 lg:h-80 relative">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

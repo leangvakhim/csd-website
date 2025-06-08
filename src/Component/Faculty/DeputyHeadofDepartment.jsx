@@ -4,7 +4,7 @@ import { RiDoubleQuotesR } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
-const DeputyHeadofDepartment = () => {
+const DeputyHeadofDepartment = ({section, facultyDetailPage}) => {
     const [deputyData, setDeputyData] = useState([]);
     const [socials, setSocials] = useState({});
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
@@ -163,7 +163,7 @@ const DeputyHeadofDepartment = () => {
                                         </div>
                                         <p className={`text-left ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{deputy.position}</p>
                                         <Link
-                                            to={`${prefix}/faculty/${deputy.ref_id}`}
+                                            to={`${prefix}${facultyDetailPage.p_alias}/${deputy.ref_id}`}
                                         >
                                             <button className={`bg-red-900 px-4 sm:px-6 py-2 text-gray-50 rounded-2xl text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
                                                 {currentLang === 1 ? "View" : "មើលបន្ថែម"}

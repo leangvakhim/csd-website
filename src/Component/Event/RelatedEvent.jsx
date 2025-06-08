@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { useLocation } from 'react-router-dom';
 
-const RelatedEvent = ({ eventId, sectionId, menuLang }) => {
+const RelatedEvent = ({ eventId, sectionId, menuLang, eventDetailPage }) => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -103,7 +103,7 @@ const RelatedEvent = ({ eventId, sectionId, menuLang }) => {
                         {events.map((event) => (
                             <Link
                                 key={event.ref_id}
-                                to={`${prefix}/events/${event.ref_id}`}
+                                to={`${prefix}${eventDetailPage.p_alias}/${event.ref_id}`}
                                 className="text-start"
                             >
                                 <motion.div

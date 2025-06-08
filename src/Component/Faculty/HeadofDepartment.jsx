@@ -4,11 +4,10 @@ import { Link } from 'react-router-dom';
 import { RiDoubleQuotesR } from 'react-icons/ri';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
-const HeadofDepartment = () => {
+const HeadofDepartment = ({section, facultyDetailPage}) => {
     const [head, setHead] = useState(null);
     const [socials, setSocials] = useState([]);
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
@@ -153,7 +152,7 @@ const HeadofDepartment = () => {
                                     </div>
                                     <p className={`!text-xl ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{head.position}</p>
                                     <Link
-                                        to={`${prefix}/faculty/${head.ref_id}`}
+                                        to={`${prefix}${facultyDetailPage.p_alias}/${head.ref_id}`}
                                     >
                                         <button className={`bg-red-900 px-4 sm:px-6 py-2 text-gray-50 rounded-2xl text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`} id="view-button">
                                             {currentLang === 1 ? "View" : "មើលបន្ថែម"}

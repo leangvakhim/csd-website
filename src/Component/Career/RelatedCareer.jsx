@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 
-const RelatedCareer = ({ sectionId, menuLang, careerId }) => {
+const RelatedCareer = ({ sectionId, menuLang, careerId, careerDetailPage }) => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -22,25 +22,23 @@ const RelatedCareer = ({ sectionId, menuLang, careerId }) => {
                     item.lang === currentLang && item.ref_id !== Number(careerId)
                 );
 
-                const formattedEvents = filteredCareers
-                    .map((item, index) => ({
-                        id: item.c_id || index + 1,
-                        ref_id: item.ref_id,
-                        title: item.c_title || 'Untitled Career',
-                        image: item.img?.img
-                            ? `${API}/storage/uploads/${item.img.img}`
-                            : '/placeholder-image.jpg',
-                        description: item.c_shorttitle || 'No description available.',
-                        date: item.c_date
-                            ? new Date(item.c_date).toLocaleDateString('en-US', {
+                const formattedEvents = filteredCareers.map((item, index) => ({
+                    id: item.c_id || index + 1,
+                    ref_id: item.ref_id,
+                    title: item.c_title || 'Untitled Career',
+                    image: item.img?.img
+                        ? `${API}/storage/uploads/${item.img.img}`
+                        : '/placeholder-image.jpg',
+                    description: item.c_shorttitle || 'No description available.',
+                    date: item.c_date
+                        ? new Date(item.c_date).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric',
-                            })
-                            : 'TBD',
-                        category: item.c_tags,
-                    }))
-                    .slice(0, 4); // Limit to 4 items
+                        })
+                        : 'TBD',
+                    category: item.c_tags,
+                }));
 
                 setEvents(formattedEvents);
                 setLoading(false);
@@ -99,8 +97,8 @@ const RelatedCareer = ({ sectionId, menuLang, careerId }) => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         {events.map((event) => (
                             <Link
-                                key={event.ref_id}
-                                to={`${prefix}/career/${event.ref_id}`}
+                                key={event.id}
+                                to={`${prefix}${careerDetailPage.p_alias}/${event.ref_id}`}
                                 className="text-start"
                             >
                                 <motion.div

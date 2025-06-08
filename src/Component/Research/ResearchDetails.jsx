@@ -10,7 +10,7 @@ import StudentResearch from './StudentResearch';
 import ResearchInnovations from './ResearcInnovation';
 
 
-const ResearchDetails = ({ refId }) => {
+const ResearchDetails = ({ refId, researchlabDetailPage }) => {
     const [sections, setSections] = useState([]);
     const [researchs, setResearchs] = useState([]);
     const currentResearch = researchs.length > 0 ? researchs[0] : null;
@@ -86,8 +86,8 @@ const ResearchDetails = ({ refId }) => {
                     {renderSection(section)}
                 </div>
             ))}
-            <StudentResearch />
-            {/* <RecentResearch /> */}
+            <StudentResearch researchlabDetailPage={researchlabDetailPage}/>
+            {/* <RecentResearch researchlabDetailPage={researchlabDetailPage}/> */}
         </div>
     );
 }

@@ -39,66 +39,66 @@ const SectionInjector = ({ alias, setOnlyContentMode }) => {
   }, [sectionKey, lastSegment, setOnlyContentMode]);
 
   switch (sectionKey) {
-    case '/faculty':
-      if (lastSegment && lastSegment !== 'faculty') {
-        return <FacultyDetail facultyId={lastSegment} />;
-      }
-      return <div></div>;
+    // case '/faculty':
+    //   if (lastSegment && lastSegment !== 'faculty') {
+    //     return <FacultyDetail facultyId={lastSegment} />;
+    //   }
+    //   return <div></div>;
 
-    case '/developer':
-      if (alias.endsWith('/developer')) {
-        if (lastSegment && lastSegment !== 'developer') {
-          return <DeveloperDetail developerId={lastSegment} />;
-        }
-        return <div></div>;
-      }
+    // case '/developer':
+    //   if (alias.endsWith('/developer')) {
+    //     if (lastSegment && lastSegment !== 'developer') {
+    //       return <DeveloperDetail developerId={lastSegment} />;
+    //     }
+    //     return <div></div>;
+    //   }
 
-    case '/research':
-      if (lastSegment && lastSegment !== 'research') {
-        return <ResearchDetails refId={lastSegment} />;
-      }
-      return <div></div>;
+    // case '/research':
+    //   if (lastSegment && lastSegment !== 'research') {
+    //     return <ResearchDetails refId={lastSegment} />;
+    //   }
+    //   return <div></div>;
 
-    case '/researchlab':
-      if (lastSegment && lastSegment !== 'researchlab') {
-        return <ResearchLabDetails researchlabId={lastSegment} />;
-      }
-      return ''; // Replaced empty string with a sensible default
+    // case '/researchlab':
+    //   if (lastSegment && lastSegment !== 'researchlab') {
+    //     return <ResearchLabDetails researchlabId={lastSegment} />;
+    //   }
+    //   return ''; // Replaced empty string with a sensible default
 
-    case '/scholarship':
-      if (lastSegment && lastSegment !== 'scholarship') {
-        return <ScholarshipDetails scholarshipId={lastSegment} />;
-      }
-      return <div></div>;
+    // case '/scholarship':
+    //   if (lastSegment && lastSegment !== 'scholarship') {
+    //     return <ScholarshipDetails scholarshipId={lastSegment} />;
+    //   }
+    //   return <div></div>;
 
-    case '/events':
-      if (lastSegment && lastSegment !== 'events') {
-        return <EventsNewsDetails  eventId={lastSegment}/>;
-      }
-      return <div></div>; // Main page content
+    // case '/events':
+    //   if (lastSegment && lastSegment !== 'events') {
+    //     return <EventsNewsDetails  eventId={lastSegment}/>;
+    //   }
+    //   return <div></div>; // Main page content
 
-    case '/news':
-      if (lastSegment && lastSegment !== 'news') {
-        return <NewDetails  newId={lastSegment} />;
-      }
-      return <div></div>; // Main page content
+    // case '/news':
+    //   if (lastSegment && lastSegment !== 'news') {
+    //     return <NewDetails  newId={lastSegment} />;
+    //   }
+    //   return <div></div>; // Main page content
 
-    case '/news&events':
-      return <div></div>; // Main page content
+    // case '/news&events':
+    //   return <div></div>; // Main page content
 
-    case '/career':
-      if (lastSegment && lastSegment !== 'career') {
-        return <CareerDetails careerId={lastSegment} />;
-      } else {
-        return ''; // Replace <div></div> with your actual banner or list component
-      }
+    // case '/career':
+    //   if (lastSegment && lastSegment !== 'career') {
+    //     return <CareerDetails careerId={lastSegment} />;
+    //   } else {
+    //     return ''; // Replace <div></div> with your actual banner or list component
+    //   }
 
-    case '/announcement':
-      if (lastSegment && lastSegment !== 'announcement') {
-        return <AnnouncementDetails announcementID={lastSegment}/>;
-      }
+    // case '/announcement':
+    //   if (lastSegment && lastSegment !== 'announcement') {
+    //     return <AnnouncementDetails announcementID={lastSegment}/>;
+    //   }
 
-      return <div></div>; // Main page content
+    //   return <div></div>; // Main page content
 
     default:
       return null;

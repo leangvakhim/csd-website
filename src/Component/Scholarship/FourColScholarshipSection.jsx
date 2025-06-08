@@ -12,7 +12,7 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-const FourColScholarshipSection = ({sectionData}) => {
+const FourColScholarshipSection = ({sectionData, scholarshipDetailPage}) => {
   const navigate = useNavigate();
   const [scholarships, setScholarships] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -233,7 +233,7 @@ const FourColScholarshipSection = ({sectionData}) => {
                     className="bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl cursor-pointer"
                     onClick={() => {
                       const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                      navigate(`${prefix}/scholarship/${scholarship.ref_id}`);
+                      navigate(`${prefix}${scholarshipDetailPage.p_alias}/${scholarship.ref_id}`);
                     }}
                     aria-label={`View details for ${scholarship.title}`}
                   >

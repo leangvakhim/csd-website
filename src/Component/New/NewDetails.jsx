@@ -6,7 +6,7 @@ import NewsBanner from './NewsBanner';
 import SocialSection from '../Social/SocialSection';
 import RelatedNews from './RelatedNews';
 
-const NewDetails = ({ sectionId, menuLang, newId }) => {
+const NewDetails = ({ sectionId, menuLang, newId, newDetailPage }) => {
     const [news, setNews] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -103,7 +103,7 @@ const NewDetails = ({ sectionId, menuLang, newId }) => {
                                 __html: DOMPurify.sanitize(news.detail),
                             }}
                         />
-                        <RelatedNews newId={newId}/>
+                        <RelatedNews newId={newId} newDetailPage={newDetailPage}/>
                          </div>
                     </div>
                 </div>

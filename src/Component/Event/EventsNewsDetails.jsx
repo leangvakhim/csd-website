@@ -7,7 +7,7 @@ import SocialSection from '../Social/SocialSection';
 import RelatedEvent from './RelatedEvent';
 import { useLocation } from 'react-router-dom';
 
-const EventsNewsDetails = ({ eventId, menuLang }) => {
+const EventsNewsDetails = ({ eventId, menuLang, eventDetailPage }) => {
     const [event, setEvent] = useState(null); // Kept for potential future use
     const [news, setNews] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -114,7 +114,7 @@ const EventsNewsDetails = ({ eventId, menuLang }) => {
                         />
 
                     </div>
-                    <RelatedEvent eventId={eventId} newId={news.e_id} />
+                    <RelatedEvent eventId={eventId} newId={news.e_id} eventDetailPage={eventDetailPage}/>
                 </div>
             ) : (
                 <motion.div

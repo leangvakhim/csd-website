@@ -3,7 +3,7 @@ import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-const FacultyMemeber = () => {
+const FacultyMemeber = ({section, facultyDetailPage}) => {
     const [facultyMembers, setFacultyMembers] = useState([]);
     const [socials, setSocials] = useState({});
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
@@ -143,7 +143,7 @@ const FacultyMemeber = () => {
                                             <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{member.position}</p>
                                         </div>
                                         <Link
-                                            to={`${prefix}/faculty/${member.ref_id}`}
+                                            to={`${prefix}${facultyDetailPage.p_alias}/${member.ref_id}`}
                                             className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} bg-red-900 px-6 py-2 text-gray-50 rounded-2xl inline-block`}
                                         >
                                             {currentLang === 1 ? "View" : "មើលបន្ថែម"}
