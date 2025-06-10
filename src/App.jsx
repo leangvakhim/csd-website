@@ -5,6 +5,7 @@ import { API_ENDPOINTS, API, axiosInstance, API_BASEURL } from './Service/APIcon
 import axios from 'axios';
 import PageRenderer from './Component/PageRenderer';
 import Faculty from './Component/Faculty/FacultyDepartment';
+import NotFound from './Component/404';
 
 function AppRoutes() {
   const location = useLocation();
@@ -162,6 +163,7 @@ function AppRoutes() {
           }
         />
       ))}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   ) : (
     <div className="text-center py-8">Loading...</div>
