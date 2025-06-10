@@ -60,6 +60,7 @@ import EventsNewsDetails from './Event/EventsNewsDetails';
 import NewDetails from './New/NewDetails';
 import AnnouncementDetails from './Announcement/AnnouncementDetails';
 import CareerDetails from './Career/CareerDetails';
+import { Helmet } from 'react-helmet';
 
 
 const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings, facultyDetailPage, researchDetailPage, researchlabDetailPage, scholarshipDetailPage, newDetailPage, eventDetailPage, announcementDetailPage, careerDetailPage }) => {
@@ -74,17 +75,6 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
     const lastSegment = path.split('/').pop();
 
     useEffect(() => {
-        // const path = location.pathname.toLowerCase();
-        // if (path.includes("/km/news") || path.includes("/km/event") || path.includes("/km/announcement")) {
-        //     document.title = "ព័ត៌មាន & ព្រឹត្តិការណ៏ - Department of Computer Science";
-        // } else if (path.includes("/news") || path.includes("/event") || path.includes("/announcement")) {
-        //     document.title = "News & Events - Department of Computer Science";
-        // } else if (path.includes("/km/researchlab")) {
-        //     document.title = "ស្រាវជ្រាវ - Department of Computer Science";
-        // } else if (path.includes("/researchlab")) {
-        //     document.title = "Research - Department of Computer Science";
-        // }
-        // else
         if (page?.menu?.title) {
             document.title = `${page.menu.title} - Department of Computer Science`;
         }
