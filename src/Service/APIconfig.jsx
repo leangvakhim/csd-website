@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // const API = "https://aimostore.shop";
-const API = "https://www.aimostore.shop";
+// const API = "https://www.aimostore.shop";
+const API = "https://cs.fs.rupp.edu.kh/laravelapi";
 // const API = "http://127.0.0.1:8000";
 // const API = "https://18.136.196.218";
 
