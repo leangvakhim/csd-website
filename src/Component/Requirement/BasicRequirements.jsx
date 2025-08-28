@@ -5,6 +5,7 @@ import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 const BasicRequirements = ({ key, section, menuLang}) => {
   const [gcAddon, setGcAddon] = useState(null);
   const [gcData, setGcData] = useState(null);
+  const [btnFileUrl, setBtnFileUrl] = useState('');
 
   useEffect(() => {
     const fetchGcAddon = async () => {
@@ -42,6 +43,42 @@ const BasicRequirements = ({ key, section, menuLang}) => {
     fetchGcAddon();
     fetchGcData();
   }, [section.sec_id]);
+
+  useEffect(() => {
+    const resolveBtnLink = async () => {
+      try {
+        if (!gcAddon?.gca_btnlink) {
+          setBtnFileUrl('');
+          return;
+        }
+        const fname = await getImageNameByID(parseInt(gcAddon.gca_btnlink));
+        if (!fname) {
+          setBtnFileUrl('');
+          return;
+        }
+        // If it's already a full URL, keep it; otherwise build URL from API base
+        const looksLikeUrl = /^https?:\/\//i.test(fname);
+        setBtnFileUrl(looksLikeUrl ? fname : `${API}/storage/uploads/${fname}`);
+      } catch (e) {
+        setBtnFileUrl('');
+        console.error('Failed to resolve button link:', e);
+      }
+    };
+    resolveBtnLink();
+  }, [gcAddon?.gca_btnlink]);
+
+  const getImageNameByID = async (id) => {
+    try {
+      const response = await axiosInstance.get(API_ENDPOINTS.getImages);
+      const images = Array.isArray(response.data) ? response.data : response.data.data;
+      const matchedImage = images.find((img) => img.image_id === id);
+      // console.log("matchedImage?.img is: ",matchedImage?.img)
+      return matchedImage?.img || null;
+    } catch (error) {
+      console.error('❌ Failed to fetch image ID:', error);
+      return null;
+    }
+  };
 
   return (
     <div className="my-16">
@@ -131,7 +168,7 @@ const BasicRequirements = ({ key, section, menuLang}) => {
               />
               {gcAddon?.gca_btntitle && gcAddon?.gca_btnlink && (
                 <div className="">
-                  <a href={gcAddon.gca_btnlink} target="_blank" rel="noopener noreferrer">
+                  <a href={btnFileUrl || '#'} target="_blank" rel="noopener noreferrer">
                     <button className={`bg-red-800 p-2 rounded-3xl px-6 text-white ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                       {gcAddon.gca_btntitle}
                     </button>
