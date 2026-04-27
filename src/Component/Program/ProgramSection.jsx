@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FaCheck } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+
+import { useData } from "../../Context/DataContext";
 
 // Animation variants for the section
 const sectionVariants = {
@@ -23,95 +25,67 @@ const cardVariants = {
 };
 
 const ProgramSection = ({ section, menuLang }) => {
+  const { globalData } = useData();
   const [aboutData, setAboutData] = useState({
     title: "",
     description: "",
     features: [],
     images: [],
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!globalData?.departments);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!section?.sec_id) {
-      console.log("ProgramSection: No section.sec_id provided");
-      setError("Missing section ID");
-      setIsLoading(false);
+    if (!globalData?.departments) {
+      setIsLoading(true);
       return;
     }
 
-    setIsLoading(true);
-    axiosInstance
-      .get(`${API_ENDPOINTS.getDepartment}?lang=${menuLang}`)
-      .then((res) => {
-        const data = res.data?.data || [];
-        const filteredEntry = data.find(
-          (entry) =>
-            String(entry.dep_sec) === String(section.sec_id) &&
-            entry.section?.sec_type === "Programs" &&
-            entry.section?.display === 1 &&
-            entry.section?.active === 1
-        );
+    try {
+      const data = globalData.departments;
+      const filteredEntry = data.find(
+        (entry) =>
+          String(entry.dep_sec) === String(section.sec_id) &&
+          entry.section?.sec_type === "Programs" &&
+          entry.section?.display === 1 &&
+          entry.section?.active === 1
+      );
 
-        if (filteredEntry && filteredEntry.section.display === 1) {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(filteredEntry.dep_detail, "text/html");
-          const descEl = doc.querySelector("p");
-          const description = descEl ? descEl.textContent.trim() : "";
-          const featureEls = [...doc.querySelectorAll("div > span")];
-          const features = featureEls.map((el) => el.textContent.trim());
-          const imgs = [];
-          if (filteredEntry.image1?.img)
-            imgs.push(`${API}/storage/uploads/${filteredEntry.image1.img}`);
-          if (filteredEntry.image2?.img)
-            imgs.push(`${API}/storage/uploads/${filteredEntry.image2.img}`);
+      if (filteredEntry && filteredEntry.section.display === 1) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(filteredEntry.dep_detail, "text/html");
+        const descEl = doc.querySelector("p");
+        const description = descEl ? descEl.textContent.trim() : "";
+        const featureEls = [...doc.querySelectorAll("div > span")];
+        const features = featureEls.map((el) => el.textContent.trim());
+        const imgs = [];
+        if (filteredEntry.image1?.img)
+          imgs.push(`${API}/storage/uploads/${filteredEntry.image1.img}`);
+        if (filteredEntry.image2?.img)
+          imgs.push(`${API}/storage/uploads/${filteredEntry.image2.img}`);
 
-          setAboutData({
-            title: filteredEntry.dep_title || "",
-            description,
-            features,
-            images: imgs,
-          });
-        } else {
-          console.log(
-            "ProgramSection: No matching department found for section_id",
-            section.sec_id
-          );
-          setError("No program data found for this section");
-        }
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("ProgramSection: Error fetching department data:", error);
-        setError("Failed to load program data");
-        setIsLoading(false);
-      });
-  }, [section, menuLang]);
+        setAboutData({
+          title: filteredEntry.dep_title || "",
+          description,
+          features,
+          images: imgs,
+        });
+      } else {
+        setError("No program data found for this section");
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error("ProgramSection processing error:", error);
+      setError("Failed to process program data");
+      setIsLoading(false);
+    }
+  }, [section.sec_id, globalData?.departments]);
 
-  if (isLoading) {
-    return (
-      <div
-        className={`text-center py-8 text-gray-600 ${
-          menuLang === 2 ? "font-khmer" : "font-sans"
-        }`}
-      >
-        {menuLang === 2 ? "កំពុងផ្ទុក..." : "Loading programs..."}
-      </div>
-    );
+
+  if (isLoading || !aboutData.title) {
+    return null;
   }
 
-  if (error || !aboutData.title) {
-    return (
-      <div
-        lang={menuLang === 2 ? "km" : "en"}
-        className={`text-center py-8 text-gray-600 ${
-          menuLang === 2 ? "lang-khmer font-khmer" : "lang-english font-sans"
-        }`}
-      >
-        {menuLang === 2 ? "គ្មានទិន្នន័យកម្មវិធី" : "No program data available"}
-      </div>
-    );
-  }
 
   return (
     <div

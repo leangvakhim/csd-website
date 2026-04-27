@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
-import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
+
 
 // Animation variants
 const quoteVariants = {
@@ -18,37 +19,28 @@ const quoteVariants = {
 const TestimonialSection = ({ section, menuLang }) => {
   const [quote, setQuote] = useState(null);
 
+  const { globalData } = useData();
+
   useEffect(() => {
-    if (section?.sec_id) {
-      // Fetch testimonial based on section.sec_id
-      axiosInstance.get(`${API_ENDPOINTS.getTestimonial}`)
-        .then((response) => {
-          const data = Array.isArray(response.data) ? response.data : response.data.data;
-          const filtered = data.find(item =>
-            item.t_sec === section?.sec_id &&
-            section.sec_type === "Testimonial" &&
-            section.display === 1 &&
-            section.active === 1
-          );
-          if (filtered) {
-            setQuote(filtered.t_title);
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching testimonial:", error);
-        });
-    } else {
-      console.log("QuoteSection: No section.sec_id provided, skipping API call");
+    if (section?.sec_id && globalData?.testimonials) {
+      const data = Array.isArray(globalData.testimonials) ? globalData.testimonials : [];
+      const filtered = data.find(item =>
+        item.t_sec === section?.sec_id &&
+        section.sec_type === "Testimonial" &&
+        section.display === 1 &&
+        section.active === 1
+      );
+      if (filtered) {
+        setQuote(filtered.t_title);
+      }
     }
-  }, [section]);
+  }, [section, globalData?.testimonials]);
+
 
   if (!quote) {
-    return (
-      <div className="text-center py-8 text-gray-600">
-        No testimonial available for this section.
-      </div>
-    );
+    return null;
   }
+
 
   return (
     <div className="my-12 sm:my-16 bg-white">

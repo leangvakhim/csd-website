@@ -1,47 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import FourColScholarshipSection from './FourColScholarshipSection';
 import OverFlowScholarshipSection from './OverFlowScholarshipSection';
-import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 
-const ScholarshipSection = ({ section }) => {
+const ScholarshipSection = ({ section, scholarshipDetailPage }) => {
+  const { globalData, isLoading } = useData();
   const [sectionData, setSectionData] = useState(null);
 
   useEffect(() => {
-    const fetchHeaderSection = async () => {
-      try {
-        const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-        const data = response.data.data || [];
+    if (globalData?.headers) {
+      const data = globalData.headers || [];
 
-        const matched = data.find(
-          (item) =>
-            item.hsec_sec === section.sec_id &&
-            item.section?.sec_type === "Scholarship" &&
-            item.section?.display === 1 &&
-            item.section?.active === 1
-        );
+      const matched = data.find(
+        (item) =>
+          item.hsec_sec === section.sec_id &&
+          item.section?.sec_type === "Scholarship" &&
+          item.section?.display === 1 &&
+          item.section?.active === 1
+      );
 
-        if (matched) {
-          setSectionData(matched);
-        }
-      } catch (err) {
-        console.error("Error fetching header section:", err);
+      if (matched) {
+        setSectionData(matched);
       }
-    };
+    }
+  }, [section, globalData]);
 
-    fetchHeaderSection();
-  }, [section.sec_page]); // Dependency to re-run if section prop changes
+  if (isLoading) return null;
 
   if (!sectionData) {
-    return <div>Loading...</div>;
+    return null;
   }
 
   const { hsec_amount } = sectionData;
 
   return (
     <div>
-      {hsec_amount === 4 && <FourColScholarshipSection sectionData={sectionData} />}
+      {hsec_amount === 4 && <FourColScholarshipSection sectionData={sectionData} scholarshipDetailPage={scholarshipDetailPage}/>}
       {( hsec_amount === 5) && (
-        <OverFlowScholarshipSection sectionData={sectionData} />
+        <OverFlowScholarshipSection sectionData={sectionData} scholarshipDetailPage={scholarshipDetailPage}/>
       )}
     </div>
   );

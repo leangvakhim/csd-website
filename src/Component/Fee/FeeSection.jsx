@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { HiOutlineCurrencyDollar } from "react-icons/hi2";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
 
 // Animation variants for the section
 const sectionVariants = {
@@ -22,47 +23,33 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const FeeSection = ({ section,  }) => {
+const FeeSection = ({ section }) => {
+  const { globalData, isLoading } = useData();
   const [tuition, setTuition] = useState(null);
-  const [currentLang, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
+  const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
-  // Fetch fee data based on section.sec_id
+  // Process fee data from globalData
   useEffect(() => {
-    if (section?.sec_id) {
-      axiosInstance
-        .get(API_ENDPOINTS.getFee)
-        .then((res) => {
-          const data = res.data?.data?.find(
-            (item) =>
-              item.fe_sec === section.sec_id &&
-              section.sec_type === "Fee" &&
-              section.display === 1 &&
-              section.active === 1
-          );
-          if (data) {
-            setTuition({
-              title: data.fe_title,
-              description: data.fe_desc.split("\n\n"),
-              price: data.fe_price,
-              image: data.image?.img ? `${API}/storage/uploads/${data.image.img}` : null,
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching fee data:", error);
+    if (globalData?.fees) {
+      const data = globalData.fees.find(
+        (item) =>
+          item.fe_sec === section.sec_id &&
+          section.sec_type === "Fee" &&
+          section.display === 1 &&
+          section.active === 1
+      );
+      if (data) {
+        setTuition({
+          title: data.fe_title,
+          description: data.fe_desc ? data.fe_desc.split("\n\n") : [],
+          price: data.fe_price,
+          image: data.image?.img ? `${API}/storage/uploads/${data.image.img}` : null,
         });
-    } else {
-      console.log("TuitionSection: No section.sec_id provided, skipping API call");
+      }
     }
-  }, [section]);
+  }, [section.sec_id, globalData]);
 
-  if (!tuition) {
-    return (
-      <div className="text-center py-8 text-gray-600">
-        No fee data available for this section.
-      </div>
-    );
-  }
+  if (isLoading || !tuition) return null;
 
   return (
     <div className="my-8 sm:my-12 lg:my-16">

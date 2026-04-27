@@ -1,61 +1,48 @@
-
 import React, { useEffect, useState } from 'react';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import CareerBanner from './CareerBanner';
 import SocialSection from '../Social/SocialSection';
 import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import RelatedCareer from './RelatedCareer';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
-const CareerDetails = ({ sectionId, menuLang, careerId }) => {
-    const [sections, setSections] = useState([]);
-    const [loading, setLoading] = useState(true);
+const CareerDetails = ({ sectionId, menuLang, careerId, careerDetailPage }) => {
+    const { globalData, isLoading } = useData();
+    const [sections, setSections] = useState(null);
     const [error, setError] = useState(null);
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        if (careerId) {
-            axiosInstance.get(`${API_ENDPOINTS.getCareer}`)
-                .then((res) => {
-                    const allCareers = res.data?.data || [];
-                    const selectedCareer = allCareers.find(
-                        item => item.ref_id === Number(careerId) && item.lang === currentLang
-                    );
+        if (globalData?.career && careerId) {
+            const allCareers = globalData.career || [];
+            const selectedCareer = allCareers.find(
+                item => item.ref_id === Number(careerId) && item.lang === currentLang
+            );
 
-                    if (selectedCareer) {
-                        setSections({
-                            title: selectedCareer.c_title,
-                            ref_id: selectedCareer.ref_id,
-                            shortTitle: selectedCareer.c_shorttitle || '',
-                            detail: selectedCareer.c_detail || 'No details available.',
-                            image: `${API}/storage/uploads/${selectedCareer.img?.img}`,
-                            date: selectedCareer.c_date && !isNaN(new Date(selectedCareer.c_date).getTime())
-                                ? new Date(selectedCareer.c_date).toLocaleDateString('en-GB', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                })
-                                : 'TBD',
-                        });
-                        setLoading(false);
-                    } else {
-                        setError('Career not found.');
-                        setLoading(false);
-                    }
-                })
-                .catch((err) =>
-                    console.error("Error fetching career details:", err)
-                );
+            if (selectedCareer) {
+                setSections({
+                    title: selectedCareer.c_title,
+                    ref_id: selectedCareer.ref_id,
+                    shortTitle: selectedCareer.c_shorttitle || '',
+                    detail: selectedCareer.c_detail || 'No details available.',
+                    image: `${API}/storage/uploads/${selectedCareer.img?.img}`,
+                    date: selectedCareer.c_date && !isNaN(new Date(selectedCareer.c_date).getTime())
+                        ? new Date(selectedCareer.c_date).toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                        })
+                        : 'TBD',
+                });
+                setError(null);
+            } else {
+                setError('Career not found.');
+            }
         }
-    }, [careerId, currentLang]);
+    }, [careerId, currentLang, globalData]);
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen px-4 text-center">
-                <p className="text-sm sm:text-base lg:text-lg text-gray-500 animate-pulse">Loading...</p>
-            </div>
-        );
-    }
+    if (isLoading) return null;
 
     if (error) {
         return (
@@ -64,6 +51,8 @@ const CareerDetails = ({ sectionId, menuLang, careerId }) => {
             </div>
         );
     }
+
+    if (!sections) return null;
 
     return (
         <div className="min-h-screen">
@@ -88,7 +77,7 @@ const CareerDetails = ({ sectionId, menuLang, careerId }) => {
                             __html: DOMPurify.sanitize(sections.detail),
                         }}
                     />
-                    <RelatedCareer careerId={careerId}/>
+                    <RelatedCareer careerId={careerId} careerDetailPage={careerDetailPage}/>
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
 
 // Animation variants
 const sectionVariants = {
@@ -34,45 +34,33 @@ const StatisticCard = ({ value, rank, className = "" }) => {
 
 // AboutSection Component
 const AboutSection = ({ section }) => {
+    const { globalData, isLoading } = useData();
     const [stats, setStats] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        setIsLoading(true);
-        axiosInstance
-            .get(API_ENDPOINTS.getSetting)
-            .then((res) => {
-                const settings = res.data?.data || [];
-                const data = settings.find(item => item.lang === 1);
-                // const data = res.data?.data; // single object, no map needed
-                if (!data) throw new Error("Invalid API response");
+        if (globalData?.settings) {
+            const settings = globalData.settings;
+            // The settings could be an array or a single object depending on how it's handled in App.jsx
+            // Based on App.jsx, globalData.settings is the result of getSetting, which usually returns the list or the current one.
+            const data = Array.isArray(settings) 
+                ? settings.find(item => item.lang === currentLang) || settings[0]
+                : settings;
+            
+            if (data) {
                 const formattedStats = [
-                    { value: data.set_amstu.toLocaleString(), rank: `${currentLang === 1 ? "Students" : "និស្សិត"}`},
-                    { value: data.set_enroll.toLocaleString(), rank: `${currentLang === 1 ? "Increase Enrollment" : "ចំនួននិស្សិតចុះឈ្មោះ"}` },
+                    { value: data.set_amstu?.toLocaleString() || "0", rank: `${currentLang === 1 ? "Students" : "និស្សិត"}`},
+                    { value: data.set_enroll?.toLocaleString() || "0", rank: `${currentLang === 1 ? "Increase Enrollment" : "ចំនួននិស្សិតចុះឈ្មោះ"}` },
                     { value: "1<sup class='text-md'>st</sup>", rank: `${currentLang === 1 ? "CS Program in Cambodia" : "កម្មវិធីសិក្សាព័ត៌មានវិទ្យាដំបូងគេនៅកម្ពុជា"}` },
                 ];
                 setStats(formattedStats);
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.error("API error:", err);
-                const fallbackStats = [
-                    { value: "2,000", rank: "Students" },
-                    { value: "5,000", rank: "Increase Enrollment" },
-                    { value: "1<sup class='text-md'>st</sup>", rank: "CS Program in Cambodia" },
-                ];
-                setStats(fallbackStats);
-                setError("Failed to load statistics");
-                setIsLoading(false);
-            });
+            }
+        }
+    }, [globalData?.settings, currentLang]);
 
-            // console.log("response is: ",response);
-    }, [section]);
+    if (isLoading) return null;
+    if (!stats || stats.length === 0) return null;
 
-    if (isLoading) return <div className="text-center py-8 text-gray-600">Loading...</div>;
-    if (error && stats.length === 0) return <div className="text-center py-8 text-gray-600">{error}</div>;
 
     return (
         <div className="my-16 py-4">

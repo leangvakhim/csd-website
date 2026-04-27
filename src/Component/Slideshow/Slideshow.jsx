@@ -4,64 +4,58 @@ import { motion } from "framer-motion";
 import { BsFillInfoCircleFill } from "react-icons/bs";
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
 import { MdExplore } from "react-icons/md";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
-// import { useTranslation } from "react-i18next";
+import { API } from "../../Service/APIconfig";
 
+import { useData } from "../../Context/DataContext";
 
-const Slideshow = ({key, section, menuLang}) => {
+const Slideshow = ({section, menuLang}) => {
+    const { globalData } = useData();
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     const [slides, setSlides] = useState([]);
 
-    const resolvePageAlias = async (routePage) => {
-        try {
-            const res = await axiosInstance.get(API_ENDPOINTS.getPage);
-            const pages = Array.isArray(res.data?.data) ? res.data.data : [];
-
-            const matched = pages.find((page) => page.p_title === routePage);
-            return matched?.p_alias || null;
-        } catch (error) {
-            console.error("Failed to fetch page alias:", error);
-            return null;
-        }
-    }
-
     useEffect(() => {
-        if (section?.sec_id) {
-            axiosInstance.get(`${API_ENDPOINTS.getSlideshow}`)
-                .then(res => {
-                    const resolveLinks = async () => {
-                        const data = res.data?.data || [];
-                        const filtered = data.filter(slide =>
-                            slide.display === 1 &&
-                            slide.active === 1 &&
-                            slide.slider_sec?.sec_id === section.sec_id
-                        );
+        const getAlias = (routePage) => {
+            if (!globalData?.pages) return null;
+            const matched = globalData.pages.find((p) => p.p_title === routePage);
+            return matched?.p_alias || null;
+        };
 
-                        const resolvedSlides = await Promise.all(filtered.map(async (slide) => {
-                            const link1 = await resolvePageAlias(slide.btn1?.bss_routepage);
-                            const link2 = await resolvePageAlias(slide.btn2?.bss_routepage);
-                            return {
-                                image: `${API}/storage/uploads/${slide.img?.img}`,
-                                title: slide.slider_title,
-                                description: slide.slider_text,
-                                buttonText1: slide.btn1?.bss_title || '',
-                                buttonLink1: link1 || '#',
-                                buttonText2: slide.btn2?.bss_title || '',
-                                buttonLink2: link2 || '#',
-                                buttonColor: 'bg-red-900',
-                                linkIcon: <BsFillInfoCircleFill className="ml-2 text-white" />,
-                                logo: `${API}/storage/uploads/${slide.logo?.img}`
-                            };
-                        }));
+        if (section?.sec_id && globalData?.slideshow) {
+            const filtered = globalData.slideshow.filter(slide =>
+                slide.display === 1 &&
+                slide.active === 1 &&
+                slide.slider_sec?.sec_id === section.sec_id
+            );
 
-                        setSlides(resolvedSlides);
-                    };
+            const resolvedSlides = filtered.map((slide) => {
+                const link1 = getAlias(slide.btn1?.bss_routepage);
+                const link2 = getAlias(slide.btn2?.bss_routepage);
+                
+                let path1 = link1 || '#';
+                let path2 = link2 || '#';
 
-                    resolveLinks();
-                })
-                .catch(err => console.error("Failed to fetch slideshow:", err));
+                // Handle language prefix for local links
+                if (path1 !== '#' && currentLang === 2 && !path1.startsWith('/km')) path1 = `/km/${path1.replace(/^\//, '')}`;
+                if (path2 !== '#' && currentLang === 2 && !path2.startsWith('/km')) path2 = `/km/${path2.replace(/^\//, '')}`;
+
+                return {
+                    image: `${API}/storage/uploads/${slide.img?.img}`,
+                    title: slide.slider_title,
+                    description: slide.slider_text,
+                    buttonText1: slide.btn1?.bss_title || '',
+                    buttonLink1: path1,
+                    buttonText2: slide.btn2?.bss_title || '',
+                    buttonLink2: path2,
+                    buttonColor: 'bg-red-900',
+                    linkIcon: <BsFillInfoCircleFill className="ml-2 text-white" />,
+                    logo: `${API}/storage/uploads/${slide.logo?.img}`
+                };
+            });
+
+            setSlides(resolvedSlides);
         }
-    }, [section, menuLang]);
+    }, [section, globalData?.slideshow, globalData?.pages, currentLang]);
+
 
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isPaused, setIsPaused] = useState(false);

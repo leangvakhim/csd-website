@@ -4,6 +4,7 @@ import { FaSearch, FaFilter, FaTimes, FaSpinner, FaArrowRight } from 'react-icon
 import { PiCalendarDots } from 'react-icons/pi';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -15,17 +16,17 @@ const useDebounce = (value, delay) => {
 };
 
 const EventSection = ({ section, menuLang }) => {
+    const { globalData } = useData();
     const navigate = useNavigate();
     const location = useLocation();
-    const isHomePage = location.pathname === '/home';
     const [events, setEvents] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [headerLoading, setHeaderLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [headerLoading, setHeaderLoading] = useState(false);
     const [error, setError] = useState(null);
     const [headerError, setHeaderError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTag, setSelectedTag] = useState('');
-    const [headerData, setHeaderData] = useState({});
+    const [headerData, setHeaderData] = useState({ hsec_title: 'Event', hsec_amount: 4 });
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
 
@@ -33,25 +34,16 @@ const EventSection = ({ section, menuLang }) => {
     const DEFAULT_IMAGE = '/placeholder-image.jpg';
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
-    const resolvePageAlias = async (routePage) => {
-        try {
-            const res = await axiosInstance.get(API_ENDPOINTS.getPage);
-            const pages = Array.isArray(res.data?.data) ? res.data.data : [];
-
-            const matched = pages.find((page) => page.p_title === routePage);
-            return matched?.p_alias || null;
-        } catch (error) {
-            console.error("Failed to fetch page alias:", error);
-            return null;
-        }
-    }
+    const getAlias = (routePage) => {
+        if (!globalData?.pages) return null;
+        const matched = globalData.pages.find((p) => p.p_title === routePage);
+        return matched?.p_alias || null;
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
+        if (globalData?.headers) {
             try {
-                setHeaderLoading(true);
-                const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-                const headerList = response.data?.data || [];
+                const headerList = globalData.headers || [];
                 const matchedHeader = headerList.find(
                     (item) =>
                         item.hsec_sec === section.sec_id &&
@@ -60,45 +52,29 @@ const EventSection = ({ section, menuLang }) => {
                         item.section?.active === 1
                 );
 
-                if (!matchedHeader) {
-                    throw new Error("No matched header section found for this Event section.");
-                }
-
                 if (matchedHeader) {
                     setHeaderData({
                         hsec_title: matchedHeader.hsec_title || 'Event',
                         hsec_subtitle: matchedHeader.hsec_subtitle || "",
                         hsec_btntitle: matchedHeader.hsec_btntitle || "",
-                        hsec_routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
+                        hsec_routepage: getAlias(matchedHeader.hsec_routepage) || "",
                         hsec_amount: typeof matchedHeader.hsec_amount === 'number' && matchedHeader.hsec_amount !== null ? matchedHeader.hsec_amount : 4,
                     });
-                    } else {
-                    setHeaderData({
-                        hsec_title: 'Event',
-                        hsec_amount: 4,
-                    });
                 }
-
-            } catch (error) {
-                console.error('Failed to fetch header data:', error);
-                setHeaderError('Failed to load section header. Using default values.');
-            } finally {
-                setHeaderLoading(false);
+            } catch (err) {
+                console.error('Header processing error:', err);
             }
+        }
+    }, [section.sec_id, globalData?.headers, globalData?.pages]);
 
+    useEffect(() => {
+        if (globalData?.events) {
             try {
-                setLoading(true);
-                const response = await axiosInstance.get(API_ENDPOINTS.getEvent);
-
-                const data = Array.isArray(response.data.data)
-                    ? response.data.data
-                    : [response.data.data];
-
+                const data = Array.isArray(globalData.events) ? globalData.events : [];
                 const transformed = data
                     .filter((item) =>
                         item.img && item.img.img && item.lang === currentLang
                     )
-                    .slice(0, headerData.hsec_amount)
                     .sort((a, b) => b.e_order - a.e_order)
                     .map(item => ({
                         id: item.e_id,
@@ -114,21 +90,19 @@ const EventSection = ({ section, menuLang }) => {
                             })
                             : 'TBD',
                         imageUrl: item.img.img ? `${BASE_IMAGE_URL}/${item.img.img}` : DEFAULT_IMAGE,
-                    }));
+                    }))
+                    .slice(0, headerData.hsec_amount);
 
                 setEvents(transformed);
-            } catch (error) {
-                console.error('Failed to fetch events:', error);
-                setError('Failed to load events. Please try again later.');
-            } finally {
-                setLoading(false);
+            } catch (err) {
+                console.error('Event processing error:', err);
             }
-        };
+        }
+    }, [currentLang, headerData.hsec_amount, globalData?.events]);
 
-        fetchData();
-    }, [headerData.hsec_amount, isHomePage]); // Add dependencies to prevent infinite loop
-
-    const tags = [...new Set(events.map(item => item.tag))];
+    if (!globalData?.events || !globalData?.headers) {
+        return null;
+    }
 
     const filteredEvents = events
         .slice(0, headerData.hsec_amount)
@@ -141,29 +115,6 @@ const EventSection = ({ section, menuLang }) => {
     });
 
     const handleClearSearch = () => setSearchTerm('');
-
-    if (headerLoading || loading) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <FaSpinner className="animate-spin text-4xl text-red-800" />
-            </div>
-        );
-    }
-
-    if (headerError || error) {
-        return (
-            <div className="text-center py-12 text-red-800">
-                {headerError && <p>{headerError}</p>}
-                {error && <p>{error}</p>}
-                <button
-                    onClick={() => window.location.reload()}
-                    className="mt-4 bg-red-800 text-white px-4 py-2 rounded-xl hover:bg-red-900"
-                >
-                    Retry
-                </button>
-            </div>
-        );
-    }
 
     return (
         <div className="my-16">

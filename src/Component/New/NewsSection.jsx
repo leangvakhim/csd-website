@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FaSearch, FaFilter, FaTimes, FaSpinner, FaArrowRight } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -13,32 +14,34 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-const NewsSection = ({ section, menuLang }) => {
+const NewsSection = ({ section, menuLang, newDetailPage }) => {
+  const { globalData } = useData();
   const navigate = useNavigate();
   const location = useLocation();
-  const isHomePage = location.pathname === '/home';
   const [newsItems, setNewsItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [headerLoading, setHeaderLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [headerLoading, setHeaderLoading] = useState(false);
   const [error, setError] = useState(null);
   const [headerError, setHeaderError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
-  const [headerData, setHeaderData] = useState([]);
+  const [headerData, setHeaderData] = useState({ hsec_title: 'New', hsec_amount: 4 });
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
-  // Fetch header data
-  useEffect(() => {
-    const fetchHeaderData = async () => {
-      try {
-        setHeaderLoading(true);
-        const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-        const headerList = response.data?.data || [];
+  const getAlias = (routePage) => {
+    if (!globalData?.pages) return null;
+    const matched = globalData.pages.find((p) => p.p_title === routePage);
+    return matched?.p_alias || null;
+  };
 
+  useEffect(() => {
+    if (globalData?.headers) {
+      try {
+        const headerList = globalData.headers || [];
         const matchedHeader = headerList.find(
           (item) =>
             item.hsec_sec === section.sec_id &&
@@ -52,51 +55,20 @@ const NewsSection = ({ section, menuLang }) => {
             hsec_title: matchedHeader.hsec_title || 'New',
             hsec_subtitle: matchedHeader.hsec_subtitle || "",
             hsec_btntitle: matchedHeader.hsec_btntitle || "",
-            hsec_routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
+            hsec_routepage: getAlias(matchedHeader.hsec_routepage) || "",
             hsec_amount: typeof matchedHeader.hsec_amount === 'number' && matchedHeader.hsec_amount !== null ? matchedHeader.hsec_amount : 4,
           });
-        } else {
-          setHeaderData({
-            hsec_title: 'New',
-            hsec_amount: 4,
-          });
         }
-      } catch (error) {
-        console.error('Failed to fetch header data:', error.message, error);
-        setHeaderError('Failed to load section header.');
-        setHeaderData({
-          hsec_title: '',
-          hsec_amount: 4,
-        });
-      } finally {
-        setHeaderLoading(false);
+      } catch (err) {
+        console.error('Header processing error:', err);
       }
-    };
-
-    fetchHeaderData();
-  }, []);
-
-  const resolvePageAlias = async (routePage) => {
-    try {
-      const res = await axiosInstance.get(API_ENDPOINTS.getPage);
-      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
-
-      const matched = pages.find((page) => page.p_title === routePage);
-      return matched?.p_alias || null;
-    } catch (error) {
-      console.error("Failed to fetch page alias:", error);
-      return null;
     }
-  }
+  }, [section.sec_id, globalData?.headers, globalData?.pages]);
 
-  // Fetch news data
   useEffect(() => {
-    const fetchAnnouncements = async () => {
+    if (globalData?.news) {
       try {
-        setLoading(true);
-        const response = await axiosInstance.get(API_ENDPOINTS.getNews);
-        const newsList = Array.isArray(response.data?.data) ? response.data.data : [];
-
+        const newsList = Array.isArray(globalData.news) ? globalData.news : [];
         const filteredList = newsList.filter(
           item => item.img &&
             item.img.img &&
@@ -124,19 +96,16 @@ const NewsSection = ({ section, menuLang }) => {
           }))
           .slice(0, headerData.hsec_amount);
 
-        setNewsItems(
-          isHomePage ? transformed.slice(0, headerData.hsec_amount) : transformed
-        );
-      } catch (error) {
-        console.error('Failed to fetch news:', error);
-        setError('Failed to load news. Please try again later.');
-      } finally {
-        setLoading(false);
+        setNewsItems(transformed);
+      } catch (err) {
+        console.error('News processing error:', err);
       }
-    };
+    }
+  }, [currentLang, headerData.hsec_amount, globalData?.news]);
 
-    fetchAnnouncements();
-  }, [currentLang, headerData.hsec_amount, isHomePage]);
+  if (!globalData?.news || !globalData?.headers) {
+    return null;
+  }
 
   const tags = [...new Set(newsItems.map(item => item.tag).filter(tag => tag))];
 
@@ -174,6 +143,14 @@ const NewsSection = ({ section, menuLang }) => {
       </div>
     );
   }
+
+  const getDetailPath = (alias, refId) => {
+    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+    if (!alias) return '#';
+    const path = alias.startsWith('/') ? alias : `/${alias}`;
+    const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+    return `${fullPath}/${refId}`;
+  };
 
   return (
     <div className="sm:my-16">
@@ -245,8 +222,7 @@ const NewsSection = ({ section, menuLang }) => {
                     key={item.ref_id}
                     className="bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer"
                     onClick={() => {
-                      const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                      navigate(`${prefix}/news/${item.ref_id}`);
+                      navigate(getDetailPath(newDetailPage?.p_alias, item.ref_id));
                     }}
                   >
                     <div className="p-3 w-full lg:w-1/2 h-58">
@@ -286,8 +262,7 @@ const NewsSection = ({ section, menuLang }) => {
                     key={item.ref_id}
                     className=" min-w-[340px] bg-white rounded-lg flex flex-col lg:flex-row shadow-md overflow-hidden cursor-pointer snap-start"
                     onClick={() => {
-                      const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                      navigate(`${prefix}/news/${item.ref_id}`);
+                      navigate(getDetailPath(newDetailPage?.p_alias, item.ref_id));
                     }}
                   >
                     <div className="p-3 w-full lg:w-1/2 h-58">

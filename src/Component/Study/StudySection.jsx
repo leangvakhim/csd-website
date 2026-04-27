@@ -1,56 +1,43 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
 import { PiGraduationCapDuotone } from "react-icons/pi";
+import { useData } from "../../Context/DataContext";
 
-const StudySection = ({key, section, menuLang}) => {
+const StudySection = ({section, menuLang}) => {
+    const { globalData, isLoading } = useData();
     const [studyInfo, setStudyInfo] = useState({ title: '', subtitle: '', type: 0 });
     const [yearCards, setYearCards] = useState([]);
 
     useEffect(() => {
-        const fetchStudyInfo = async () => {
-            try {
-                const res = await axiosInstance.get(API_ENDPOINTS.getStudy);
-                const data = Array.isArray(res.data?.data) ? res.data.data : [];
+        if (globalData?.studies) {
+            const data = globalData.studies;
+            const matched = data.find(
+                (item) => item.section?.sec_type === 'Study' &&
+                          item.std_sec === section.sec_id &&
+                          item.section?.display === 1 &&
+                          item.section?.active === 1
+            );
 
-                const matched = data.find(
-                  (item) => item.section?.sec_type === 'Study' &&
-                            item.std_sec === section.sec_id &&
-                            item.section?.display === 1 &&
-                            item.section?.active === 1
-                );
-
-                if (matched) {
-                  setStudyInfo({
+            if (matched) {
+                setStudyInfo({
                     title: matched.std_title,
                     subtitle: matched.std_subtitle,
                     type: matched.std_type,
-                  });
-                }
-            } catch (err) {
-                console.error('Failed to fetch study info:', err);
+                });
             }
-        };
+        }
 
-        fetchStudyInfo();
+        if (globalData?.subStudyDegrees) {
+            const allYears = globalData.subStudyDegrees;
+            const filteredYears = allYears
+                .filter(y => y.studydegree?.std_id === y.y_std && y.studydegree?.std_sec === section.sec_id)
+                .sort((a, b) => a.y_order - b.y_order);
 
-        const fetchYears = async () => {
-            try {
-                const res = await axiosInstance.get(API_ENDPOINTS.getSubStudyDegree);
-                const allYears = Array.isArray(res.data?.data) ? res.data.data : [];
+            setYearCards(filteredYears);
+        }
+    }, [section.sec_id, globalData]);
 
-                const filteredYears = allYears
-                  .filter(y => y.studydegree?.std_id === y.y_std && y.studydegree?.std_sec === section.sec_id)
-                  .sort((a, b) => a.y_order - b.y_order);
-
-                setYearCards(filteredYears);
-            } catch (err) {
-                console.error("Failed to fetch year data:", err);
-            }
-        };
-
-        fetchYears();
-    }, [section.sec_id]);
+    if (isLoading) return null;
 
     return (
       <>

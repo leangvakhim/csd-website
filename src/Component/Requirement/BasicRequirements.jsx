@@ -1,47 +1,49 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
 
-const BasicRequirements = ({ key, section, menuLang}) => {
+import { useData } from "../../Context/DataContext";
+
+const BasicRequirements = ({ section, menuLang}) => {
+  const { globalData } = useData();
   const [gcAddon, setGcAddon] = useState(null);
   const [gcData, setGcData] = useState(null);
+  const [btnFileUrl, setBtnFileUrl] = useState('');
+
+  const resolveBtnLink = (gcaBtnlink) => {
+    if (!gcaBtnlink || !globalData?.images) return '';
+    const id = parseInt(gcaBtnlink);
+    const matchedImage = globalData.images.find((img) => img.image_id === id);
+    const fname = matchedImage?.img || null;
+    if (!fname) return '';
+    const looksLikeUrl = /^https?:\/\//i.test(fname);
+    return looksLikeUrl ? fname : `${API}/storage/uploads/${fname}`;
+  };
 
   useEffect(() => {
-    const fetchGcAddon = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getSubRequirement);
-        const data = res.data?.data;
-        const filtered = data.find(
-          (item) =>
-            item.gc?.gc_sec === section.sec_id
-        );
-        setGcAddon(filtered || null);
-      } catch (error) {
-        console.error("Failed to fetch gcaddon:", error);
+    if (globalData?.subRequirements) {
+      const filtered = globalData.subRequirements.find(
+        (item) => item.gc?.gc_sec === section.sec_id
+      );
+      setGcAddon(filtered || null);
+      if (filtered?.gca_btnlink) {
+        setBtnFileUrl(resolveBtnLink(filtered.gca_btnlink));
       }
-    };
+    }
 
+    if (globalData?.criterias) {
+      const filtered = globalData.criterias.find(
+        (item) =>
+          item.gc_sec === section.sec_id &&
+          item.section?.sec_type === "Requirement" &&
+          item.section?.display === 1 &&
+          item.section?.active === 1
+      );
+      setGcData(filtered || null);
+    }
+  }, [section.sec_id, globalData?.subRequirements, globalData?.criterias, globalData?.images]);
 
-    const fetchGcData = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getCriteria);
-        const data = res.data?.data || [];
-        const filtered = data.find(
-          (item) =>
-            item.gc_sec === section.sec_id &&
-            item.section?.sec_type === "Requirement" &&
-            item.section?.display === 1 &&
-            item.section?.active === 1
-        );
-        setGcData(filtered || null);
-      } catch (error) {
-        console.error("Failed to fetch requirement:", error);
-      }
-    };
-
-    fetchGcAddon();
-    fetchGcData();
-  }, [section.sec_id]);
+  if (!gcData) return null;
 
   return (
     <div className="my-16">
@@ -131,7 +133,7 @@ const BasicRequirements = ({ key, section, menuLang}) => {
               />
               {gcAddon?.gca_btntitle && gcAddon?.gca_btnlink && (
                 <div className="">
-                  <a href={gcAddon.gca_btnlink} target="_blank" rel="noopener noreferrer">
+                  <a href={btnFileUrl || '#'} target="_blank" rel="noopener noreferrer">
                     <button className={`bg-red-800 p-2 rounded-3xl px-6 text-white ${menuLang === 2 ? 'fonts-khmer' : 'font-sans'}`}>
                       {gcAddon.gca_btntitle}
                     </button>

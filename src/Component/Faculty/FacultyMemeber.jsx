@@ -1,40 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
-const FacultyMemeber = () => {
+const FacultyMemeber = ({section, facultyDetailPage}) => {
+    const { globalData, isLoading } = useData();
     const [facultyMembers, setFacultyMembers] = useState([]);
     const [socials, setSocials] = useState({});
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
     useEffect(() => {
-        const fetchFacultyMembers = async () => {
-            try {
-                // Fetch faculty data
-                const res = await axiosInstance.get(API_ENDPOINTS.getFaculty);
-                const allFaculty = res.data?.data || [];
+        if (globalData?.faculty) {
+            const allFaculty = globalData.faculty || [];
+            const filteredMembers = allFaculty
+                .filter(item => item.display === 1 && item.active === 1 && item.lang === currentLang)
+                .slice(3);
 
-                const filteredMembers = allFaculty
-                    .filter(item => item.display === 1 && item.active === 1 && item.lang === currentLang)
-                    .slice(3);
+            const formattedMembers = filteredMembers.map(member => ({
+                id: member.f_id,
+                ref_id: member.ref_id,
+                name: member.f_name,
+                position: member.f_position,
+                bio: member.f_portfolio || 'No bio available.',
+                image: member.img?.img
+                    ? `${API}/storage/uploads/${member.img.img}`
+                    : "/placeholder-icon.png",
+            }));
 
-                const formattedMembers = filteredMembers.map(member => ({
-                    id: member.f_id,
-                    ref_id: member.ref_id,
-                    name: member.f_name,
-                    position: member.f_position,
-                    bio: member.f_portfolio || 'No bio available.',
-                    image: member.img?.img
-                        ? `${API}/storage/uploads/${member.img.img}`
-                        : "/placeholder-icon.png",
-                }));
+            setFacultyMembers(formattedMembers);
 
-                setFacultyMembers(formattedMembers);
-
-                // Fetch social media data
-                const socialRes = await axiosInstance.get(API_ENDPOINTS.getSocial);
-                const allSocials = socialRes.data?.data || [];
+            if (globalData?.socials) {
+                const allSocials = globalData.socials || [];
                 const socialsByMember = {};
 
                 formattedMembers.forEach(member => {
@@ -47,13 +45,11 @@ const FacultyMemeber = () => {
                 });
 
                 setSocials(socialsByMember);
-            } catch (error) {
-                console.error("Error fetching faculty members or socials:", error);
             }
-        };
+        }
+    }, [currentLang, globalData?.faculty, globalData?.socials]);
 
-        fetchFacultyMembers();
-    }, [currentLang]);
+    if (isLoading) return null;
 
     return (
         <div className='my-16'>
@@ -142,12 +138,22 @@ const FacultyMemeber = () => {
                                             <h1 className={`text-2xl font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{member.name}</h1>
                                             <p className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{member.position}</p>
                                         </div>
-                                        <Link
-                                            to={`${prefix}/faculty/${member.ref_id}`}
-                                            className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} bg-red-900 px-6 py-2 text-gray-50 rounded-2xl inline-block`}
-                                        >
-                                            {currentLang === 1 ? "View" : "មើលបន្ថែម"}
-                                        </Link>
+                                        {(() => {
+                                            const getDetailPath = (alias, refId) => {
+                                                if (!alias) return '#';
+                                                const path = alias.startsWith('/') ? alias : `/${alias}`;
+                                                const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+                                                return `${fullPath}/${refId}`;
+                                            };
+                                            return (
+                                                <Link
+                                                    to={getDetailPath(facultyDetailPage?.p_alias, member.ref_id)}
+                                                    className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} bg-red-900 px-6 py-2 text-gray-50 rounded-2xl inline-block`}
+                                                >
+                                                    {currentLang === 1 ? "View" : "មើលបន្ថែម"}
+                                                </Link>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
                             </div>

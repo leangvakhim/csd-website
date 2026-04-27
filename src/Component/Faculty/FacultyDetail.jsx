@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { BsViewStacked } from "react-icons/bs";
 import { Link, useLocation } from 'react-router-dom';
-import { FaExternalLinkAlt } from 'react-icons/fa';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
-const FacultyDetail = ({ facultyId }) => {
+const FacultyDetail = ({ facultyId, section }) => {
+    const { globalData, isLoading } = useData();
     const location = useLocation();
     const [faculty, setFaculty] = useState(null);
     const [socials, setSocials] = useState([]);
@@ -12,155 +13,87 @@ const FacultyDetail = ({ facultyId }) => {
     const [contacts, setContacts] = useState([]);
     const [backgrounds, setBackgrounds] = useState([]);
     const [researchProjects, setResearchProjects] = useState([]);
-    const [currentLang, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
+    const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        const newLang = location.pathname.startsWith('/km') ? 2 : 1;
-        if (newLang !== currentLang) {
-            setCurrentLang(newLang);
-        }
-    }, [location.pathname]);
+        if (!globalData?.faculty || !facultyId) return;
 
-    useEffect(() => {
-        const fetchFacultyDetail = async () => {
-            try {
-                const facultyRes = await axiosInstance.get(API_ENDPOINTS.getFaculty);
-                const allFaculty = facultyRes.data?.data || [];
-                const selectedFaculty = allFaculty.find(item => item.ref_id === Number(facultyId) && item.lang === currentLang);
+        // 1. Find Faculty
+        const allFaculty = globalData.faculty || [];
+        const selectedFaculty = allFaculty.find(item => item.ref_id === Number(facultyId) && item.lang === currentLang);
 
-                if (selectedFaculty) {
-                    setFaculty({
-                        name: selectedFaculty.f_name,
-                        f_id: selectedFaculty.f_id,
-                        ref_id: selectedFaculty.ref_id,
-                        position: selectedFaculty.f_position,
-                        image: selectedFaculty.img?.img
-                            ? `${API}/storage/uploads/${selectedFaculty.img.img}`
-                            : "/placeholder-icon.png",
-                    });
-                }
+        if (selectedFaculty) {
+            const f_id_int = parseInt(selectedFaculty.f_id);
+            setFaculty({
+                name: selectedFaculty.f_name,
+                f_id: selectedFaculty.f_id,
+                ref_id: selectedFaculty.ref_id,
+                position: selectedFaculty.f_position,
+                image: selectedFaculty.img?.img
+                    ? `${API}/storage/uploads/${selectedFaculty.img.img}`
+                    : "/placeholder-icon.png",
+            });
 
-                // Fetch social icons
-                // Note: faculty may not be set yet, so we use selectedFaculty
-                const socialRes = await axiosInstance.get(API_ENDPOINTS.getSocial);
-                const allSocials = socialRes.data?.data || [];
-                const filteredSocials = allSocials.filter(social =>
-                    social.social_faculty === parseInt(selectedFaculty?.f_id) &&
+            // 2. Filter Socials
+            if (globalData.socials) {
+                const filteredSocials = globalData.socials.filter(social =>
+                    social.social_faculty === f_id_int &&
                     social.display === 1 &&
                     social.active === 1
                 );
                 setSocials(filteredSocials);
-            } catch (error) {
-                console.error("Error fetching faculty detail or socials:", error);
             }
-        };
-        fetchFacultyDetail();
-    }, [facultyId, currentLang]);
 
-    useEffect(() => {
-        if (!faculty) return;
-
-        const fetchFacultyInfo = async () => {
-            try {
-                const infoRes = await axiosInstance.get(API_ENDPOINTS.getFacultyInfo);
-                const allInfo = infoRes.data?.data || [];
-                const selectedInfo = allInfo.find(info =>
-                    info.finfo_f === parseInt(faculty.f_id) &&
+            // 3. Filter Info (About)
+            if (globalData.facultyInfo) {
+                const selectedInfo = globalData.facultyInfo.find(info =>
+                    info.finfo_f === f_id_int &&
                     info.display === 1 &&
                     info.active === 1 &&
                     info.finfo_order === 1
                 );
+                if (selectedInfo) setFacultyInfo(selectedInfo);
 
-                if (selectedInfo) {
-                    setFacultyInfo(selectedInfo);
-                }
-            } catch (error) {
-                console.error("Error fetching faculty info:", error);
+                // 4. Filter Research Projects
+                const filteredProjects = globalData.facultyInfo.filter(project =>
+                    project.finfo_f === f_id_int &&
+                    Number(project.finfo_order) >= 2 &&
+                    project.display === 1 &&
+                    project.active === 1
+                );
+                setResearchProjects(filteredProjects);
             }
-        };
 
-        const fetchFacultyContact = async () => {
-            try {
-                const contactRes = await axiosInstance.get(API_ENDPOINTS.getFacultyContact);
-                const allContacts = contactRes.data?.data || [];
-                const filteredContacts = allContacts.filter(contact =>
-                    contact.fc_f === parseInt(faculty.f_id) &&
+            // 5. Filter Contacts
+            if (globalData.facultyContacts) {
+                const filteredContacts = globalData.facultyContacts.filter(contact =>
+                    contact.fc_f === f_id_int &&
                     contact.display === 1 &&
                     contact.active === 1
                 );
                 setContacts(filteredContacts);
-            } catch (error) {
-                console.error("Error fetching faculty contacts:", error);
             }
-        };
 
-        const fetchFacultyBackground = async () => {
-            try {
-                const bgRes = await axiosInstance.get(API_ENDPOINTS.getFacultyBG);
-                const allBackgrounds = bgRes.data?.data || [];
-                const filteredBackgrounds = allBackgrounds.filter(bg =>
-                    bg.fbg_f === parseInt(faculty.f_id) &&
+            // 6. Filter Backgrounds
+            if (globalData.facultyBackgrounds) {
+                const filteredBackgrounds = globalData.facultyBackgrounds.filter(bg =>
+                    bg.fbg_f === f_id_int &&
                     bg.display === 1 &&
                     bg.active === 1
                 );
                 setBackgrounds(filteredBackgrounds);
-            } catch (error) {
-                console.error("Error fetching faculty backgrounds:", error);
             }
-        };
+        }
+    }, [facultyId, currentLang, globalData]);
 
-        const fetchFacultyResearchProjects = async () => {
-            try {
-                const projectRes = await axiosInstance.get(API_ENDPOINTS.getFacultyInfo);
-                const allProjects = projectRes.data?.data || [];
-                const filteredProjects = allProjects.filter(project =>
-                    project.finfo_f === parseInt(faculty.f_id) &&
-                    Number(project.finfo_order) >= 2 &&
-                    project.display === 1 &&
-                    project.active === 1 &&
-                    typeof project.finfo_detail === 'string' &&
-                    project.finfo_detail.includes('<svg')
-                );
-                setResearchProjects(filteredProjects);
-            } catch (error) {
-                console.error("Error fetching faculty research projects:", error);
-            }
-        };
-
-        fetchFacultyInfo();
-        fetchFacultyContact();
-        fetchFacultyBackground();
-        fetchFacultyResearchProjects();
-    }, [faculty]);
+    if (isLoading || !faculty) return null;
 
     return (
         <>
             {/* Faculty Profile */}
-            <section className="bg-gray-50">
-                {/* Cover Photo Area */}
+            <section className="bg-gray-50" >
                 <div className="bg-red-900 h-48 sm:h-64 md:h-72 lg:h-80 relative">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                        {/* Social Icons for Mobile */}
-                        {/* <div className="flex justify-center sm:hidden pt-4 ">
-                            <div className="flex gap-3">
-                                {socials.map(social => (
-                                    <a
-                                        key={social.social_id}
-                                        href={social.social_link || '#'}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center justify-center bg-white rounded-full shadow-md p-2 border border-gray-200 hover:bg-gray-100 transition-colors"
-                                    >
-                                        <img
-                                            src={social.img?.img ? `${API}/storage/uploads/${social.img.img}` : "/placeholder-icon.png"}
-                                            alt="Social Icon"
-                                            className="w-6 h-6 rounded-full object-cover"
-                                        />
-                                    </a>
-                                ))}
-                            </div>
-                        </div> */}
-
                         <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-4 pt-8 md:pt-12">
                             <div className="flex flex-1 items-end gap-4 w-full">
                                 <div className="absolute md:static left-1/2 -bottom-16 md:bottom-auto transform -translate-x-1/2 md:translate-x-0">
@@ -242,7 +175,7 @@ const FacultyDetail = ({ facultyId }) => {
                     </div>
                     <button className="w-full max-w-xs mx-auto bg-red-800 hover:bg-red-900 text-white px-6 py-3 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2 shadow-md text-sm sm:text-base">
                         <BsViewStacked className="text-base sm:text-lg" />
-                            <span className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} >{currentLang === 1 ? "View Portfolio" : "ប្រវត្តិរូបការងារ"}</span>
+                        <span className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} >{currentLang === 1 ? "View Portfolio" : "ប្រវត្តិរូបការងារ"}</span>
                     </button>
                 </div>
             </section>
@@ -291,28 +224,28 @@ const FacultyDetail = ({ facultyId }) => {
                             {researchProjects.length >= 1 && researchProjects.some((project, index) => {
                                 return project.finfo_side === 1;
                             }) && (
-                                <div>
-                                    {researchProjects.filter(project => project.finfo_side === 1).map((project) => (
-                                        <section key={project.finfo_id || `${project.finfo_f}-${project.finfo_order}`} className="my-8 sm:my-12 ">
-                                            <div className="bg-white rounded-xl shadow-md ">
-                                                <div className=" mx-auto p-4 sm:p-6">
-                                                    <div className="py-4">
-                                                        <section className="space-y-4">
-                                                            <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-bold text-gray-900`}>
-                                                                {project.finfo_title}
-                                                            </h2>
-                                                            <div
-                                                                className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base`}
-                                                                dangerouslySetInnerHTML={{ __html: project.finfo_detail }}
-                                                            ></div>
-                                                        </section>
+                                    <div>
+                                        {researchProjects.filter(project => project.finfo_side === 1).map((project) => (
+                                            <section key={project.finfo_id || `${project.finfo_f}-${project.finfo_order}`} className="my-8 sm:my-12 ">
+                                                <div className="bg-white rounded-xl shadow-md ">
+                                                    <div className=" mx-auto p-4 sm:p-6">
+                                                        <div className="py-4">
+                                                            <section className="space-y-4">
+                                                                <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-bold text-gray-900`}>
+                                                                    {project.finfo_title}
+                                                                </h2>
+                                                                <div
+                                                                    className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base`}
+                                                                    dangerouslySetInnerHTML={{ __html: project.finfo_detail }}
+                                                                ></div>
+                                                            </section>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </section>
-                                    ))}
-                                </div>
-                            )}
+                                            </section>
+                                        ))}
+                                    </div>
+                                )}
                         </div>
                     </section>
                 </div>
@@ -342,27 +275,27 @@ const FacultyDetail = ({ facultyId }) => {
                     {researchProjects.length >= 1 && researchProjects.some((project, index) => {
                         return project.finfo_side === 2;
                     }) && (
-                        <div>
-                            {researchProjects.filter(project => project.finfo_side === 2).map((project) => (
-                                <div key={project.finfo_id || `${project.finfo_f}-${project.finfo_order}`} className=" my-8 sm:my-12">
-                                    <div className="bg-red-800 rounded-xl p-6  text-white">
-                                        <div className="py-4">
-                                        <section className="space-y-4">
-                                            <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-semibold `}>
-                                            {project.finfo_title}
-                                            </h2>
-                                            <div
-                                            className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} space-y-4 text-gray-50 leading-relaxed text-sm sm:text-base`}
-                                            dangerouslySetInnerHTML={{ __html: project.finfo_detail }}
-                                            ></div>
-                                        </section>
-                                        </div>
+                            <div>
+                                {researchProjects.filter(project => project.finfo_side === 2).map((project) => (
+                                    <div key={project.finfo_id || `${project.finfo_f}-${project.finfo_order}`} className=" my-8 sm:my-12">
+                                        <div className="bg-red-800 rounded-xl p-6  text-white">
+                                            <div className="py-4">
+                                                <section className="space-y-4">
+                                                    <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-semibold `}>
+                                                        {project.finfo_title}
+                                                    </h2>
+                                                    <div
+                                                        className={`${currentLang === 2 ? "fonts-khmer" : "font-sans"} space-y-4 text-gray-50 leading-relaxed text-sm sm:text-base`}
+                                                        dangerouslySetInnerHTML={{ __html: project.finfo_detail }}
+                                                    ></div>
+                                                </section>
+                                            </div>
 
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                                ))}
+                            </div>
+                        )}
                 </div>
             </div>
         </>

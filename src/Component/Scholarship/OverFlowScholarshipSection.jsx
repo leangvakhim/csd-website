@@ -1,145 +1,96 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaArrowRight, FaSpinner } from 'react-icons/fa';
+import { FaArrowRight } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
-const OverFlowScholarshipSection = ({sectionData}) => {
+const OverFlowScholarshipSection = ({sectionData, scholarshipDetailPage}) => {
+  const { globalData, isLoading } = useData();
   const navigate = useNavigate();
   const scrollContainerRef = useRef(null);
   const [scholarships, setScholarships] = useState([]);
   const [headerData, setHeaderData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const BASE_IMAGE_URL = `${API}/storage/uploads`;
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
   const [resolvedAlias, setResolvedAlias] = useState(null);
 
   useEffect(() => {
-    const fetchAlias = async () => {
-      if (sectionData?.hsec_routepage) {
-        const alias = await resolvePageAlias(sectionData.hsec_routepage);
-        setResolvedAlias(alias);
-      }
-    };
-    fetchAlias();
-  }, [sectionData?.hsec_routepage]);
+    if (globalData?.pages && sectionData?.hsec_routepage) {
+      const pages = globalData.pages || [];
+      const matched = pages.find((page) => page.p_title === sectionData.hsec_routepage);
+      setResolvedAlias(matched?.p_alias || null);
+    }
+  }, [sectionData?.hsec_routepage, globalData]);
 
   // Fetch header data
   useEffect(() => {
-    const fetchHeaderData = async () => {
-      try {
-        const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-        const headerList = response.data?.data || [];
+    if (globalData?.headers) {
+      const headerList = globalData.headers || [];
 
-        const matchedHeader = headerList.find(
-          (item) =>
-            item.hsec_sec === sectionData.sec_id &&
-            item.section?.sec_type === "Scholarship" &&
-            item.section?.display === 1 &&
-            item.section?.active === 1
-        );
+      const matchedHeader = headerList.find(
+        (item) =>
+          item.hsec_sec === sectionData.sec_id &&
+          item.section?.sec_type === "Scholarship" &&
+          item.section?.display === 1 &&
+          item.section?.active === 1
+      );
 
-        if (!matchedHeader) {
-          console.warn("No matching header found");
-          setHeaderData({
-            hsec_title: "Scholarship",
-            hsec_amount: 4,
-            hsec_subtitle: "",
-            hsec_btntitle: "",
-            hsec_routepage: "",
-          });
-          return;
-        }
-
+      if (matchedHeader) {
         setHeaderData({
           hsec_title: matchedHeader.hsec_title || "Scholarship",
           hsec_amount: matchedHeader.hsec_amount,
           hsec_subtitle: matchedHeader.hsec_subtitle || "",
           hsec_btntitle: matchedHeader.hsec_btntitle || "",
-          hsec_routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
-        });
-      } catch (error) {
-        console.error('Failed to fetch header data:', error.message, error);
-        setHeaderData({
-          hsec_title: '',
-          hsec_amount: typeof hsec_amount === 'number' ? hsec_amount : 4,
-          hsec_btntitle: 'View All',
+          hsec_routepage: matchedHeader.hsec_routepage || "",
         });
       }
-    };
-
-    fetchHeaderData();
-  }, []);
-
-  const resolvePageAlias = async (routePage) => {
-    try {
-      const res = await axiosInstance.get(API_ENDPOINTS.getPage);
-      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
-
-      const matched = pages.find((page) => page.p_title === routePage);
-      return matched?.p_alias || null;
-    } catch (error) {
-      console.error("Failed to fetch page alias:", error);
-      return null;
     }
-  }
+  }, [globalData, sectionData]);
 
   // Fetch scholarship data
   useEffect(() => {
-    const fetchScholarships = async () => {
-      try {
-        setLoading(true);
-        const scRes = await axiosInstance.get(API_ENDPOINTS.getScholarship);
-        const formattedScholarships = (scRes.data?.data || [])
-          .filter((item) => {
-            if (!item) return false;
-            return (
-              item.lang === currentLang &&
-              item.display === 1 &&
-              item.active === 1
-            );
-          })
-          .sort((a, b) => (a.sc_orders ?? 0) - (b.sc_orders ?? 0))
-          .map((item) => {
-            let formattedDeadline = 'TBD';
-            try {
-              if (item.sc_deadline) {
-                formattedDeadline = new Date(item.sc_deadline).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                });
-              }
-            } catch (error) {
-              console.warn(`Invalid deadline for scholarship ${item.sc_id}:`, error);
+    if (globalData?.scholarship) {
+      const formattedScholarships = (globalData.scholarship || [])
+        .filter((item) => {
+          if (!item) return false;
+          return (
+            item.lang === currentLang &&
+            item.display === 1 &&
+            item.active === 1
+          );
+        })
+        .sort((a, b) => (a.sc_orders ?? 0) - (b.sc_orders ?? 0))
+        .map((item) => {
+          let formattedDeadline = 'TBD';
+          try {
+            if (item.sc_deadline) {
+              formattedDeadline = new Date(item.sc_deadline).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              });
             }
+          } catch (error) {
+            console.warn(`Invalid deadline for scholarship ${item.sc_id}:`, error);
+          }
 
-            return {
-              id: item.sc_id ?? null,
-              ref_id: item.ref_id ,
-              tag: item.sc_sponsor ?? '',
-              title: item.sc_title ?? '',
-              description: item.sc_shortdesc ?? '',
-              deadline: formattedDeadline,
-              imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
-            };
-          })
-          .slice(0, headerData.hsec_amount);
+          return {
+            id: item.sc_id ?? null,
+            ref_id: item.ref_id ,
+            tag: item.sc_sponsor ?? '',
+            title: item.sc_title ?? '',
+            description: item.sc_shortdesc ?? '',
+            deadline: formattedDeadline,
+            imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
+          };
+        });
 
-        setScholarships(formattedScholarships);
-      } catch (err) {
-        console.error('Error fetching scholarships:', err);
-        setError('Failed to load scholarships');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchScholarships();
-  }, [currentLang, headerData.hsec_amount]);
+      setScholarships(formattedScholarships);
+    }
+  }, [currentLang, globalData, headerData.hsec_amount]);
 
   // Auto-scroll effect
   useEffect(() => {
@@ -175,21 +126,15 @@ const OverFlowScholarshipSection = ({sectionData}) => {
     };
   }, [scholarships]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <FaSpinner className="animate-spin text-4xl text-red-800" />
-      </div>
-    );
-  }
+  if (isLoading) return null;
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
+  const getDetailPath = (alias, refId) => {
+    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+    if (!alias) return '#';
+    const path = alias.startsWith('/') ? alias : `/${alias}`;
+    const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+    return `${fullPath}/${refId}`;
+  };
 
   return (
     <div className="py-8 md:py-12 lg:py-16">
@@ -274,8 +219,7 @@ const OverFlowScholarshipSection = ({sectionData}) => {
                     <button
                       className={`bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl text-sm w-full sm:w-auto text-center transition-colors duration-200 ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}
                       onClick={() => {
-                        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                        navigate(`${prefix}/scholarship/${scholarship.ref_id}`);
+                        navigate(getDetailPath(scholarshipDetailPage?.p_alias, scholarship.ref_id));
                       }}
                     >
                       {currentLang === 1 ? "View Detail" : "មើលលម្អិត"}

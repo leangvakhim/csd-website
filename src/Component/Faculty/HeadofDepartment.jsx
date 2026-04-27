@@ -2,41 +2,37 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { RiDoubleQuotesR } from 'react-icons/ri';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
-const HeadofDepartment = () => {
+const HeadofDepartment = ({section, facultyDetailPage}) => {
+    const { globalData, isLoading } = useData();
     const [head, setHead] = useState(null);
     const [socials, setSocials] = useState([]);
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        const fetchHead = async () => {
-            try {
-                // Fetch faculty data
-                const res = await axiosInstance.get(API_ENDPOINTS.getFaculty);
-                const allFaculty = res.data?.data || [];
+        if (globalData?.faculty) {
+            const allFaculty = globalData.faculty || [];
+            const filteredHead = allFaculty
+                .filter(item => item.display === 1 && item.active === 1 && item.lang === currentLang)
+                .sort((a, b) => a.f_order - b.f_order);
 
-                const filteredHead = allFaculty
-                    .filter(item => item.display === 1 && item.active === 1 && item.lang === currentLang)
-                    .sort((a, b) => a.f_order - b.f_order);
+            if (filteredHead.length) {
+                const headData = filteredHead[0];
+                setHead({
+                    id: headData.f_id,
+                    ref_id: headData.ref_id,
+                    name: headData.f_name,
+                    position: headData.f_position,
+                    image: headData.img?.img
+                        ? `${API}/storage/uploads/${headData.img.img}`
+                        : "/placeholder-icon.png",
+                });
 
-                if (filteredHead.length) {
-                    const headData = filteredHead[0];
-                    setHead({
-                        id: headData.f_id,
-                        ref_id: headData.ref_id,
-                        name: headData.f_name,
-                        position: headData.f_position,
-                        image: headData.img?.img
-                            ? `${API}/storage/uploads/${headData.img.img}`
-                            : "/placeholder-icon.png",
-                    });
-
-                    // Fetch social media data
-                    const socialRes = await axiosInstance.get(API_ENDPOINTS.getSocial);
-                    const allSocials = socialRes.data?.data || [];
+                if (globalData?.socials) {
+                    const allSocials = globalData.socials || [];
                     const filteredSocials = allSocials.filter(
                         social =>
                             social.social_faculty === headData.f_id &&
@@ -44,16 +40,12 @@ const HeadofDepartment = () => {
                             social.active === 1
                     );
                     setSocials(filteredSocials);
-                } else {
-                    console.warn("No matching Khmer records found for currentLang =", currentLang);
                 }
-            } catch (error) {
-                console.error("Error fetching head of department or socials:", error);
             }
-        };
+        }
+    }, [currentLang, globalData?.faculty, globalData?.socials]);
 
-        fetchHead();
-    }, [currentLang]);
+    if (isLoading) return null;
 
     return (
         <div className='my-8 sm:my-12 md:my-16'>
@@ -146,19 +138,29 @@ const HeadofDepartment = () => {
                                 {/* Profile Info */}
                                 <div className='w-full space-y-4 sm:space-y-6 max-w-xl relative' id="profile-info">
                                     <div className='flex justify-between items-center'>
-                                        <h1 className={`text-3xl font-semibold ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`} id="professor-name">{head.name}</h1>
+                                        <h1 className={`!text-3xl font-semibold ${currentLang === 2 ? "font-khmer" : "font-sans"}`} id="professor-name">{head.name}</h1>
                                         <div className='text-right'>
                                             <RiDoubleQuotesR className='text-7xl text-red-900' />
                                         </div>
                                     </div>
                                     <p className={`!text-xl ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{head.position}</p>
-                                    <Link
-                                        to={`${prefix}/faculty/${head.ref_id}`}
-                                    >
-                                        <button className={`bg-red-900 px-4 sm:px-6 py-2 text-gray-50 rounded-2xl text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`} id="view-button">
-                                            {currentLang === 1 ? "View" : "មើលបន្ថែម"}
-                                        </button>
-                                    </Link>
+                                    {(() => {
+                                        const getDetailPath = (alias, refId) => {
+                                            if (!alias) return '#';
+                                            const path = alias.startsWith('/') ? alias : `/${alias}`;
+                                            const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+                                            return `${fullPath}/${refId}`;
+                                        };
+                                        return (
+                                            <Link
+                                                to={getDetailPath(facultyDetailPage?.p_alias, head.ref_id)}
+                                            >
+                                                <button className={`bg-red-900 px-4 sm:px-6 py-2 text-gray-50 rounded-2xl text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`} id="view-button">
+                                                    {currentLang === 1 ? "View" : "មើលបន្ថែម"}
+                                                </button>
+                                            </Link>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </div>

@@ -1,52 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 import { MdComputer } from 'react-icons/md';
 import { useLocation } from 'react-router-dom';
 
 const ResearchBanner = ({ researchId }) => {
+  const { globalData, isLoading: dataLoading } = useData();
   const [bannerSection, setBannerSection] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const location = useLocation();
   const currentLang = location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
-    setIsLoading(true);
-    axiosInstance
-      .get(`${API_ENDPOINTS.getResearch}/${researchId}`)
-      .then((res) => {
-        const data = res.data?.data;
-        if (data && data.rsd_title && data.image?.img) {
-          setBannerSection({
-            title: data.rsd_title,
-            description: data.rsd_subtitle || '',
-            image: `${API}/storage/uploads/${data.image.img}`,
-            lead: data.rsd_lead || (currentLang === 2 ? 'ការស្រាវជ្រាវ' : 'Research'),
-          });
-        } else {
-          console.log('ResearchBanner: Invalid or incomplete research data');
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error fetching research details:', err);
-        setIsLoading(false);
-      });
-  }, [researchId, currentLang]);
+    if (researchId && globalData?.research) {
+      const data = globalData.research.find(item => item.rsd_id == researchId || item.ref_id == researchId);
+      if (data && data.rsd_title && data.image?.img) {
+        setBannerSection({
+          title: data.rsd_title,
+          description: data.rsd_subtitle || '',
+          image: `${API}/storage/uploads/${data.image.img}`,
+          lead: data.rsd_lead || (currentLang === 2 ? 'ការស្រាវជ្រាវ' : 'Research'),
+        });
+      }
+    }
+  }, [researchId, currentLang, globalData?.research]);
 
-  if (isLoading) {
-    return (
-      <section
-        lang={currentLang === 2 ? 'km' : 'en'}
-        className={`text-center py-8 text-gray-600 ${
-          currentLang === 2 ? 'lang-khmer font-khmer' : 'lang-english font-sans'
-        }`}
-      >
-        {currentLang === 2 ? 'កំពុងផ្ទុក...' : 'Loading research banner...'}
-      </section>
-    );
+  if (dataLoading || !bannerSection) {
+    return null;
   }
+
 
   return (
     <section

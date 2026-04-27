@@ -1,70 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 import { motion } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import NewsBanner from './NewsBanner';
 import SocialSection from '../Social/SocialSection';
 import RelatedNews from './RelatedNews';
 
-const NewDetails = ({ sectionId, menuLang, newId }) => {
+const NewDetails = ({ sectionId, menuLang, newId, newDetailPage }) => {
     const [news, setNews] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
+    const { globalData, isLoading: isDataLoading } = useData();
+
     useEffect(() => {
-        const fetchNews = async () => {
-            setLoading(true);
-            try {
-                const response = await axiosInstance.get(
-                    `${API_ENDPOINTS.getNews}`
-                );
-                const data = response.data?.data || [];
+        if (!globalData?.news || isDataLoading) return;
 
-                if (!data.length) {
-                    setError('No news data available for this section and language.');
-                    setLoading(false);
-                    return;
-                }
+        const data = globalData.news;
+        const selectedItem = data.find(item =>
+            item.display === 1 &&
+            item.lang === currentLang &&
+            item.ref_id === Number(newId)
+        );
 
-                const selectedItem = data.find(item =>
-                    item.display === 1 &&
-                    item.lang === currentLang &&
-                    item.ref_id === Number(newId)
-                );
-
-                if (selectedItem) {
-                    setNews({
-                        n_id: selectedItem.n_id,
-                        date: selectedItem.n_date && !isNaN(new Date(selectedItem.n_date).getTime())
-                            ? new Date(selectedItem.n_date).toLocaleDateString('en-GB', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                  year: 'numeric',
-                              })
-                            : 'TBD',
-                        title: selectedItem.n_title || 'Untitled Event',
-                        shortTitle: selectedItem.n_shorttitle || '',
-                        detail: selectedItem.n_detail || 'No details available.',
-                        image: selectedItem.img?.img
-                            ? `${API}/storage/uploads/${selectedItem.img?.img}`
-                            : '/placeholder-image.jpg',
-                    });
-                } else {
-                    setError('No relevant news found.');
-                }
-                setLoading(false);
-            } catch (err) {
-                const errorMessage = err.response?.status === 404
-                    ? 'News not found.'
-                    : `Failed to load news data: ${err.message}`;
-                console.error('Failed to fetch news data:', err);
-                setError(errorMessage);
-                setLoading(false);
-            }
-        };
-        fetchNews();
-    }, [sectionId, newId, currentLang]);
+        if (selectedItem) {
+            setNews({
+                n_id: selectedItem.n_id,
+                date: selectedItem.n_date && !isNaN(new Date(selectedItem.n_date).getTime())
+                    ? new Date(selectedItem.n_date).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                      })
+                    : 'TBD',
+                title: selectedItem.n_title || 'Untitled News',
+                shortTitle: selectedItem.n_shorttitle || '',
+                detail: selectedItem.n_detail || 'No details available.',
+                image: selectedItem.img?.img
+                    ? `${API}/storage/uploads/${selectedItem.img?.img}`
+                    : '/placeholder-image.jpg',
+            });
+            setError(null);
+        } else {
+            setError('No relevant news found.');
+        }
+        setLoading(false);
+    }, [newId, currentLang, globalData, isDataLoading]);
 
     return (
         <div className="min-h-screen">
@@ -103,7 +86,7 @@ const NewDetails = ({ sectionId, menuLang, newId }) => {
                                 __html: DOMPurify.sanitize(news.detail),
                             }}
                         />
-                        <RelatedNews newId={newId}/>
+                        <RelatedNews newId={newId} newDetailPage={newDetailPage}/>
                          </div>
                     </div>
                 </div>

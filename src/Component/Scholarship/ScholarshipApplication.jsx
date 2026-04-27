@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
+import { API } from "../../Service/APIconfig";
 
 // Animation variants
 const sectionVariants = {
@@ -21,97 +22,54 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-// Reusable Components
-const LoadingSpinner = () => (
-  <div className="text-center py-8 text-gray-600">
-    <div className="animate-pulse flex space-x-4">
-      <div className="flex-1 space-y-4 py-1">
-        <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
-      </div>
-    </div>
-  </div>
-);
-
-const ErrorMessage = ({ message }) => (
-  <div className="text-center py-8 text-red-600" role="alert">
-    Error: {message}
-  </div>
-);
-
 const ScholarshipApplication = ({ scholarshipId }) => {
+  const { globalData, isLoading } = useData();
   const [applicationData, setApplicationData] = useState({
     bannerImage: "",
     details: [],
   });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const currentLang = window.location.pathname.startsWith("/km") ? 2 : 1;
 
-  const fetchApplicationDetails = useCallback(async () => {
-    if (!scholarshipId) {
-      setError("Missing scholarship ID");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await axiosInstance.get(`${API_ENDPOINTS.getScholarship}`);
-      const allScholarships = response.data?.data || [];
+  useEffect(() => {
+    if (globalData?.scholarship && scholarshipId) {
+      const allScholarships = globalData.scholarship || [];
 
       const data = allScholarships.find(
         item => item.ref_id === Number(scholarshipId) && item.lang === currentLang
       );
 
-      if (!data) {
-        setError("No scholarship data found.");
-        setIsLoading(false);
-        return;
+      if (data) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.sc_detail || "<div></div>", "text/html");
+        const detailDivs = doc.querySelectorAll('div[style*="display: flex"]');
+
+        const details = Array.from(detailDivs).map((div, index) => {
+          const svgElement = div.querySelector("svg");
+          const linkElement = div.querySelector("a");
+
+          return {
+            id: index,
+            title: div.querySelector("h3")?.textContent?.trim() || ``,
+            description: div.querySelector("p")?.textContent?.trim() || "",
+            svgIcon: svgElement ? svgElement.outerHTML : "",
+            link: {
+              url: linkElement?.href || "",
+              text: linkElement?.textContent?.trim() || "",
+            },
+          };
+        });
+
+        setApplicationData({
+          bannerImage: data.letter?.img
+            ? `${API}/storage/uploads/${data.letter.img}`
+            : "/placeholder-image.jpg",
+          details,
+        });
       }
-
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(data.sc_detail || "<div></div>", "text/html");
-      const detailDivs = doc.querySelectorAll('div[style*="display: flex"]');
-
-      const details = Array.from(detailDivs).map((div, index) => {
-        const svgElement = div.querySelector("svg");
-        const linkElement = div.querySelector("a");
-
-        return {
-          id: index,
-          title: div.querySelector("h3")?.textContent?.trim() || ``,
-          description: div.querySelector("p")?.textContent?.trim() || "",
-          svgIcon: svgElement ? svgElement.outerHTML : "",
-          link: {
-            url: linkElement?.href || "",
-            text: linkElement?.textContent?.trim() || "",
-          },
-        };
-      });
-
-      setApplicationData({
-        bannerImage: data.letter?.img
-          ? `${API}/storage/uploads/${data.letter.img}`
-          : "/placeholder-image.jpg",
-        details,
-      });
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load application details");
-      console.error("Error fetching application details:", err);
-    } finally {
-      setIsLoading(false);
     }
-  }, [scholarshipId, currentLang]);
+  }, [scholarshipId, currentLang, globalData]);
 
-  useEffect(() => {
-    fetchApplicationDetails();
-  }, [fetchApplicationDetails, currentLang]);
-
-  if (isLoading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error} />;
+  if (isLoading) return null;
 
   return (
     <div className="my-12">

@@ -3,67 +3,56 @@ import { motion } from 'framer-motion';
 import { MdVerified } from 'react-icons/md';
 import { BsPeople } from "react-icons/bs";
 import { PiGraduationCapDuotone } from "react-icons/pi";
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+import { useData } from "../../Context/DataContext";
+
 
 const CSDSection = ({key, section, menuLang}) => {
+  const { globalData } = useData();
   const [keyMetrics, setKeyMetrics] = useState({title: '', count: '', description: '' });
   const [programData, setProgramData] = useState(null);
   const [objectives, setObjectives] = useState([]);
 
   useEffect(() => {
-
-    const fetchKeyMetrics = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getAddOnCSD);
-        const dataList = Array.isArray(res.data?.data) ? res.data.data : [];
-        const item = dataList.find(item => item.ras?.ras_sec === section?.sec_id);
-        if (item) {
+    if (globalData?.addOnCSD && globalData?.specializations && section?.sec_id) {
+        // Key Metrics
+        const itemMetrics = globalData.addOnCSD.find(item => item.ras?.ras_sec === section?.sec_id);
+        if (itemMetrics) {
           setKeyMetrics({
-            title: item.rason_title,
-            count: item.rason_amount,
-            description: item.rason_subtitle
+            title: itemMetrics.rason_title,
+            count: itemMetrics.rason_amount,
+            description: itemMetrics.rason_subtitle
           });
         }
-      } catch (error) {
-        console.error("Failed to fetch key metrics:", error);
-      }
-    };
 
-    const fetchProgramData = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getSpecialization);
-        const dataList = Array.isArray(res.data?.data) ? res.data.data : [];
-        const item = dataList.find(item => item.section?.sec_id === section?.sec_id && item.text?.text_sec === section?.sec_id);
-        if (item) {
+        // Program Data
+        const itemProgram = globalData.specializations.find(item => item.section?.sec_id === section?.sec_id && item.text?.text_sec === section?.sec_id);
+        if (itemProgram) {
           setProgramData({
-            programTitle: item.text.title,
-            description: item.text.desc,
+            programTitle: itemProgram.text.title,
+            description: itemProgram.text.desc,
             images: [
-              { src: `${API}/storage/uploads/${item.image1?.img}`, alt: "Image 1" },
-              { src: `${API}/storage/uploads/${item.image2?.img}`, alt: "Image 2" }
+              { src: `${API}/storage/uploads/${itemProgram.image1?.img}`, alt: "Image 1" },
+              { src: `${API}/storage/uploads/${itemProgram.image2?.img}`, alt: "Image 2" }
             ]
           });
 
-          const resSub = await axiosInstance.get(API_ENDPOINTS.getSubserviceAF);
-          const subItems = Array.isArray(resSub.data?.data) ? resSub.data.data : [];
-          const filteredObjectives = subItems
-            .filter(obj => obj.ras?.ras_sec === section?.sec_id && obj.ss_ras === item.ras_id && obj.display === 1)
-            .sort((a, b) => a.ss_order - b.ss_order)
-            .map(obj => ({
-              title: obj.ss_title,
-              description: obj.ss_subtitle,
-              icon: () => <img src={`${API}/storage/uploads/${obj.image?.img}`} />
-            }));
-          setObjectives(filteredObjectives);
+          // Objectives (Subservices)
+          if (globalData?.subServices) {
+              const filteredObjectives = globalData.subServices
+                .filter(obj => obj.ras?.ras_sec === section?.sec_id && obj.ss_ras === itemProgram.ras_id && obj.display === 1)
+                .sort((a, b) => a.ss_order - b.ss_order)
+                .map(obj => ({
+                  title: obj.ss_title,
+                  description: obj.ss_subtitle,
+                  icon: () => <img src={`${API}/storage/uploads/${obj.image?.img}`} />
+                }));
+              setObjectives(filteredObjectives);
+          }
         }
-      } catch (error) {
-        console.error("Failed to fetch section program data:", error);
-      }
-    };
+    }
+  }, [section?.sec_id, globalData]);
 
-    fetchKeyMetrics();
-    fetchProgramData();
-  }, []);
 
   const { programTitle, description, images } = programData || {};
 

@@ -1,57 +1,41 @@
-import React, { useEffect, useState } from "react";
-import { MdComputer, MdExplore } from "react-icons/md";
-import { AiOutlineRobot } from "react-icons/ai";
-import { useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
+import { API } from "../../Service/APIconfig";
 
 const ResearchInnovations = ({section, menuLang}) => {
+  const { globalData, isLoading } = useData();
   const navigate = useNavigate();
   const [researchData, setResearchData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const location = useLocation();
   const currentLang = location.pathname.includes('/km') ? 2 : 1;
 
   useEffect(() => {
-    const fetchResearch = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getResearch);
-        const data = res.data?.data || [];
+    if (!globalData?.research) return;
 
-        const filtered = data
-          .filter((item) => item.display === 1 &&
-                            item.active === 1 &&
-                            item.lang === currentLang
-                          )
-          .map((item) => ({
-            id: item.rsd_id,
-            title: item.rsd_title,
-            subtitle: item.rsd_subtitle,
-            description: item.rsd_description,
-            image: item.image?.img
-              ? `${API}/storage/uploads/${item.image.img}`
-              : "/placeholder-image.jpg",
-            exploreText: `${currentLang === 1 ? "Explore" : "មើលបន្ថែម"}`,
-            buttons: [
-              { icon: <MdComputer className="mr-1" />, text: "Computational Advancements" },
-              { icon: <AiOutlineRobot className="mr-1" />, text: "AI & Systems Optimization" },
-            ],
-          }));
+    const filtered = globalData.research
+      .filter((item) => item.display === 1 &&
+                        item.active === 1 &&
+                        item.lang === currentLang
+                      )
+      .map((item) => ({
+        id: item.rsd_id,
+        title: item.rsd_title,
+        subtitle: item.rsd_subtitle,
+        description: item.rsd_description,
+        image: item.image?.img
+          ? `${API}/storage/uploads/${item.image.img}`
+          : "/placeholder-image.jpg",
+        exploreText: `${currentLang === 1 ? "Explore" : "មើលបន្ថែម"}`,
+        buttons: [
+          { icon: <MdComputer className="mr-1" />, text: "Computational Advancements" },
+          { icon: <AiOutlineRobot className="mr-1" />, text: "AI & Systems Optimization" },
+        ],
+      }));
 
-        setResearchData(filtered);
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to load research data.");
-        setLoading(false);
-      }
-    };
+    setResearchData(filtered);
+  }, [currentLang, globalData?.research]);
 
-    fetchResearch();
-  }, []);
+  if (isLoading || !researchData.length) return null;
 
-  if (loading) return <div className="text-center py-8 text-gray-500">Loading...</div>;
-  if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
     <div className="my-6 sm:my-8 lg:my-12">

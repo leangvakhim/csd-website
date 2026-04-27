@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaFilter, FaCalendarAlt, FaTimes, FaSpinner } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaCalendarAlt, FaTimes } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -12,19 +13,12 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-const FourColScholarshipSection = ({sectionData}) => {
+const FourColScholarshipSection = ({sectionData, scholarshipDetailPage}) => {
+  const { globalData, isLoading } = useData();
   const navigate = useNavigate();
   const [scholarships, setScholarships] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [headerLoading, setHeaderLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [headerError, setHeaderError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
-  const [headerData, setHeaderData] = useState({
-    hsec_title: "Available Scholarships", // Default title
-    hsec_amount: 4 // Default number of scholarships
-  });
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -32,84 +26,46 @@ const FourColScholarshipSection = ({sectionData}) => {
   const DEFAULT_IMAGE = '/placeholder-image.jpg';
 
   useEffect(() => {
-    const fetchHeaderData = async () => {
-      try {
-        setHeaderLoading(true);
-        // Assuming API_ENDPOINTS.getHeaderSection is the endpoint for header data
-        const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-        const data = Array.isArray(response.data) ? response.data : response.data.data;
-        const filtered = data.find(
-          item =>
-            item.hsec_sec === sectionData?.sec_id &&
-            item.section?.sec_type === "Scholarship" &&
-            item.section?.display === 1 &&
-            item.section?.active === 1
-        );
-        if (filtered) {
-          setHeaderData({
-            hsec_title: sectionData.hsec_title,
-            hsec_amount: sectionData.hsec_amount || 4
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch header data:', error);
-        setHeaderError('Failed to load section header. Using default values.');
-      } finally {
-        setHeaderLoading(false);
-      }
-    };
-
-    const fetchScholarships = async () => {
-      try {
-        setLoading(true);
-        const scRes = await axiosInstance.get(API_ENDPOINTS.getScholarship);
-        const formattedScholarships = (scRes.data?.data || [])
-          .filter((item) => {
-            if (!item) return false;
-            return (
-              item.lang === currentLang &&
-              item.display === 1 &&
-              item.active === 1
-            );
-          })
-          .sort((a, b) => (a.sc_orders ?? 0) - (b.sc_orders ?? 0))
-          .map((item) => {
-            let formattedDeadline = 'TBD';
-            try {
-              if (item.sc_deadline) {
-                formattedDeadline = new Date(item.sc_deadline).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                });
-              }
-            } catch (error) {
-              console.warn(`Invalid deadline for scholarship ${item.sc_id}:`, error);
+    if (globalData?.scholarship) {
+      const formattedScholarships = (globalData.scholarship || [])
+        .filter((item) => {
+          if (!item) return false;
+          return (
+            item.lang === currentLang &&
+            item.display === 1 &&
+            item.active === 1
+          );
+        })
+        .sort((a, b) => (a.sc_orders ?? 0) - (b.sc_orders ?? 0))
+        .map((item) => {
+          let formattedDeadline = 'TBD';
+          try {
+            if (item.sc_deadline) {
+              formattedDeadline = new Date(item.sc_deadline).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              });
             }
+          } catch (error) {
+            console.warn(`Invalid deadline for scholarship ${item.sc_id}:`, error);
+          }
 
-            return {
-              id: item.sc_id ?? null,
-              ref_id: item.ref_id,
-              tag: item.sc_sponsor ?? '',
-              title: item.sc_title ?? '',
-              description: item.sc_shortdesc ?? '',
-              deadline: formattedDeadline,
-              imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
-            };
-          })
-          .slice(0, headerData.hsec_amount);// Use the amount from header data
+          return {
+            id: item.sc_id ?? null,
+            ref_id: item.ref_id,
+            tag: item.sc_sponsor ?? '',
+            title: item.sc_title ?? '',
+            description: item.sc_shortdesc ?? '',
+            deadline: formattedDeadline,
+            imageUrl: item.image?.img ? `${BASE_IMAGE_URL}/${item.image.img}` : DEFAULT_IMAGE,
+          };
+        })
+        .slice(0, sectionData.hsec_amount || 4);
 
-        setScholarships(formattedScholarships);
-      } catch (error) {
-        console.error('Failed to fetch scholarships:', error);
-        setError('Failed to load scholarships. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHeaderData().then(fetchScholarships);
-  }, [headerData.hsec_amount]); // Re-fetch when hsec_amount changes
+      setScholarships(formattedScholarships);
+    }
+  }, [currentLang, globalData, sectionData]);
 
   const tags = [...new Set(scholarships.map(item => item.tag))];
 
@@ -124,28 +80,15 @@ const FourColScholarshipSection = ({sectionData}) => {
   const handleClearSearch = () => setSearchTerm('');
   const handleClearFilter = () => setSelectedTag('');
 
-  if (headerLoading || loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <FaSpinner className="animate-spin text-4xl text-red-800" />
-      </div>
-    );
-  }
+  if (isLoading) return null;
 
-  if (headerError || error) {
-    return (
-      <div className="text-center py-12 text-red-800">
-        {headerError && <p>{headerError}</p>}
-        {error && <p>{error}</p>}
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 bg-red-800 text-white px-4 py-2 rounded-xl hover:bg-red-900"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  const getDetailPath = (alias, refId) => {
+    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+    if (!alias) return '#';
+    const path = alias.startsWith('/') ? alias : `/${alias}`;
+    const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+    return `${fullPath}/${refId}`;
+  };
 
   return (
     <div className="my-12">
@@ -232,8 +175,7 @@ const FourColScholarshipSection = ({sectionData}) => {
                   <button
                     className="bg-red-800 hover:bg-red-900 text-white py-2 px-4 rounded-xl cursor-pointer"
                     onClick={() => {
-                      const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                      navigate(`${prefix}/scholarship/${scholarship.ref_id}`);
+                      navigate(getDetailPath(scholarshipDetailPage?.p_alias, scholarship.ref_id));
                     }}
                     aria-label={`View details for ${scholarship.title}`}
                   >

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
 
 // Animation variants for the section
 const sectionVariants = {
@@ -22,50 +23,35 @@ const cardVariants = {
 };
 
 const Introduction = ({ section, menuLang}) => {
+  const { globalData, isLoading } = useData();
   const [introduction, setIntroduction] = useState(null);
 
   // Fetch introduction data based on section.sec_id
   useEffect(() => {
-    if (section?.sec_id) {
-      axiosInstance
-        .get(`${API_ENDPOINTS.getIntroduction}`)
-        .then((res) => {
-          const filteredData = Array.isArray(res.data?.data)
-            ? res.data.data.find(
-                (item) =>
-                  item.in_sec === section.sec_id &&
-                  item.section.sec_type === "Introduction" &&
-                  item.section?.display === 1 &&
-                  item.section?.active === 1
-              )
-            : null;
+    if (globalData?.intros) {
+        const filteredData = globalData.intros.find(
+            (item) =>
+              item.in_sec === section.sec_id &&
+              item.section?.sec_type === "Introduction" &&
+              item.section?.display === 1 &&
+              item.section?.active === 1
+        );
 
-          const data = filteredData || null;
-          if (data) {
-            setIntroduction({
-              title: data.in_title,
-              detail: data.in_detail,
-              image: data.image?.img ? `${API}/storage/uploads/${data.image.img}` : null,
-              established: data.inadd_title,
-              subtitle: data.in_addsubtitle,
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching introduction data:", error);
-        });
-    } else {
-      console.log("Introduction: No section.sec_id provided, skipping API call");
+        if (filteredData) {
+          setIntroduction({
+            title: filteredData.in_title,
+            detail: filteredData.in_detail || "",
+            image: filteredData.image?.img ? `${API}/storage/uploads/${filteredData.image.img}` : null,
+            established: filteredData.inadd_title,
+            subtitle: filteredData.in_addsubtitle,
+          });
+        }
     }
-  }, [section]);
+  }, [section.sec_id, globalData]);
 
-  if (!introduction) {
-    return (
-      <div className="text-center py-8 text-gray-600">
-        No introduction data available for this section.
-      </div>
-    );
-  }
+
+  if (isLoading || !introduction) return null;
+
 
   return (
     <div className="my-8 sm:my-12 lg:my-16">

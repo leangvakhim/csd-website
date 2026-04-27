@@ -1,27 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 import { motion } from 'framer-motion';
 
 const ResearchProject = ({rsdtId}) => {
+    const { globalData } = useData();
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     const [projectRequirement, setProjectRequirement] = useState({ rsdp_title: '', rsdp_detail: '' });
 
     useEffect(() => {
-        if (rsdtId) {
-            axiosInstance.get(API_ENDPOINTS.getRsdProject)
-                .then((res) => {
-                    const allProjects = res.data?.data;
-                    const match = allProjects.find(item => item.rsdp_rsdtile === rsdtId);
-                    if (match) {
-                        setProjectRequirement({
-                            rsdp_title: match.rsdp_title,
-                            rsdp_detail: match.rsdp_detail
-                        });
-                    }
-                })
-                .catch(err => console.error("Error fetching project requirements:", err));
+        if (rsdtId && globalData?.researchProjects) {
+            const allProjects = globalData.researchProjects;
+            const match = allProjects.find(item => item.rsdp_rsdtile === rsdtId);
+            if (match) {
+                setProjectRequirement({
+                    rsdp_title: match.rsdp_title,
+                    rsdp_detail: match.rsdp_detail
+                });
+            }
         }
-    }, [rsdtId]);
+    }, [rsdtId, globalData?.researchProjects]);
+
+    if (!projectRequirement.rsdp_title) {
+        return null;
+    }
+
 
     return (
         <section>

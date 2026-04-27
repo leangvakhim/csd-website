@@ -1,11 +1,14 @@
 import React from 'react'
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaCheck } from "react-icons/fa";
+import { useData } from "../../Context/DataContext";
 
 
 const FutureSection = ({key, section, menuLang}) => {
+  const { globalData } = useData();
   const [selectedBenefitIndex, setSelectedBenefitIndex] = useState(1);
   const [currentLang, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
 
@@ -13,60 +16,48 @@ const FutureSection = ({key, section, menuLang}) => {
   const [benefitsData, setBenefitsData] = useState([]);
 
   useEffect(() => {
-    const fetchFutureData = async () => {
-      try {
-        const response = await axiosInstance.get(API_ENDPOINTS.getFuture);
-        const data = Array.isArray(response.data?.data) ? response.data.data : [];
+    if (globalData?.futures) {
+      const data = globalData.futures;
+      const filtered = data.find(
+        (item) =>
+          item.section?.sec_type === "Future" &&
+          item.uf_sec === section?.sec_id &&
+          item.section.display === 1 &&
+          item.section.active === 1
+      );
 
-        const filtered = data.find(
+      if (filtered) {
+        setFutureData({
+          title: filtered.uf_title,
+          subtitle: filtered.uf_subtitle,
+          img: filtered.image?.img,
+        });
+      }
+    }
+
+    if (globalData?.subfutures) {
+      const data = globalData.subfutures;
+      const filtered = data
+        .filter(
           (item) =>
-            item.section?.sec_type === "Future" &&
-            item.uf_sec === section?.sec_id &&
-            item.section.display === 1 &&
-            item.section.active === 1
-        );
+            item.uf?.uf_sec === section?.sec_id &&
+            item.display === 1 &&
+            item.active === 1
+        )
+        .sort((a, b) => a.ufa_order - b.ufa_order)
+        .map((item) => ({
+          title: item.ufa_title,
+          description: item.ufa_subtitle,
+        }));
 
-        if (filtered) {
-          setFutureData({
-            title: filtered.uf_title,
-            subtitle: filtered.uf_subtitle,
-            img: filtered.image?.img,
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch UF data:", error);
-      }
-    };
+      setBenefitsData(filtered);
+    }
+  }, [section?.sec_id, globalData?.futures, globalData?.subfutures]);
 
-    const fetchAddonData = async () => {
-      try {
-        const response = await axiosInstance.get(API_ENDPOINTS.getSubFuture);
-        const data = Array.isArray(response.data?.data) ? response.data.data : [];
 
-        const filtered = data
-          .filter(
-            (item) =>
-              item.uf?.uf_sec === section?.sec_id &&
-              item.display === 1 &&
-              item.active === 1
-          )
-          .sort((a, b) => a.ufa_order - b.ufa_order)
-          .map((item) => ({
-            title: item.ufa_title,
-            description: item.ufa_subtitle,
-          }));
 
-        setBenefitsData(filtered);
-      } catch (error) {
-        console.error("Failed to fetch UF Addon data:", error);
-      }
-    };
+  if (!futureData) return null;
 
-    fetchFutureData();
-    fetchAddonData();
-  }, []);
-
-  // Animation variants
   const containerVariants = {
       hidden: { opacity: 0, y: 50 },
       visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },

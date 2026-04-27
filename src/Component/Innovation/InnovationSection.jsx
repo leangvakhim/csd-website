@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaCheck } from "react-icons/fa";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
+import { API } from "../../Service/APIconfig";
 
 const sectionVariants = {
   hidden: { opacity: 0 },
@@ -21,59 +21,49 @@ const cardVariants = {
 };
 
 const InnovationSection = ({ section, menuLang }) => {
+  const { globalData, isLoading } = useData();
   const [innovation, setInnovation] = useState(null);
   const [subservices, setSubservices] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (section?.sec_id) {
-        try {
-          const res = await axiosInstance.get(
-            `${API_ENDPOINTS.getSpecialization}?section_id=${section.sec_id}`
+    if (globalData?.specializations) {
+        const data = globalData.specializations;
+        const filteredData = data.filter(
+          (item) =>
+            item.section?.sec_page === section.sec_page &&
+            item.section.display === 1 &&
+            item.section.active === 1
+        );
+
+        if (filteredData.length > 0) {
+          const item = filteredData[0];
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(item.text.desc, "text/html");
+
+          const listItems = Array.from(doc.querySelectorAll("span")).map(
+            (span) => span.textContent
           );
-          const data = res.data?.data || [];
 
-          const filteredData = data.filter(
-            (item) =>
-              item.section?.sec_page === section.sec_page &&
-              item.section.display === 1 &&
-              item.section.active === 1
-          );
+          const paragraphs = Array.from(doc.querySelectorAll("p"))
+            .map((p) => p.textContent.trim())
+            .filter((p) => p);
 
-          if (filteredData.length > 0) {
-            const item = filteredData[0];
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(item.text.desc, "text/html");
+          setInnovation({
+            title: item.text.title,
+            description: item.text.desc,
+            paragraphs,
+            listItems,
+            imageLeft: item.image1?.img
+              ? `${API}/storage/uploads/${item.image1.img}`
+              : null,
+            imageRight: item.image2?.img
+              ? `${API}/storage/uploads/${item.image2.img}`
+              : null,
+            hasRas: !!item.ras,
+          });
 
-            const listItems = Array.from(doc.querySelectorAll("span")).map(
-              (span) => span.textContent
-            );
-
-            const paragraphs = Array.from(doc.querySelectorAll("p"))
-              .map((p) => p.textContent.trim())
-              .filter((p) => p);
-
-            setInnovation({
-              title: item.text.title,
-              description: item.text.desc,
-              paragraphs,
-              listItems,
-              imageLeft: item.image1?.img
-                ? `${API}/storage/uploads/${item.image1.img}`
-                : null,
-              imageRight: item.image2?.img
-                ? `${API}/storage/uploads/${item.image2.img}`
-                : null,
-              hasRas: !!item.ras, // ✅ Add this line
-            });
-
-
-            // Fetch subservices
-            const subserviceRes = await axiosInstance.get(
-              `${API_ENDPOINTS.getSubserviceAF}?af_id=${item.af_id}`
-            );
-
-            const subserviceData = (subserviceRes.data?.data || []).filter(
+          if (globalData?.subServices) {
+            const subserviceData = (globalData.subServices || []).filter(
               (s) => s.ras?.ras_sec === item.ras_sec
             );
 
@@ -86,24 +76,14 @@ const InnovationSection = ({ section, menuLang }) => {
               }))
             );
           }
-        } catch (error) {
-          console.error("Error fetching data:", error);
         }
-      } else {
-        console.log("InnovationSection: No section.sec_id provided, skipping API call.");
-      }
-    };
+    }
+  }, [section, globalData?.specializations, globalData?.subServices]);
 
-    fetchData();
-  }, [section]);
-
-  if (!innovation) {
-    return (
-      <div className="text-center py-8 text-gray-600">
-        No specialization data available for this section.
-      </div>
-    );
+  if (isLoading || !innovation) {
+    return null;
   }
+
 
   return (
     <div className="my-8 sm:my-12 lg:my-16">
@@ -134,23 +114,6 @@ const InnovationSection = ({ section, menuLang }) => {
               dangerouslySetInnerHTML={{ __html: innovation.description }}
             />
 
-
-
-
-            {/* <motion.ul
-              className="space-y-3 sm:space-y-4 text-gray-700 mb-6 text-[12px] sm:text-[14px] lg:text-[16px] sm:text-justify"
-              variants={cardVariants}
-              transition={{ delay: 0.8 }}
-            >
-              {innovation.listItems.map((item, i) => (
-                <li key={i} className="flex items-start">
-                  <div className="border border-red-800 p-2 rounded-full mr-2 sm:mr-3 mt-1">
-                    <FaCheck className="text-red-800 text-sm sm:text-base" />
-                  </div>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </motion.ul> */}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 text-[12px] sm:text-[14px] lg:text-[16px]">
               {subservices.map((s, i) => (

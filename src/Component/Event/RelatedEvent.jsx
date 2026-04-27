@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { FaCalendarAlt } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
-import { useLocation } from 'react-router-dom';
+import { API } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 
-const RelatedEvent = ({ eventId, sectionId, menuLang }) => {
+const RelatedEvent = ({ eventId, sectionId, menuLang, eventDetailPage }) => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -13,49 +13,39 @@ const RelatedEvent = ({ eventId, sectionId, menuLang }) => {
     const currentLang = location.pathname.includes('/km') ? 2 : 1;
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
 
+    const { globalData, isLoading: isDataLoading } = useData();
+
     useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const response = await axiosInstance.get(
-                    `${API_ENDPOINTS.getEvent}`
-                );
-                const data = response.data?.data || [];
-                const eventData = Array.isArray(data) ? data : [data].filter(Boolean);
+        if (!globalData?.events || isDataLoading) return;
 
-                const filteredEvents = eventData.filter(
-                    item => item.lang === currentLang && item.ref_id !== Number(eventId)
-                );
+        const eventData = globalData.events;
+        const filteredEvents = eventData.filter(
+            item => item.lang === currentLang && item.ref_id !== Number(eventId) && item.display === 1
+        );
 
-                const formattedEvents = filteredEvents
-                    .map((item, index) => ({
-                        id: item.e_id || index + 1,
-                        ref_id: item.ref_id,
-                        title: item.e_title || 'Untitled Event',
-                        image: item.img?.img
-                            ? `${API}/storage/uploads/${item.img.img}`
-                            : '/placeholder-image.jpg',
-                        description: item.e_shorttitle || 'No description available.',
-                        date: item.e_date
-                            ? new Date(item.e_date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                            })
-                            : 'TBD',
-                        category: item.e_tags,
-                    }))
-                    .slice(0, 4); // 🔥 Limit to 4 items
+        const formattedEvents = filteredEvents
+            .map((item, index) => ({
+                id: item.e_id || index + 1,
+                ref_id: item.ref_id,
+                title: item.e_title || 'Untitled Event',
+                image: item.img?.img
+                    ? `${API}/storage/uploads/${item.img.img}`
+                    : '/placeholder-image.jpg',
+                description: item.e_shorttitle || 'No description available.',
+                date: item.e_date
+                    ? new Date(item.e_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    })
+                    : 'TBD',
+                category: item.e_tags,
+            }))
+            .slice(0, 4);
 
-                setEvents(formattedEvents);
-                setLoading(false);
-            } catch (err) {
-                console.error('Error fetching events:', err);
-                setError('Failed to load events.');
-                setLoading(false);
-            }
-        };
-        fetchEvents();
-    }, [sectionId, menuLang]);
+        setEvents(formattedEvents);
+        setLoading(false);
+    }, [eventId, currentLang, globalData, isDataLoading]);
 
     if (loading) {
         return (
@@ -88,6 +78,13 @@ const RelatedEvent = ({ eventId, sectionId, menuLang }) => {
         );
     }
 
+    const getDetailPath = (alias, refId) => {
+        if (!alias) return '#';
+        const path = alias.startsWith('/') ? alias : `/${alias}`;
+        const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+        return `${fullPath}/${refId}`;
+    };
+
     return (
         <div className="my-16">
             <div className="container mx-auto px-4">
@@ -103,7 +100,7 @@ const RelatedEvent = ({ eventId, sectionId, menuLang }) => {
                         {events.map((event) => (
                             <Link
                                 key={event.ref_id}
-                                to={`${prefix}/events/${event.ref_id}`}
+                                to={getDetailPath(eventDetailPage?.p_alias, event.ref_id)}
                                 className="text-start"
                             >
                                 <motion.div

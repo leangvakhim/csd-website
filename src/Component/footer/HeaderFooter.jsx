@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
@@ -10,42 +12,39 @@ const HeaderFooter = () => {
     const [currentLang, setCurrentLang] = useState(1);
     const [socialLinks, setSocialLinks] = useState([]);
 
-    useEffect(() => {
-    const langFromUrl = location.pathname.includes('/km') ? 2 : 1;
-    setCurrentLang(langFromUrl);
+    const { globalData } = useData();
 
-    axiosInstance.get(`${API_ENDPOINTS.getSetting}/lang/${langFromUrl}`)
-        .then(res => {
-            const settingData = res.data?.data || [];
+    useEffect(() => {
+        const langFromUrl = location.pathname.includes('/km') ? 2 : 1;
+        setCurrentLang(langFromUrl);
+
+        if (globalData?.settings) {
+            const settingData = globalData.settings || [];
             const langSetting = Array.isArray(settingData)
-            ? settingData.find(item => item.lang === langFromUrl)
-            : settingData;
+                ? settingData.find(item => item.lang === langFromUrl)
+                : settingData;
 
             if (langSetting) {
                 setSettings({
                     facultyTitle: langSetting.set_facultytitle || "",
                     departmentTitle: langSetting.set_facultydep || "",
                     logoUrl: langSetting.logo?.img
-                    ? `${API}/storage/uploads/${langSetting.logo.img}`
-                    : "/placeholder-icon.png"
+                        ? `${API}/storage/uploads/${langSetting.logo.img}`
+                        : "/placeholder-icon.png"
                 });
             }
-        })
-        .catch(err => console.error("Error fetching settings:", err));
-    }, [location.pathname]);
+        }
 
-    useEffect(() => {
-      axiosInstance.get(API_ENDPOINTS.getSocialSetting)
-        .then(res => {
-          const socialData = res.data?.data || res.data || [];
-          const filtered = Array.isArray(socialData)
-            ? socialData.filter(item => item.active === 1 && item.display === 1)
-            : [];
-          const sorted = filtered.sort((a, b) => a.setsoc_order - b.setsoc_order);
-          setSocialLinks(sorted);
-        })
-        .catch(err => console.error("Failed to fetch social links:", err));
-    }, []);
+        if (globalData?.socialSettings) {
+            const socialData = globalData.socialSettings || [];
+            const filtered = Array.isArray(socialData)
+                ? socialData.filter(item => item.active === 1 && item.display === 1)
+                : [];
+            const sorted = filtered.sort((a, b) => a.setsoc_order - b.setsoc_order);
+            setSocialLinks(sorted);
+        }
+    }, [location.pathname, globalData]);
+
 
     if (!settings) return null;
 

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { API_ENDPOINTS,API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+
 import { Link } from "react-router-dom";
+import { useData } from "../../Context/DataContext";
 
 const UnlockSection = ({key, section, menuLang}) => {
-
+    const { globalData } = useData();
     const [unlockData, setUnlockData] = useState(null);
     const [umdAlias, setUmdAlias] = useState('');
 
@@ -13,41 +15,30 @@ const UnlockSection = ({key, section, menuLang}) => {
         visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
     };
 
-    const resolvePageAlias = async (routePage) => {
-        try {
-            const res = await axiosInstance.get(API_ENDPOINTS.getPage);
-            const pages = Array.isArray(res.data?.data) ? res.data.data : [];
-
-            const matched = pages.find((page) => page.p_title === routePage);
-            return matched?.p_alias || null;
-        } catch (error) {
-            console.error("Failed to fetch page alias:", error);
-            return null;
-        }
-    }
+    const getAlias = (routePage) => {
+        if (!globalData?.pages) return null;
+        const matched = globalData.pages.find((page) => page.p_title === routePage);
+        return matched?.p_alias || null;
+    };
 
     useEffect(() => {
-        const fetchUnlock = async () => {
-            try {
-                const res = await axiosInstance.get(API_ENDPOINTS.getUnlock);
-                const dataList = Array.isArray(res.data?.data) ? res.data.data : [];
-                const matched = dataList.find(item => item.umd_sec === section?.sec_id);
-                if (matched) {
-                    setUnlockData(matched);
-                    const alias = await resolvePageAlias(matched.umd_routepage);
-                    if (alias) {
-                        setUmdAlias(alias);
-                    }
+        if (globalData?.unlocks) {
+            const dataList = globalData.unlocks;
+            const matched = dataList.find(item => item.umd_sec === section?.sec_id);
+            if (matched) {
+                setUnlockData(matched);
+                const alias = getAlias(matched.umd_routepage);
+                if (alias) {
+                    setUmdAlias(alias);
                 }
-            } catch (error) {
-                console.error("Failed to fetch unlock data:", error);
             }
-        };
+        }
+    }, [section?.sec_id, globalData?.unlocks, globalData?.pages]);
 
-        fetchUnlock();
-    }, [section]);
+    if (!unlockData) return null;
 
     return (
+
         <div className="bg-black my-16">
             <div className="container mx-auto px-4">
                 {unlockData && (

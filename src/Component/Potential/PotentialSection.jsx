@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaUsers, FaDollarSign, FaUserGraduate, FaCheck } from "react-icons/fa";
 import { MdSchool } from "react-icons/md";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
+
 
 const sectionVariants = {
   hidden: { opacity: 0 },
@@ -22,6 +24,7 @@ const cardVariants = {
 };
 
 const PotentialSection = ({ section, menuLang }) => {
+  const { globalData } = useData();
   const [researchData, setResearchData] = useState(null);
   const [subservices, setSubservices] = useState([]);
 
@@ -34,85 +37,64 @@ const PotentialSection = ({ section, menuLang }) => {
   ];
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (section?.sec_id) {
-        try {
-          // Fetch specialization data
-          const res = await axiosInstance.get(
-            `${API_ENDPOINTS.getSpecialization}?section_id=${section.sec_id}`
-          );
-          const data = res.data?.data || [];
-
-          const filteredData = data.filter(
+    if (globalData?.specializations && section?.sec_id) {
+        const data = globalData.specializations;
+        const filteredData = data.filter(
             (item) =>
-              item.section?.sec_page === section.sec_page &&
-              item.section.display === 1 &&
-              item.section.active === 1 &&
-              item.section.sec_id === section.sec_id
-          );
+                item.section?.sec_page === section.sec_page &&
+                item.section.display === 1 &&
+                item.section.active === 1 &&
+                item.section.sec_id === section.sec_id
+        );
 
-          if (filteredData.length > 0) {
+        if (filteredData.length > 0) {
             const item = filteredData[0];
             const parser = new DOMParser();
-            const doc = parser.parseFromString(item.text.desc, "text/html");
+            const doc = parser.parseFromString(item.text?.desc || "", "text/html");
 
             const listItems = Array.from(doc.querySelectorAll("span")).map(
-              (span) => span.textContent
+                (span) => span.textContent
             );
 
             const paragraphs = Array.from(doc.querySelectorAll("p"))
-              .map((p) => p.textContent.trim())
-              .filter((p) => p);
+                .map((p) => p.textContent.trim())
+                .filter((p) => p);
 
             setResearchData({
-              title: item.text.title || "Research & Labs: Unlock Your Potential in Research & Technology",
-              description: item.text.desc || "",
-              paragraphs,
-              listItems,
-              imageLeft: item.image1?.img
-                ? `${API}/storage/uploads/${item.image1.img}`
-                : null,
-              hasRas: !!item.ras,
+                title: item.text?.title || "",
+                description: item.text?.desc || "",
+                paragraphs,
+                listItems,
+                imageLeft: item.image1?.img
+                    ? `${API}/storage/uploads/${item.image1.img}`
+                    : null,
+                hasRas: !!item.ras,
             });
 
-            // Fetch subservices
-            const subserviceRes = await axiosInstance.get(
-              `${API_ENDPOINTS.getSubserviceAF}?af_id=${item.af_id}`
-            );
+            if (globalData?.subServices) {
+                const subserviceData = (globalData.subServices || []).filter(
+                    (s) => s.ras?.ras_sec === item.ras_sec
+                );
 
-            const subserviceData = (subserviceRes.data?.data || []).filter(
-              (s) => s.ras?.ras_sec === item.ras_sec
-            );
-
-            setSubservices(
-              subserviceData.map((s, index) => ({
-                ss_id: s.ss_id,
-                title: s.ss_title || "Untitled Subservice",
-                description: s.ss_subtitle || "No description available",
-                icon: s.image?.img
-                  ? `${API}/storage/uploads/${s.image.img}`
-                  : defaultIcons[index % defaultIcons.length], // Fallback to default icons
-              }))
-            );
-          }
-        } catch (error) {
-          console.error("Error fetching data:", error);
+                setSubservices(
+                    subserviceData.map((s, index) => ({
+                        ss_id: s.ss_id,
+                        title: s.ss_title,
+                        description: s.ss_subtitle,
+                        icon: s.image?.img
+                            ? `${API}/storage/uploads/${s.image.img}`
+                            : defaultIcons[index % defaultIcons.length],
+                    }))
+                );
+            }
         }
-      } else {
-        console.log("ResearchLabsSection: No section.sec_id provided, skipping API call.");
-      }
-    };
-
-    fetchData();
-  }, [section, menuLang]);
+    }
+  }, [section, menuLang, globalData?.specializations, globalData?.subServices]);
 
   if (!researchData) {
-    return (
-      <div className="text-center py-8 text-gray-600">
-        No research lab data available for this section.
-      </div>
-    );
+    return null;
   }
+
 
   return (
     <div className="my-8 sm:my-12 lg:my-16">
@@ -155,7 +137,7 @@ const PotentialSection = ({ section, menuLang }) => {
           >
             <motion.h2
               className={`text-3xl font-normal mb-8 text-gray-800 ${
-                menuLang === 2 ? "font-khmer" : "font-semibold"
+                menuLang === 2 ? "font-khmer leading-12" : "font-semibold"
               }`}
               variants={cardVariants}
               transition={{ delay: 0.2 }}
@@ -194,9 +176,9 @@ const PotentialSection = ({ section, menuLang }) => {
                     )}
                   </div>
                   <div>
-                    <h3 className={`text-lg lg:text-xl !font-semibold mb-1 text-gray-800 ${menuLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans'}`}>
+                    <h1 className={`text-lg lg:text-xl mb-1 text-gray-800 ${menuLang === 2 ? 'font-khmer !text-[18px] leading-8' : 'font-sans font-semibold'}`}>
                       {s.title}
-                    </h3>
+                    </h1>
                     <p className={`text-gray-800 lg:text-lg ${menuLang === 2 ? 'fonts-khmer text-[20]' : 'font-sans'}`}>{s.description}</p>
                   </div>
                 </motion.div>
