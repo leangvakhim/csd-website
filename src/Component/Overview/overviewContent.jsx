@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
-import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
+
 
 // Animation variants
 const sectionVariants = {
@@ -24,71 +25,69 @@ const cardVariants = {
 
 
 const Overview = ({section, menuLang}) => {
+  const { globalData } = useData();
   const { degree } = useParams();
   const [content, setContent] = useState({
     title: "",
     description: "",
     type: null,
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!globalData?.texts);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setIsLoading(true);
-    setError(null);
+    if (!globalData?.texts) {
+      setIsLoading(true);
+      return;
+    }
 
-    axiosInstance.get(API_ENDPOINTS.getText)
-      .then((res) => {
-        if (!res.data?.data) {
-          throw new Error("Invalid API response structure");
-        }
+    try {
+      const data = globalData.texts;
 
-        const data = res.data.data;
+      // Find items for the specific page
+      const pageItems = data.filter(item =>
+        item.text_sec?.sec_page === section.sec_page
+      );
 
-        // Find items for the specific page
-        const pageItems = data.filter(item =>
-          item.text_sec?.sec_page === section.sec_page
+      // Find the information section (sec_type === "Information") with preference for text_type 1, fallback to 2
+      const infoItem =
+        pageItems.find(item =>
+          item.text_sec?.sec_type === "Information" && item.text_type === 1
+        ) ||
+        pageItems.find(item =>
+          item.text_sec?.sec_type === "Information" && item.text_type === 2
         );
 
-        // Find the information section (sec_type === "Information") with preference for text_type 1, fallback to 2
-        const infoItem =
-          pageItems.find(item =>
-            item.text_sec?.sec_type === "Information" && item.text_type === 1
-          ) ||
-          pageItems.find(item =>
-            item.text_sec?.sec_type === "Information" && item.text_type === 2
-          );
-
-        if (infoItem) {
+      if (infoItem) {
+        setContent({
+          title: infoItem.title,
+          description: infoItem.desc,
+          type: infoItem.text_type,
+        });
+      } else {
+        // Fallback to first item on the page if no information section found
+        const fallbackItem = pageItems[0];
+        if (fallbackItem) {
           setContent({
-            title: infoItem.title,
-            description: infoItem.desc,
-            type: infoItem.text_type,
+            title: fallbackItem.title,
+            description: fallbackItem.desc,
+            type: null,
           });
         } else {
-          // Fallback to first item on the page if no information section found
-          const fallbackItem = pageItems[0];
-          if (fallbackItem) {
-            setContent({
-              title: fallbackItem.title,
-              description: fallbackItem.desc,
-              type: null,
-            });
-          } else {
-            setError("No content found for this degree");
-          }
+          setError("No content found for this degree");
         }
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error("API error:", err);
-        setError("Failed to load content");
-        setIsLoading(false);
-      });
-  }, [degree]);
+      }
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Data processing error:", err);
+      setError("Failed to process content");
+      setIsLoading(false);
+    }
+  }, [degree, globalData?.texts, section.sec_page]);
+
 
   if (isLoading) {
-    return <div className="text-center py-8 text-gray-600">Loading...</div>;
+    return null;
   }
 
   if (error) {

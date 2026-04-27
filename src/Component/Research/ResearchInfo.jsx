@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaFilter, FaTimes, FaArrowRight } from 'react-icons/fa';
+import { FaSearch, FaTimes } from 'react-icons/fa';
 import { MdExplore, MdComputer } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
 // Custom hook for debouncing
 const useDebounce = (value, delay) => {
@@ -24,93 +25,71 @@ const useDebounce = (value, delay) => {
 };
 
 const ResearchInfo = ({section, researchDetailPage}) => {
+    const { globalData, isLoading } = useData();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [researchData, setResearchData] = useState([]);
-    const [headerData, setHeaderData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [headerData, setHeaderData] = useState({ hsec_title: '', hsec_subtitle: '', hsec_amount: 8 });
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = headerData.hsec_amount;
+    
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+    const itemsPerPage = headerData.hsec_amount || 8;
 
     useEffect(() => {
-        const fetchHeaderData = async () => {
-          try {
-            const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-            const headerList = response.data?.data || [];
+        if (!globalData?.research) return;
 
-            const matchedHeader = headerList.find(
-              (item) =>
-                item.hsec_sec === section.sec_id &&
-                item.section?.sec_type === "LoR" &&
-                item.section?.display === 1 &&
-                item.section?.active === 1
-            );
+        const formattedResearchData = globalData.research
+          .filter((item) => item.display === 1 && item.active === 1
+            && item.lang === currentLang)
+          .map((item) => ({
+            id: item.rsd_id,
+            ref_id: item.ref_id,
+            title: item.rsd_title || 'Untitled Research',
+            description: item.rsd_subtitle || 'No description available',
+            image: item.image?.img
+              ? `${API}/storage/uploads/${item.image.img}`
+              : '/placeholder-image.jpg',
+            lead: item.rsd_lead || 'Unknown Lead',
+          }));
 
-            if (matchedHeader) {
-              setHeaderData({
-                hsec_title: matchedHeader.hsec_title,
-                hsec_subtitle: matchedHeader.hsec_subtitle,
-                hsec_amount: matchedHeader.hsec_amount ,
-              });
-            } else {
-              setHeaderData({
-                hsec_title: 'Student Research',
-                hsec_amount: 8,
-              });
-            }
-          } catch (error) {
-            console.error('Failed to fetch header data:', error.message, error);
+        setResearchData(formattedResearchData);
+
+        if (globalData?.headers) {
+          const headerList = globalData.headers;
+          const matchedHeader = headerList.find(
+            (item) =>
+              item.hsec_sec === section.sec_id &&
+              item.section?.sec_type === "LoR" &&
+              item.section?.display === 1 &&
+              item.section?.active === 1
+          );
+
+          if (matchedHeader) {
             setHeaderData({
-              hsec_title: 'Student Research',
+              hsec_title: matchedHeader.hsec_title,
+              hsec_subtitle: matchedHeader.hsec_subtitle,
+              hsec_amount: matchedHeader.hsec_amount ,
+            });
+          } else {
+            setHeaderData({
+              hsec_title: currentLang === 2 ? 'ការស្រាវជ្រាវរបស់និស្សិត' : 'Student Research',
               hsec_amount: 8,
             });
           }
-        };
-
-        fetchHeaderData();
-    }, []);
-
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const researchResponse = await axiosInstance.get(API_ENDPOINTS.getResearch);
-          const researchData = researchResponse.data?.data || [];
-          const formattedResearchData = researchData
-            .filter((item) => item.display === 1 && item.active === 1
-              && item.lang === currentLang)
-            .map((item) => ({
-              id: item.rsd_id,
-              ref_id: item.ref_id,
-              title: item.rsd_title || 'Untitled Research',
-              description: item.rsd_subtitle || 'No description available',
-              image: item.image?.img
-                ? `${API}/storage/uploads/${item.image.img}`
-                : '/placeholder-image.jpg',
-              lead: item.rsd_lead || 'Unknown Lead',
-            }));
-
-          setResearchData(formattedResearchData);
-
-          setLoading(false);
-        } catch (err) {
-          console.error('Error fetching data:', err);
-          setError('Failed to load data. Please try again later.');
-          setLoading(false);
         }
-      };
+    }, [currentLang, globalData?.research, globalData?.headers, section.sec_id]);
 
-      fetchData();
-    }, []);
+    if (isLoading || !researchData.length) {
+      return null;
+    }
 
     const filteredSections = researchData
-      .filter((section) => {
+      .filter((item) => {
         const matchesSearch =
-          section.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-          section.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-          section.lead.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+          item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+          item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+          item.lead.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
         return matchesSearch;
       });
 
@@ -119,73 +98,42 @@ const ResearchInfo = ({section, researchDetailPage}) => {
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-    const displayedData = filteredSections.slice(indexOfFirstItem, indexOfLastItem).slice(0, headerData?.hsec_amount || itemsPerPage);
+    const displayedData = filteredSections.slice(indexOfFirstItem, indexOfLastItem);
 
     const handleClearSearch = () => {
       setSearchTerm('');
     };
 
-    if (loading) {
-      return (
-        <div className="my-8 text-center text-gray-600">
-          Loading research data...
-        </div>
-      );
-    }
-
-    if (error) {
-      return (
-        <div className="my-8 text-center text-gray-600">
-          {error}
-        </div>
-      );
-    }
-
     const paginationRange = () => {
         if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
 
         const range = [];
-
         if (currentPage <= 3) {
-        range.push(1, 2, 3, 4, '...', totalPages);
+            range.push(1, 2, 3, 4, '...', totalPages);
         } else if (currentPage >= totalPages - 2) {
-        range.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+            range.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
         } else {
-        range.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+            range.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
         }
-
         return range;
     };
 
-    const maxPagesToShow = 5; // Show up to 5 page numbers (e.g., 1, 2, ..., 9, 10)
-    let pageNumbers = [];
-    // const totalItems = displayedData.length;
-
-    if (totalPages <= maxPagesToShow) {
-        // If total pages are less than or equal to maxPagesToShow, show all pages
-        pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
-    } else {
-        // Show first 2 pages, ellipsis, and last 2 pages
-        const firstPages = [1, 2];
-        const lastPages = [totalPages - 1, totalPages];
-        pageNumbers = [...firstPages];
-
-        // Add ellipsis if there are pages between the first and last sets
-        if (totalPages > 5) {
-        pageNumbers.push('...');
-        }
-
-        pageNumbers.push(...lastPages);
-    }
-
-    // Handle page change
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
         }
     };
 
-      return (
+    const getDetailPath = (alias, refId) => {
+        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+        const defaultAlias = '/research';
+        const finalAlias = alias || defaultAlias;
+        const path = finalAlias.startsWith('/') ? finalAlias : `/${finalAlias}`;
+        const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+        return `${fullPath}/${refId}`;
+    };
+
+    return (
         <div className="my-8 sm:my-12 lg:my-16">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header Section */}
@@ -200,11 +148,10 @@ const ResearchInfo = ({section, researchDetailPage}) => {
                         <div className="relative w-full ">
                             <input
                                 type="text"
-                                placeholder="Search researchs"
+                                placeholder={currentLang === 2 ? "ស្វែងរកការស្រាវជ្រាវ" : "Search researchs"}
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                                 className="border rounded-full py-2 px-4 pl-10 focus:outline-none w-full"
-                                aria-label="Search researchs"
                             />
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <FaSearch className="text-gray-400" />
@@ -213,7 +160,6 @@ const ResearchInfo = ({section, researchDetailPage}) => {
                                 <button
                                     onClick={handleClearSearch}
                                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                                    aria-label="Clear search"
                                 >
                                     <FaTimes className="text-sm" />
                                 </button>
@@ -221,7 +167,6 @@ const ResearchInfo = ({section, researchDetailPage}) => {
                         </div>
                     </div>
                   </div>
-
                 </div>
                 <p className={`text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base max-w-2xl ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
                   {headerData.hsec_subtitle}
@@ -232,11 +177,10 @@ const ResearchInfo = ({section, researchDetailPage}) => {
                         <div className="relative w-full hidden xl:block">
                             <input
                                 type="text"
-                                placeholder="Search researchs"
+                                placeholder={currentLang === 2 ? "ស្វែងរកការស្រាវជ្រាវ" : "Search researchs"}
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                                 className="border rounded-full py-2 px-4 pl-10 focus:outline-none w-full"
-                                aria-label="Search researchs"
                             />
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <FaSearch className="text-gray-400" />
@@ -245,7 +189,6 @@ const ResearchInfo = ({section, researchDetailPage}) => {
                                 <button
                                     onClick={handleClearSearch}
                                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                                    aria-label="Clear search"
                                 >
                                     <FaTimes className="text-sm" />
                                 </button>
@@ -257,9 +200,9 @@ const ResearchInfo = ({section, researchDetailPage}) => {
 
             <div className="mt-8 sm:mt-12">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
-                  {displayedData?.length > 0 && displayedData.map((section) => (
+                  {displayedData?.length > 0 && displayedData.map((item) => (
                     <motion.div
-                      key={section.id}
+                      key={item.id}
                       initial={{ opacity: 0, y: 50 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6 }}
@@ -267,8 +210,8 @@ const ResearchInfo = ({section, researchDetailPage}) => {
                       className="bg-white rounded-lg shadow-md relative group overflow-hidden"
                     >
                       <img
-                        src={section.image}
-                        alt={section.title}
+                        src={item.image}
+                        alt={item.title}
                         className="w-full h-48 sm:h-64 lg:h-80 object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
                           e.target.onerror = null;
@@ -281,21 +224,20 @@ const ResearchInfo = ({section, researchDetailPage}) => {
                           <button className="text-black text-[9px] sm:text-[10px] lg:text-xs bg-gray-300 py-1 sm:py-1.5 px-2 sm:px-3 lg:px-4 shadow-md rounded-full flex items-center mb-2">
                             <MdComputer className="mr-1 text-xs sm:text-sm" />
                             <span className={`truncate w-full ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                              {section.lead}
+                              {item.lead}
                             </span>
                           </button>
                         </div>
                         <div>
                           <h3 className={`line-clamp-1 overflow-hidden text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans-serif'}`}>
-                            {section.title}
+                            {item.title}
                           </h3>
                           <p className={`line-clamp-2 overflow-hidden mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base sm:line-clamp-2 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                            {section.description}
+                            {item.description}
                           </p>
                           <button
                             onClick={() => {
-                              const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                              navigate(`${prefix}${researchDetailPage.p_alias}/${section.ref_id}`);
+                                navigate(getDetailPath(researchDetailPage?.p_alias, item.ref_id));
                             }}
                             className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
                               }`}
@@ -311,7 +253,7 @@ const ResearchInfo = ({section, researchDetailPage}) => {
                 </div>
               </div>
           </div>
-          {totalItems > 0 && (
+          {totalPages > 1 && (
             <div className="flex justify-center mt-6 space-x-2">
                 <button
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -345,8 +287,7 @@ const ResearchInfo = ({section, researchDetailPage}) => {
             </div>
         )}
         </div>
-
     );
 }
 
-export default ResearchInfo
+export default ResearchInfo;

@@ -1,40 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaCheck } from "react-icons/fa";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+
+import { useData } from "../../Context/DataContext";
 
 const CriteriaSection = ({section, menuLang}) => {
+    const { globalData } = useData();
     const [criteriaData, setCriteriaData] = useState(null);
 
     useEffect(() => {
-      const fetchCriteriaData = async () => {
-        if (!section?.sec_id) return;
-        try {
-            const res = await axiosInstance.get(API_ENDPOINTS.getCriteria);
-            const data = res.data.data;
-            const filtered = data.find(
-            (item) =>
-                item.gc_sec === section?.sec_id &&
-                item.section?.sec_type === "Criteria" &&
-                item.section?.display === 1 &&
-                item.section?.active === 1
-            );
-            setCriteriaData(filtered);
-        } catch (error) {
-            console.error("Failed to fetch criteria data:", error);
-        }
-    };
-
-      fetchCriteriaData();
-    }, [section]);
+      if (globalData?.criterias) {
+        const data = globalData.criterias;
+        const filtered = data.find(
+          (item) =>
+            item.gc_sec === section?.sec_id &&
+            item.section?.sec_type === "Criteria" &&
+            item.section?.display === 1 &&
+            item.section?.active === 1
+        );
+        setCriteriaData(filtered);
+      }
+    }, [section.sec_id, globalData?.criterias]);
 
     if (!criteriaData) {
-        return (
-            <div className="w-full text-center py-10 text-gray-500">
-                Loading criteria information...
-            </div>
-        );
+        return null;
     }
+
 
     return (
        <div className="my-16">

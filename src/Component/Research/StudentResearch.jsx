@@ -1,84 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronLeft, FaChevronRight, FaArrowRight } from 'react-icons/fa';
-import { MdExplore, MdComputer } from 'react-icons/md';
-import { AiOutlineRobot } from 'react-icons/ai';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { MdExplore } from 'react-icons/md';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
 const StudentResearch = ({researchlabDetailPage}) => {
+  const { globalData, isLoading } = useData();
   const navigate = useNavigate();
   const [researchData, setResearchData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const location = useLocation();
   const currentLang = location.pathname.startsWith('/km') ? 2 : 1;
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const researchResponse = await axiosInstance.get(API_ENDPOINTS.getResearchlab);
-        const researchData = researchResponse.data?.data || [];
-        const formattedResearchData = researchData
-          .filter((item) =>
-            item.display === 1 &&
-            item.active === 1 &&
-            item.lang === currentLang
-          )
-          .sort((a, b) => b.rsdl_order - a.rsdl_order)
-          .map((item) => ({
-            id: item.rsdl_id,
-            ref_id: item.ref_id,
-            title: item.rsdl_title || 'Untitled Research',
-            description: item.rsdl_detail || 'No description available',
-            image: item.img?.img
-              ? `${API}/storage/uploads/${item.img?.img}`
-              : '/placeholder-image.jpg',
-          }))
+    if (!globalData?.researchlab) return;
 
-          setResearchData(formattedResearchData);
-          setLoading(false);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load data. Please try again later.');
-        setLoading(false);
-      }
-    };
+    const formattedResearchData = globalData.researchlab
+      .filter((item) =>
+        item.display === 1 &&
+        item.active === 1 &&
+        item.lang === currentLang
+      )
+      .sort((a, b) => b.rsdl_order - a.rsdl_order)
+      .map((item) => ({
+        id: item.rsdl_id,
+        ref_id: item.ref_id,
+        title: item.rsdl_title || 'Untitled Research',
+        description: item.rsdl_detail || 'No description available',
+        image: item.img?.img
+          ? `${API}/storage/uploads/${item.img?.img}`
+          : '/placeholder-image.jpg',
+      }));
 
-    fetchData();
-  }, [currentLang]);
+    setResearchData(formattedResearchData);
+  }, [currentLang, globalData?.researchlab]);
 
   useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const tagRes = await axiosInstance.get(API_ENDPOINTS.getResearchlabTag);
-        const allTags = tagRes.data?.data || [];
+    if (researchData.length > 0 && globalData?.researchlabTags) {
+      const allTags = globalData.researchlabTags;
+      const rsdlId = researchData[currentIndex]?.id;
+      if (!rsdlId) return;
 
-        const rsdlId = researchData[0]?.id;
-        if (!rsdlId) return;
+      const filteredTags = allTags
+        .filter(tag => tag.rsdlt_rsdl === rsdlId && tag.active === 1)
+        .map(tag => ({
+          title: tag.rsdlt_title,
+          image: tag.img?.img
+            ? `${API}/storage/uploads/${tag.img.img}`
+            : '/placeholder-image.jpg',
+        }));
 
-        const filteredTags = allTags
-          .filter(tag => tag.rsdlt_rsdl === rsdlId && tag.active === 1)
-          .map(tag => ({
-            title: tag.rsdlt_title,
-            image: tag.img?.img
-              ? `${API}/storage/uploads/${tag.img.img}`
-              : '/placeholder-image.jpg',
-          }));
-
-        setTags(filteredTags);
-      } catch (err) {
-        console.error('Failed to fetch research tags:', err);
-      }
-    };
-
-    if (researchData.length > 0) {
-      fetchTags();
+      setTags(filteredTags);
     }
-  }, [researchData]);
+  }, [researchData, currentIndex, globalData?.researchlabTags]);
 
-  // Navigation for carousel
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? researchData.length - 1 : prev - 1));
   };
@@ -87,31 +64,20 @@ const StudentResearch = ({researchlabDetailPage}) => {
     setCurrentIndex((prev) => (prev === researchData.length - 1 ? 0 : prev + 1));
   };
 
+  if (isLoading || researchData.length === 0) {
+    return null;
+  }
+
   const buttons = tags;
 
-  if (loading) {
-    return (
-      <div className="my-16 text-center text-gray-600">
-        Loading research data...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="my-16 text-center text-gray-600">
-        {error}
-      </div>
-    );
-  }
-
-  if (researchData.length === 0) {
-    return (
-      <div className="my-16 text-center text-gray-600">
-        No recent research found.
-      </div>
-    );
-  }
+  const getDetailPath = (alias, refId) => {
+    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+    const defaultAlias = '/researchlab';
+    const finalAlias = alias || defaultAlias;
+    const path = finalAlias.startsWith('/') ? finalAlias : `/${finalAlias}`;
+    const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+    return `${fullPath}/${refId}`;
+  };
 
   return (
     <div className="my-16">
@@ -187,8 +153,7 @@ const StudentResearch = ({researchlabDetailPage}) => {
 
                     <button
                       onClick={() => {
-                        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                        navigate(`${prefix}${researchlabDetailPage.p_alias}/${section.ref_id}`);
+                        navigate(getDetailPath(researchlabDetailPage?.p_alias, section.ref_id));
                       }}
                       className={`${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'} bg-red-900 hover:bg-red-800 xl:text-[14px] text-[12px] text-white py-2 px-6 rounded-4xl flex items-center`}
                     >

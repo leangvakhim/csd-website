@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
 
 // Animation variants for the section
 const sectionVariants = {
@@ -22,83 +23,57 @@ const cardVariants = {
 };
 
 const GallerySection = ({ section, menuLang }) => {
+  const { globalData, isLoading } = useData();
   const [galleryData, setGalleryData] = useState({
     title: "",
     description: "",
     images: [],
   });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Fetch gallery data based on section.sec_id
+
+  // Process gallery data from globalData
   useEffect(() => {
-    if (!section?.sec_id) {
-      console.log("GallerySection: No section.sec_id provided, skipping API call");
-      setIsLoading(false);
-      setError("Missing section ID");
+    if (!globalData?.galleries) {
       return;
     }
 
-    setIsLoading(true);
-      axiosInstance.get(`${API_ENDPOINTS.getGallery}`)
-      .then((res) => {
-        if (!res.data?.data || !Array.isArray(res.data.data)) {
-          setError("No gallery data found");
-          setIsLoading(false);
-          return;
-        }
+    try {
+      const data = globalData.galleries;
 
-        // Filter gallery item matching section ID and type
-        const matchedGallery = res.data.data.find(
-          (item) =>
-            item.gal_sec === section.sec_id &&
-            section.sec_type === "Gallery"
-        );
+      // Filter gallery item matching section ID and type
+      const matchedGallery = data.find(
+        (item) =>
+          item.gal_sec === section.sec_id &&
+          section.sec_type === "Gallery"
+      );
 
-        if (!matchedGallery) {
-          setError("No matching gallery section found");
-          setIsLoading(false);
-          return;
-        }
+      if (!matchedGallery) {
+        return;
+      }
 
-        const formatted = {
-          title: matchedGallery.text?.title || "",
-          description: matchedGallery.text?.desc || "",
-          images: [
-            matchedGallery.image1?.img ? `${API}/storage/uploads/${matchedGallery.image1.img}` : null,
-            matchedGallery.image2?.img ? `${API}/storage/uploads/${matchedGallery.image2.img}` : null,
-            matchedGallery.image3?.img ? `${API}/storage/uploads/${matchedGallery.image3.img}` : null,
-            matchedGallery.image4?.img ? `${API}/storage/uploads/${matchedGallery.image4.img}` : null,
-            matchedGallery.image5?.img ? `${API}/storage/uploads/${matchedGallery.image5.img}` : null,
-          ].filter(Boolean),
-        };
+      const formatted = {
+        title: matchedGallery.text?.title || "",
+        description: matchedGallery.text?.desc || "",
+        images: [
+          matchedGallery.image1?.img ? `${API}/storage/uploads/${matchedGallery.image1.img}` : null,
+          matchedGallery.image2?.img ? `${API}/storage/uploads/${matchedGallery.image2.img}` : null,
+          matchedGallery.image3?.img ? `${API}/storage/uploads/${matchedGallery.image3.img}` : null,
+          matchedGallery.image4?.img ? `${API}/storage/uploads/${matchedGallery.image4.img}` : null,
+          matchedGallery.image5?.img ? `${API}/storage/uploads/${matchedGallery.image5.img}` : null,
+        ].filter(Boolean),
+      };
 
-        if (formatted.images.length === 0) {
-          setError("No images available for this gallery");
-        }
+      setGalleryData(formatted);
+    } catch (error) {
+      console.error("Gallery processing error:", error);
+    }
+  }, [section.sec_id, globalData]);
 
-        setGalleryData(formatted);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("GallerySection: Error fetching gallery data:", error);
-        setError("Failed to load gallery data");
-        setIsLoading(false);
-      });
-  }, [section]);
 
-  if (isLoading) {
-    return <div className="text-center py-8 text-gray-600">Loading gallery...</div>;
+  if (isLoading || !galleryData.images || galleryData.images.length === 0) {
+    return null;
   }
 
-  if (error || !galleryData.images || galleryData.images.length === 0) {
-    console.log("GallerySection: Render error or no images", { error, images: galleryData.images });
-    return (
-      <div className="text-center py-8 text-gray-600">
-        {error || "No gallery content available"}
-      </div>
-    );
-  }
 
   return (
     <div className="my-16">

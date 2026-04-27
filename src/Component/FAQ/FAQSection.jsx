@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaChevronDown } from "react-icons/fa";
-import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
 
 // Animation variants
 const sectionVariants = {
@@ -23,6 +23,7 @@ const cardVariants = {
 
 
 const FAQSection = ({section}) => {
+  const { globalData, isLoading } = useData();
   const [openIndex, setOpenIndex] = useState(null);
   const [faqItems, setFaqItems] = useState([]);
   const [content, setContent] = useState({
@@ -30,84 +31,64 @@ const FAQSection = ({section}) => {
     description:
       "Professor: Inspiring Minds, Nurturing Curiosity, and Shaping the Future of Knowledge and Innovation",
   });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const currentLang = location.pathname.includes('/km') ? 2 : 1;
+
+  const currentLang = window.location.pathname.includes('/km') ? 2 : 1;
 
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    setError(null);
+    if (!globalData?.faqs || !globalData?.subfaqs) {
+      return;
+    }
 
-    Promise.all([axiosInstance.get(API_ENDPOINTS.getFAQ), axiosInstance.get(API_ENDPOINTS.getSubFAQ)])
-      .then(([faqRes, subFaqRes]) => {
+    try {
+      const faqData = globalData.faqs;
+      const subFaqData = globalData.subfaqs;
 
-        if (!faqRes.data?.data || !subFaqRes.data?.data) {
-          throw new Error("Invalid API response structure");
-        }
+      // Find the FAQ section based on the 'section' prop
+      const faqSection = faqData.find(
+        (item) => item.section?.sec_type === "FAQ" &&
+                  item.faq_sec === section.sec_id &&
+                  item.section?.display === 1 &&
+                  item.section?.active === 1
+      );
 
-        const faqData = faqRes.data.data;
-        const subFaqData = subFaqRes.data.data;
+      // Set title and description
+      if (faqSection) {
+        setContent({
+          title: faqSection.faq_title || "Frequently Asked Questions",
+          description: faqSection.faq_subtitle || "Professor: Inspiring Minds, Nurturing Curiosity, and Shaping the Future of Knowledge and Innovation",
+        });
+      }
 
-        // Find the FAQ section based on the 'section' prop
-        const faqSection = faqData.find(
-          (item) => item.section?.sec_type === "FAQ" &&
-                    item.faq_sec === section.sec_id &&
-                    item.section?.display === 1 &&
-                    item.section?.active === 1
-        );
+      // Filter sub-FAQ items based on the section id
+      const subFaqItems = subFaqData
+        .filter((item) => item.display === 1 &&
+                          item.active === 1 &&
+                          item.faq?.faq_sec === section?.sec_id
+                        )
+        .map((item) => ({
+          question: item.fa_question,
+          answer: item.fa_answer,
+          order: item.fa_order,
+        }))
+        .sort((a, b) => a.order - b.order);
 
-        // Set title and description
-        if (faqSection) {
-          setContent({
-            title: faqSection.faq_title || content.title,
-            description: faqSection.faq_subtitle || content.description,
-          });
-        } else {
-          setContent({
-            title: content.title,
-            description: content.description,
-          });
-        }
+      setFaqItems(subFaqItems);
+    } catch (err) {
+      console.error("Data processing error:", err);
+    }
+  }, [section, globalData]);
 
-        // Filter sub-FAQ items based on the section id if needed, or simply display all active ones
-        const subFaqItems = subFaqData
-          .filter((item) => item.display === 1 &&
-                            item.active === 1 &&
-                            item.faq?.faq_sec === section?.sec_id
-                          )
-          .map((item) => ({
-            question: item.fa_question,
-            answer: item.fa_answer,
-            order: item.fa_order,
-          }))
-          .sort((a, b) => a.order - b.order);
 
-        if (subFaqItems.length === 0) {
-          setError("No FAQ items found");
-        } else {
-          setFaqItems(subFaqItems);
-        }
+  if (isLoading) return null;
 
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error("API error:", err);
-        setError("Failed to load FAQ content");
-        setIsLoading(false);
-      });
-  }, [section]);
-
-  if (isLoading) {
-    return <div className="text-center py-8 text-gray-600">Loading...</div>;
+  if (!faqItems || faqItems.length === 0) {
+    return null;
   }
 
-  if (error) {
-    return <div className="text-center py-8 text-gray-600">{error}</div>;
-  }
 
   return (
     <div className="my-16 py-4">

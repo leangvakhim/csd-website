@@ -1,31 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaSearch } from 'react-icons/fa';
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { PiCalendarDots } from 'react-icons/pi';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
 const EventNewsInfo = ({section, newDetailPage, eventDetailPage, announcementDetailPage}) => {
+    const { globalData, isLoading } = useData();
     const [searchQuery, setSearchQuery] = useState('');
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-    const [headerData, setHeaderData] = useState([]);
+    const [headerData, setHeaderData] = useState({
+        hsec_title: 'News & Events',
+        hsec_subtitle: '',
+        hsec_amount: 8,
+    });
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
     const [activeTab, setActiveTab] = useState(currentLang === 2 ? 'ទាំងអស់' : 'All');
     const [newsItems, setNewsItems] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = headerData.hsec_amount;
+    const itemsPerPage = headerData.hsec_amount || 8;
 
     useEffect(() => {
-        const fetchHeaderData = async () => {
-          try {
-            const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-            const headerList = response.data?.data || [];
-
+        if (globalData && section) {
+            // 1. Process Header Data
+            const headerList = globalData.headers || [];
             const matchedHeader = headerList.find(
-              (item) =>
+                (item) =>
                 item.hsec_sec === section.sec_id &&
                 item.section?.sec_type === "LoNE" &&
                 item.section?.display === 1 &&
@@ -36,62 +39,38 @@ const EventNewsInfo = ({section, newDetailPage, eventDetailPage, announcementDet
               setHeaderData({
                 hsec_title: matchedHeader.hsec_title,
                 hsec_subtitle: matchedHeader.hsec_subtitle,
-                hsec_amount: matchedHeader.hsec_amount ,
-              });
-            } else {
-              setHeaderData({
-                hsec_title: 'News & Events',
-                hsec_amount: 8,
+                hsec_amount: matchedHeader.hsec_amount || 8,
               });
             }
-          } catch (error) {
-            console.error('Failed to fetch header data:', error.message, error);
-            setHeaderData({
-              hsec_title: 'News & Events',
-              hsec_amount: 8,
-            });
-          }
-        };
 
-        fetchHeaderData();
-    }, []);
+            // 2. Process Items (News, Events, Announcements)
+            const newsData = globalData.news || [];
+            const eventsData = globalData.events || [];
+            const announcementsData = globalData.announcements || [];
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [newsRes, eventRes, announcementRes] = await Promise.all([
-                    axiosInstance.get(API_ENDPOINTS.getNews),
-                    axiosInstance.get(API_ENDPOINTS.getEvent),
-                    axiosInstance.get(API_ENDPOINTS.getAnnouncement)
-                ]);
+            const extractData = (dataArray, prefixType) => dataArray
+                .filter(item => item.lang === currentLang)
+                .map(item => ({
+                    id: item[`${prefixType}_id`],
+                    ref_id: item[`ref_id`],
+                    title: item[`${prefixType}_title`],
+                    description: item[`${prefixType}_shorttitle`] || item[`${prefixType}_shortdesc`] || '',
+                    date: new Date(item[`${prefixType}_date`] || item[`${prefixType}_postdate`]),
+                    image: item.img?.img || '',
+                    tag: item[`${prefixType}_tag`] || item[`${prefixType}_tags`] || '',
+                    route_url: prefixType === 'n' ? 'news' : prefixType === 'e' ? 'event' : prefixType === 'am' ? 'announcement' : '',
+                }));
 
-                const extractData = (dataArray, prefix) => dataArray
-                    .filter(item => item.lang === currentLang)
-                    .map(item => ({
-                        id: item[`${prefix}_id`],
-                        ref_id: item[`ref_id`],
-                        title: item[`${prefix}_title`],
-                        description: item[`${prefix}_shorttitle`] || item[`${prefix}_shortdesc`] || '',
-                        date: new Date(item[`${prefix}_date`] || item[`${prefix}_postdate`]),
-                        image: item.img?.img || BASE_IMAGE_URL,
-                        tag: item[`${prefix}_tag`] || item[`${prefix}_tags`] || '',
-                        route_url: prefix === 'n' ? 'news' : prefix === 'e' ? 'event' : prefix === 'am' ? 'announcement' : '',
-                    }));
+            const allItems = [
+                ...extractData(newsData, 'n'),
+                ...extractData(eventsData, 'e'),
+                ...extractData(announcementsData, 'am'),
+            ];
 
-                const allItems = [
-                    ...extractData(newsRes.data.data, 'n'),
-                    ...extractData(eventRes.data.data, 'e'),
-                    ...extractData(announcementRes.data.data, 'am'),
-                ];
-
-                allItems.sort((a, b) => b.date - a.date);
-                setNewsItems(allItems);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-        fetchData();
-    }, [currentLang]);
+            allItems.sort((a, b) => b.date - a.date);
+            setNewsItems(allItems);
+        }
+    }, [currentLang, section, globalData]);
 
 
     // Animation variants for the cards
@@ -120,18 +99,15 @@ const EventNewsInfo = ({section, newDetailPage, eventDetailPage, announcementDet
 
         return matchesTab && matchesSearch;
     });
-    // Move totalPages calculation below filteredNewsItems so it reflects filtered results
-    const totalPages = Math.ceil(filteredNewsItems.length / itemsPerPage);
 
-    const indexOfLastStudent = currentPage * itemsPerPage;
-    const indexOfFirstStudent = indexOfLastStudent - itemsPerPage;
-    const displayedData = filteredNewsItems.slice(indexOfFirstStudent, indexOfLastStudent);
+    const totalPages = Math.ceil(filteredNewsItems.length / itemsPerPage);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const displayedData = filteredNewsItems.slice(indexOfFirstItem, indexOfLastItem);
 
     const paginationRange = () => {
         if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
-
         const range = [];
-
         if (currentPage <= 3) {
           range.push(1, 2, 3, 4, '...', totalPages);
         } else if (currentPage >= totalPages - 2) {
@@ -139,42 +115,33 @@ const EventNewsInfo = ({section, newDetailPage, eventDetailPage, announcementDet
         } else {
           range.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
         }
-
         return range;
-      };
+    };
 
     // Reset to page 1 when tab or search query changes
-    React.useEffect(() => {
+    useEffect(() => {
         setCurrentPage(1);
     }, [activeTab, searchQuery]);
-
-    // Pagination display logic with truncation
-    const maxPagesToShow = 5; // Show up to 5 page numbers (e.g., 1, 2, ..., 9, 10)
-    let pageNumbers = [];
-    const totalItems = displayedData.length;
-
-    if (totalPages <= maxPagesToShow) {
-        // If total pages are less than or equal to maxPagesToShow, show all pages
-        pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
-    } else {
-        // Show first 2 pages, ellipsis, and last 2 pages
-        const firstPages = [1, 2];
-        const lastPages = [totalPages - 1, totalPages];
-        pageNumbers = [...firstPages];
-
-        // Add ellipsis if there are pages between the first and last sets
-        if (totalPages > 5) {
-        pageNumbers.push('...');
-        }
-
-        pageNumbers.push(...lastPages);
-    }
 
     // Handle page change
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
         }
+    };
+
+    if (isLoading) return null;
+
+    const getDetailPath = (routeUrl, refId) => {
+        let alias = '';
+        if (routeUrl && routeUrl.toLowerCase() === 'news') alias = newDetailPage?.p_alias || '';
+        else if (routeUrl && routeUrl.toLowerCase() === 'event') alias = eventDetailPage?.p_alias || '';
+        else if (routeUrl && routeUrl.toLowerCase() === 'announcement') alias = announcementDetailPage?.p_alias || '';
+
+        if (!alias) return '#';
+        const path = alias.startsWith('/') ? alias : `/${alias}`;
+        const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+        return `${fullPath}/${refId}`;
     };
 
     return (
@@ -184,12 +151,11 @@ const EventNewsInfo = ({section, newDetailPage, eventDetailPage, announcementDet
             <div className="mb-4 md:mb-0">
             <h1 className={`text-2xl sm:text-3xl font-bold text-gray-800 ${currentLang === 2 ? "font-khmer " : "font-bold"
                             }`}>
-                                {headerData.hsec_title}
+                                 {headerData.hsec_title}
             </h1>
             <p className={`text-xs sm:text-sm text-gray-600 mt-2 ${currentLang === 2 ? "fonts-khmer leading-8" : "font-sans"
                             }`}>
                 {headerData.hsec_subtitle}
-
             </p>
             </div>
 
@@ -237,20 +203,13 @@ const EventNewsInfo = ({section, newDetailPage, eventDetailPage, announcementDet
                 whileHover="hover"
                 >
                     <Link
-                        to={`${prefix}${event.route_url && event.route_url.toLowerCase() === 'news'
-                            ? `${newDetailPage.p_alias}`
-                            : event.route_url && event.route_url.toLowerCase() === 'event'
-                            ? `${eventDetailPage.p_alias}`
-                            : event.route_url && event.route_url.toLowerCase() === 'announcement'
-                            ? `${announcementDetailPage.p_alias}`
-                            : ''
-                        }/${event.ref_id}`}
+                        to={getDetailPath(event.route_url, event.ref_id)}
                         className="block group"
                         aria-label={event.title}
                     >
                     <div className="flex flex-col sm:flex-row sm:items-center">
                         <img
-                            src={`${BASE_IMAGE_URL}/${event.image}`}
+                            src={event.image ? `${BASE_IMAGE_URL}/${event.image}` : '/placeholder-image.jpg'}
                             alt={event.title}
                             className="w-full h-64 sm:h-60 object-cover rounded-md mb-3 sm:mb-0 sm:w-1/2"
                         />
@@ -291,8 +250,7 @@ const EventNewsInfo = ({section, newDetailPage, eventDetailPage, announcementDet
         </div>
 
         {/* Pagination Controls */}
-
-        {totalItems > 0 && (
+        {filteredNewsItems.length > itemsPerPage && (
             <div className="flex justify-center mt-6 space-x-2">
                 <button
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -329,4 +287,4 @@ const EventNewsInfo = ({section, newDetailPage, eventDetailPage, announcementDet
     );
 }
 
-export default EventNewsInfo
+export default EventNewsInfo;

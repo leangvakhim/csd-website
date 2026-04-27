@@ -1,54 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+import { useData } from "../../Context/DataContext";
 
 const FeedbackSection = ({ menuLang }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [feedbackData, setFeedbackData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isNavigating, setIsNavigating] = useState(false);
 
+
+  const { globalData } = useData();
+
   useEffect(() => {
-    const fetchFeedback = async () => {
-      try {
-        setLoading(true);
-        const response = await axiosInstance.get(`${API_ENDPOINTS.getFeedback}?lang=${menuLang}`);
-        const data = Array.isArray(response.data?.data) ? response.data.data : [];
+    if (!globalData?.feedbacks) return;
 
-        const formattedData = data
-          .filter(
-            (item) =>
-              item.display === 1 &&
-              item.active === 1 &&
-              item.lang === menuLang
-          )
-          .map((item) => ({
-            id: item.fb_id || item.fb_title || `feedback-${Math.random()}`,
-            title: item.fb_writer || (menuLang === 2 ? 'អនាមិក' : 'Anonymous'),
-            name: item.fb_title || (menuLang === 2 ? 'អនាមិក' : 'Anonymous'),
-            text: item.fb_subtitle || (menuLang === 2 ? 'គ្មានមតិយោបល់' : 'No feedback provided'),
-            image: item.image?.img
-              ? `${API}/storage/uploads/${item.image.img}`
-              : '/images/placeholder-image.jpg',
-          }));
+    const data = Array.isArray(globalData.feedbacks) ? globalData.feedbacks : [];
 
-        setFeedbackData(formattedData);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching feedback:', err);
-        setError(
-          menuLang === 2
-            ? 'បរាជ័យក្នុងការទាញយកមតិយោបល់'
-            : 'Failed to load feedback. Please try again later.'
-        );
-        setLoading(false);
-      }
-    };
+    const formattedData = data
+      .filter(
+        (item) =>
+          item.display === 1 &&
+          item.active === 1 &&
+          item.lang === menuLang
+      )
+      .map((item) => ({
+        id: item.fb_id || item.fb_title || `feedback-${Math.random()}`,
+        title: item.fb_writer || (menuLang === 2 ? 'អនាមិក' : 'Anonymous'),
+        name: item.fb_title || (menuLang === 2 ? 'អនាមិក' : 'Anonymous'),
+        text: item.fb_subtitle || (menuLang === 2 ? 'គ្មានមតិយោបល់' : 'No feedback provided'),
+        image: item.image?.img
+          ? `${API}/storage/uploads/${item.image.img}`
+          : '/images/placeholder-image.jpg',
+      }));
 
-    fetchFeedback();
-  }, [menuLang]);
+    setFeedbackData(formattedData);
+  }, [menuLang, globalData?.feedbacks]);
+
 
   const nextFeedback = () => {
     if (isNavigating) return;
@@ -75,42 +63,10 @@ const FeedbackSection = ({ menuLang }) => {
     setTimeout(() => setIsNavigating(false), 500);
   };
 
-  if (loading) {
-    return (
-      <div
-        lang={menuLang === 2 ? 'km' : 'en'}
-        className={`my-8 sm:my-12 lg:my-16 text-center text-gray-600 ${
-          menuLang === 2 ? 'lang-khmer font-khmer' : 'lang-english font-sans'
-        }`}
-      >
-        {menuLang === 2 ? 'កំពុងផ្ទុកមតិយោបល់...' : 'Loading feedback...'}
-      </div>
-    );
+  if (feedbackData.length === 0) {
+    return null;
   }
 
-  if (error || feedbackData.length === 0) {
-    return (
-      <div
-        lang={menuLang === 2 ? 'km' : 'en'}
-        className={`my-8 sm:my-12 lg:my-16 text-center text-gray-600 ${
-          menuLang === 2 ? 'lang-khmer font-khmer' : 'lang-english font-sans'
-        }`}
-        role="region"
-        aria-label={menuLang === 2 ? 'ផ្នែកមតិយោបល់' : 'Feedback section'}
-        aria-live="polite"
-      >
-        {error || (menuLang === 2 ? 'គ្មានមតិយោបល់សម្រាប់បង្ហាញ' : 'No feedback available at this time.')}
-        {error && (
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700"
-          >
-            {menuLang === 2 ? 'សាកល្បងម្តងទៀត' : 'Retry'}
-          </button>
-        )}
-      </div>
-    );
-  }
 
   const { id, title, name, text, image } = feedbackData[currentIndex];
 

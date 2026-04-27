@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
+
 import { RiDoubleQuotesR } from "react-icons/ri";
 
 const TypeSection = ({ section, menuLang }) => {
@@ -9,29 +10,25 @@ const TypeSection = ({ section, menuLang }) => {
   const [description, setDescription] = useState('');
 
   // Fetching Scholarship Types (Full-Funded, Merit-Based, etc.)
-  useEffect(() => {
-    if (section && section.sec_id) {
-      // Fetch data for both API endpoints
-      axiosInstance.get(API_ENDPOINTS.getSubType)
-        .then((response) => {
-          const allScholarships = response.data?.data || [];
-          const filtered = allScholarships.filter(item => item?.tse?.tse_sec === section.sec_id);
-          setScholarships(filtered);
-        })
-        .catch((error) => console.error("Error fetching scholarships from getSubType:", error));
+  const { globalData } = useData();
 
-      axiosInstance.get(API_ENDPOINTS.getType)
-        .then((response) => {
-          const tseData = response.data?.data || [];
-          const filtered = tseData.find(t => t.tse_sec === section.sec_id);
-          if (filtered && filtered.text) {
-            setMainTitle(filtered.text.title || 'Default Title');
-            setDescription(filtered.text.desc || 'No description available.');
-          }
-        })
-        .catch((error) => console.error("Error fetching data from /api/tse:", error));
+  useEffect(() => {
+    if (section && section.sec_id && globalData) {
+      // Use subTypes from globalData
+      const allScholarships = globalData.subTypes || [];
+      const filteredScholarships = allScholarships.filter(item => item?.tse?.tse_sec === section.sec_id);
+      setScholarships(filteredScholarships);
+
+      // Use types from globalData
+      const tseData = globalData.types || [];
+      const filteredTse = tseData.find(t => t.tse_sec === section.sec_id);
+      if (filteredTse && filteredTse.text) {
+        setMainTitle(filteredTse.text.title || 'Default Title');
+        setDescription(filteredTse.text.desc || 'No description available.');
+      }
     }
-  }, [section]);  // Fetch scholarships when `section` is available or changes
+  }, [section, globalData]);
+
 
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },

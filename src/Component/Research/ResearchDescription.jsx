@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 import { motion } from 'framer-motion';
 
 const ResearchDescription = ({rsdtId}) => {
+    const { globalData } = useData();
     const [descriptionSection, setDescriptionSection] = useState({ rsdd_title: '', rsdd_details: '' });
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        if (rsdtId) {
-            axiosInstance.get(API_ENDPOINTS.getRsdDescription)
-                .then((res) => {
-                    const allItems = res.data?.data;
-                    const filtered = allItems.find(item => item.rsdd_rsdtile == rsdtId);
-                    if (filtered?.rsdd_details) {
-                        setDescriptionSection({
-                            rsdd_title: filtered.rsdd_title,
-                            rsdd_details: filtered.rsdd_details
-                        });
-                    }
-                })
-                .catch(err => console.error("Error fetching focus data:", err));
+        if (rsdtId && globalData?.researchDescs) {
+            const allItems = globalData.researchDescs;
+            const filtered = allItems.find(item => item.rsdd_rsdtile == rsdtId);
+            if (filtered?.rsdd_details) {
+                setDescriptionSection({
+                    rsdd_title: filtered.rsdd_title,
+                    rsdd_details: filtered.rsdd_details
+                });
+            }
         }
-    }, [rsdtId]);
+    }, [rsdtId, globalData?.researchDescs]);
+
+    if (!descriptionSection.rsdd_details) return null;
+
 
     return (
         <section>

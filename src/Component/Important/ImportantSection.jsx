@@ -1,53 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
 
 const ImportantSection = ({ section, menuLang }) => {
+  const { globalData, isLoading } = useData();
   const [importantData, setImportantData] = useState(null);
   const [subDates, setSubDates] = useState([]);
 
   useEffect(() => {
-    const fetchImportantData = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getImportant);
-        const data = Array.isArray(res.data?.data) ? res.data.data : [];
-        const filtered = data.filter(item =>
-          item.section?.sec_id === section?.sec_id &&
-          item.section?.sec_type === "Important"
-        );
-        if (filtered && filtered.length > 0) {
-          setImportantData(filtered[0]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch important data:", error);
+    if (globalData?.importants) {
+      const data = globalData.importants;
+      const filtered = data.filter(item =>
+        item.section?.sec_id === section?.sec_id &&
+        item.section?.sec_type === "Important"
+      );
+      if (filtered && filtered.length > 0) {
+        setImportantData(filtered[0]);
       }
-    };
-    fetchImportantData();
-  }, [section]);
+    }
 
-  useEffect(() => {
-    const fetchSubDates = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getSubImportant);
-        const data = Array.isArray(res.data?.data) ? res.data.data : [];
+    if (globalData?.subImportants) {
+      const data = globalData.subImportants;
+      const filtered = data
+        .filter(
+          (item) =>
+            item.display === 1 &&
+            item.active === 1 &&
+            item.idd?.idd_sec === section?.sec_id
+        )
+        .sort((a, b) => a.sidd_order - b.sidd_order);
 
-        const filtered = data
-          .filter(
-            (item) =>
-              item.display === 1 &&
-              item.active === 1 &&
-              item.idd?.idd_sec === section?.sec_id
-          )
-          .sort((a, b) => a.sidd_order - b.sidd_order);
+      setSubDates(filtered);
+    }
+  }, [section?.sec_id, globalData]);
 
-        setSubDates(filtered);
-      } catch (error) {
-        console.error("Failed to fetch sub important dates:", error);
-      }
-    };
-
-    fetchSubDates();
-  }, [section]);
+  if (isLoading) return null;
 
   return (
     <div className="my-16">
@@ -90,11 +77,12 @@ const ImportantSection = ({ section, menuLang }) => {
                     className="space-y-4"
                 >
                     {subDates.map((item, index) => {
-                      const formattedDate = new Date(item.sidd_date).toLocaleDateString("en-GB", {
+                      const dateObj = new Date(item.sidd_date);
+                      const formattedDate = dateObj.toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
                       });
-                      const day = new Date(item.sidd_date).getDate();
+                      const day = dateObj.getDate();
                       const suffix = (d) => {
                         if (d > 3 && d < 21) return "th";
                         switch (d % 10) {

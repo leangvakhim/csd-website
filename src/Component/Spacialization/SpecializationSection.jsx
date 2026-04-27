@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaCheck } from "react-icons/fa";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+
+import { useData } from "../../Context/DataContext";
 
 const sectionVariants = {
   hidden: { opacity: 0 },
@@ -21,84 +23,68 @@ const cardVariants = {
 };
 
 const SpecializationSection = ({ section, menuLang }) => {
+  const { globalData } = useData();
   const [innovation, setInnovation] = useState(null);
   const [subservices, setSubservices] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!section?.sec_id) {
-        console.log("No section.sec_id provided.");
-        return;
-      }
+    if (!globalData?.specializations || !globalData?.subServices) return;
 
-      try {
-        const res = await axiosInstance.get(
-          `${API_ENDPOINTS.getSpecialization}`
-        );
-        const data = res.data?.data || [];
+    try {
+      const data = globalData.specializations;
+      const filteredData = data.filter(
+        (item) =>
+          item.section?.sec_page === section.sec_page &&
+          item.section.display === 1 &&
+          item.section.active === 1
+      );
 
-        const filteredData = data.filter(
-          (item) =>
-            item.section?.sec_page === section.sec_page &&
-            item.section.display === 1 &&
-            item.section.active === 1
-        );
+      if (filteredData.length === 0) return;
 
-        if (filteredData.length === 0) return;
+      const item = filteredData[0];
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(item.text.desc, "text/html");
 
-        const item = filteredData[0];
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(item.text.desc, "text/html");
+      const listItems = Array.from(doc.querySelectorAll("span")).map((span) =>
+        span.textContent.trim()
+      );
 
-        const listItems = Array.from(doc.querySelectorAll("span")).map((span) =>
-          span.textContent.trim()
-        );
+      const paragraphs = Array.from(doc.querySelectorAll("p"))
+        .map((p) => p.textContent.trim())
+        .filter(Boolean);
 
-        const paragraphs = Array.from(doc.querySelectorAll("p"))
-          .map((p) => p.textContent.trim())
-          .filter(Boolean);
+      setInnovation({
+        title: item.text.title,
+        description: item.text.desc,
+        paragraphs,
+        listItems,
+        imageLeft: item.image1?.img ? `${API}/storage/uploads/${item.image1.img}` : null,
+        imageRight: item.image2?.img ? `${API}/storage/uploads/${item.image2.img}` : null,
+        hasRas: !!item.ras,
+      });
 
-        setInnovation({
-          title: item.text.title,
-          description: item.text.desc,
-          paragraphs,
-          listItems,
-          imageLeft: item.image1?.img ? `${API}/storage/uploads/${item.image1.img}` : null,
-          imageRight: item.image2?.img ? `${API}/storage/uploads/${item.image2.img}` : null,
-          hasRas: !!item.ras,
-        });
+      const subserviceData = (globalData.subServices || []).filter(
+        (s) => s.ras?.ras_sec === item.ras_sec
+      );
 
-        const subserviceRes = await axiosInstance.get(
-          `${API_ENDPOINTS.getSubserviceAF}?af_id=${item.af_id}`
-        );
+      setSubservices(
+        subserviceData.map((s) => ({
+          ss_id: s.ss_id,
+          title: s.ss_title || "Untitled Subservice",
+          description: s.ss_subtitle || "No description available",
+          icon: s.image?.img ? `${API}/storage/uploads/${s.image.img}` : "",
+        }))
+      );
+    } catch (error) {
+      console.error("Specialization processing error:", error);
+    }
+  }, [section, globalData?.specializations, globalData?.subServices]);
 
-        const subserviceData = (subserviceRes.data?.data || []).filter(
-          (s) => s.ras?.ras_sec === item.ras_sec
-        );
-
-        setSubservices(
-          subserviceData.map((s) => ({
-            ss_id: s.ss_id,
-            title: s.ss_title || "Untitled Subservice",
-            description: s.ss_subtitle || "No description available",
-            icon: s.image?.img ? `${API}/storage/uploads/${s.image.img}` : "",
-          }))
-        );
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [section]);
 
   if (!innovation) {
-    return (
-      <div className="text-center py-8 text-gray-600">
-        No specialization data available for this section.
-      </div>
-    );
+    return null;
   }
+
 
   return (
     <div className="my-8 sm:my-12 lg:my-16">

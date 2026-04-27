@@ -2,7 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { RiDoubleQuotesR } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+
+import { useData } from "../../Context/DataContext";
+
 
 const DeveloperSection = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,75 +36,68 @@ const DeveloperSection = () => {
     };
   }, []);
 
+  const { globalData } = useData();
+
   useEffect(() => {
-    const fetchDevelopers = async () => {
-      try {
-        // Fetch developer data
-        const devRes = await axiosInstance.get(API_ENDPOINTS.getDevelopers);
-        const allDevelopers = devRes.data?.data || [];
+    if (!globalData?.developers) return;
 
-        // Filter for lang: currentLang, display: 1, active: 1, ensuring numbers
-        const filteredDevelopers = allDevelopers.filter(item => {
-          const valid =
-            Number(item.display) === 1 &&
-            Number(item.active) === 1 &&
-            Number(item.lang) === Number(currentLang);
-          return valid;
+    // Filter for lang: currentLang, display: 1, active: 1, ensuring numbers
+    const allDevelopers = globalData.developers || [];
+    const filteredDevelopers = allDevelopers.filter(item => {
+      const valid =
+        Number(item.display) === 1 &&
+        Number(item.active) === 1 &&
+        Number(item.lang) === Number(currentLang);
+      return valid;
+    });
+
+    // Remove duplicates based on image (d_img) and normalize names
+    const uniqueDevelopers = [];
+    const seenImages = new Set();
+    const seenNames = new Set();
+
+    filteredDevelopers
+    .sort((a, b) => b.d_order - a.d_order)
+    .forEach(dev => {
+      const normalizedName = dev.d_name.toLowerCase().replace(/\s+/g, '');
+      const imageId = dev.d_img;
+
+      if (
+        !seenImages.has(imageId) &&
+        !seenNames.has(normalizedName)
+      ) {
+        uniqueDevelopers.push({
+          id: dev.d_id,
+          name: dev.d_name,
+          position: dev.d_position,
+          bio: dev.d_write || 'No bio available.',
+          image: dev.img?.img
+            ? `${API}/storage/uploads/${dev.img.img}`
+            : '/placeholder-icon.png',
         });
-
-        // Remove duplicates based on image (d_img) and normalize names
-        const uniqueDevelopers = [];
-        const seenImages = new Set();
-        const seenNames = new Set();
-
-        filteredDevelopers
-        .sort((a, b) => b.d_order - a.d_order)
-        .forEach(dev => {
-          const normalizedName = dev.d_name.toLowerCase().replace(/\s+/g, '');
-          const imageId = dev.d_img;
-
-          if (
-            !seenImages.has(imageId) &&
-            !seenNames.has(normalizedName)
-          ) {
-            uniqueDevelopers.push({
-              id: dev.d_id,
-              name: dev.d_name,
-              position: dev.d_position,
-              bio: dev.d_write || 'No bio available.',
-              image: dev.img?.img
-                ? `${API}/storage/uploads/${dev.img.img}`
-                : '/placeholder-icon.png',
-            });
-            seenImages.add(imageId);
-            seenNames.add(normalizedName);
-          }
-        });
-
-        setDevelopers(uniqueDevelopers);
-
-        // Fetch social media data
-        const socialRes = await axiosInstance.get(API_ENDPOINTS.getSocialDeveloper);
-        const allSocials = socialRes.data?.data || [];
-        const socialsByDeveloper = {};
-
-        uniqueDevelopers.forEach(dev => {
-          socialsByDeveloper[dev.id] = allSocials.filter(
-            social =>
-              social.ds_developer === dev.id &&
-              social.display === 1 &&
-              social.active === 1
-          );
-        });
-
-        setSocials(socialsByDeveloper);
-      } catch (error) {
-        console.error('Error fetching developers or socials:', error);
+        seenImages.add(imageId);
+        seenNames.add(normalizedName);
       }
-    };
+    });
 
-    fetchDevelopers();
-  }, [currentLang]);
+    setDevelopers(uniqueDevelopers);
+
+    // Use social media data from globalData
+    const allSocials = globalData.devSocials || [];
+    const socialsByDeveloper = {};
+
+    uniqueDevelopers.forEach(dev => {
+      socialsByDeveloper[dev.id] = allSocials.filter(
+        social =>
+          social.ds_developer === dev.id &&
+          social.display === 1 &&
+          social.active === 1
+      );
+    });
+
+    setSocials(socialsByDeveloper);
+  }, [currentLang, globalData?.developers, globalData?.devSocials]);
+
 
   // Close modal when clicking outside
   useEffect(() => {

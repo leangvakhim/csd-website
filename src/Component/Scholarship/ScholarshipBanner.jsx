@@ -1,62 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaCalendarAlt } from 'react-icons/fa';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
 const ScholarshipBanner = ({ scholarshipId }) => {
+  const { globalData, isLoading } = useData();
   const [bannerSection, setBannerSection] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
-    if (scholarshipId) {
-      const fetchBanner = async () => {
-        try {
-          const response = await axiosInstance.get(`${API_ENDPOINTS.getScholarship}`);
-          const allScholarships = response.data?.data || [];
-          const selectedItem = allScholarships.find(item =>
-            item.ref_id === Number(scholarshipId) && item.lang === currentLang
-          );
-          if (selectedItem) {
-            setBannerSection({
-              title: selectedItem.sc_title,
-              postDate: new Date(selectedItem.sc_postdate).toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-              }),
-              image: selectedItem.image?.img
-                ? `${API}/storage/uploads/${selectedItem.image.img}`
-                : '/placeholder-image.jpg',
-            });
-          }
-          setLoading(false);
-        } catch (err) {
-          setError('Failed to load scholarship banner.');
-          console.error('Error fetching scholarship details:', err);
-          setLoading(false);
-        }
-      };
-      fetchBanner();
+    if (globalData?.scholarship && scholarshipId) {
+      const allScholarships = globalData.scholarship || [];
+      const selectedItem = allScholarships.find(item =>
+        item.ref_id === Number(scholarshipId) && item.lang === currentLang
+      );
+      if (selectedItem) {
+        setBannerSection({
+          title: selectedItem.sc_title,
+          postDate: new Date(selectedItem.sc_postdate).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          }),
+          image: selectedItem.image?.img
+            ? `${API}/storage/uploads/${selectedItem.image.img}`
+            : '/placeholder-image.jpg',
+        });
+      }
     }
-  }, [scholarshipId, currentLang]);
+  }, [scholarshipId, currentLang, globalData]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[600px] px-4 text-center">
-        <p className="text-base text-gray-500 animate-pulse">Loading...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-[600px] px-4 text-center">
-        <p className="text-base text-red-500">{error}</p>
-      </div>
-    );
-  }
+  if (isLoading || !bannerSection) return null;
 
   return (
     <motion.div

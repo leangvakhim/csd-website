@@ -1,69 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { PiGraduationCapDuotone } from "react-icons/pi";
 import { motion } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { Link } from 'react-router-dom';
+import { useData } from "../../Context/DataContext";
+import { API } from '../../Service/APIconfig';
 
-const AvailableSection = ({key, section, menuLang}) => {
-
-    const location = useLocation();
+const AvailableSection = ({section, menuLang}) => {
+    const { globalData, isLoading } = useData();
 
     const [apdTitle, setApdTitle] = useState('');
     const [programs, setPrograms] = useState([]);
 
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-
-        const fetchTitle = async () => {
-            try {
-                const res = await axiosInstance.get(API_ENDPOINTS.getAvailable);
-                const dataList = Array.isArray(res.data?.data) ? res.data.data : [];
-                const match = dataList.find(item => item.apd_sec === section?.sec_id);
-                if (match) {
-                    setApdTitle(match.apd_title || 'Available Programs & Degree');
-                }
-            } catch (error) {
-                console.error("Failed to fetch apd_title:", error);
+        if (globalData?.availables) {
+            const dataList = globalData.availables;
+            const match = dataList.find(item => item.apd_sec === section?.sec_id);
+            if (match) {
+                setApdTitle(match.apd_title || 'Available Programs & Degree');
             }
-        };
+        }
 
-        const fetchPrograms = async () => {
-            try {
-                const res = await axiosInstance.get(API_ENDPOINTS.getSubAvailable);
-                const dataList = Array.isArray(res.data?.data) ? res.data.data : [];
-                const filtered = dataList.filter(item => item.apd?.apd_sec === section?.sec_id && item.display === 1);
-                const mapped = filtered.map(item => ({
+        if (globalData?.subAvailables && globalData?.pages) {
+            const dataList = globalData.subAvailables;
+            const pages = globalData.pages;
+            
+            const filtered = dataList.filter(item => item.apd?.apd_sec === section?.sec_id && item.display === 1);
+            const mapped = filtered.map(item => {
+                const programLink = item.sapd_routepage || '';
+                const matchPage = pages.find((page) => page.p_title === programLink.replace('/', ''));
+                return {
                     title: item.sapd_title,
                     image: item.image?.img ? `${API}/storage/uploads/${item.image.img}` : '',
-                    link: item.sapd_routepage || ''
-                }));
-                setPrograms(mapped);
-            } catch (error) {
-                console.error("Failed to fetch programs:", error);
-            }
-        };
+                    link: matchPage ? matchPage.p_alias : programLink
+                };
+            });
+            setPrograms(mapped);
+        }
+    }, [section?.sec_id, globalData]);
 
-        const resolvePageAliases = async () => {
-            try {
-                const res = await axiosInstance.get(API_ENDPOINTS.getPage);
-                const pages = Array.isArray(res.data?.data) ? res.data.data : [];
-
-                setPrograms((prevPrograms) =>
-                    prevPrograms.map((program) => {
-                        const match = pages.find((page) => page.p_title === program.link.replace('/', ''));
-                        return match ? { ...program, link: match.p_alias } : program;
-                    })
-                );
-            } catch (error) {
-                console.error("Failed to fetch page aliases:", error);
-            }
-        };
-
-        fetchTitle();
-        fetchPrograms().then(() => {
-            resolvePageAliases();
-        });
-    }, [location]);
+    if (isLoading) return null;
 
     return (
         <div className="my-16">

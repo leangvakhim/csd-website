@@ -1,131 +1,133 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
-import OneCol from './OneCol';
-import TwoCol from './TwoCol';
-import FourCol from './FourCol';
+import { Link, useNavigate } from 'react-router-dom';
+import { MdExplore } from 'react-icons/md';
 
-const sectionVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.5, when: 'beforeChildren', staggerChildren: 0.2 },
-  },
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 }
 };
 
-const contentVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
+const TwoCol = ({ researchData = [], headerData = {}, baseRoute = '' }) => {
+  const navigate = useNavigate();
+  const DEFAULT_IMAGE = '/placeholder-image.jpg';
 
-const DATA_ENDPOINTS = {
-  Partner: `${API_ENDPOINTS.getPartnership}?section_id=`,
-  Research: `${API_ENDPOINTS.getResearch}?section_id=`,
-  Faculty: `${API_ENDPOINTS.getFaculty}?section_id=`,
-  Scholarship: `${API_ENDPOINTS.getScholarship}?section_id=`,
-  Lab: `${API_ENDPOINTS.getLab}?section_id=`,
-  Announcement: `${API_ENDPOINTS.getAnnouncement}?section_id=`,
-  Career: `${API_ENDPOINTS.getCareer}?section_id=`,
-  Event: `${API_ENDPOINTS.getEvent}?section_id=`,
-  New: `${API_ENDPOINTS.getNews}?section_id=`,
-};
-
-const ColController = ({ sections = [] }) => {
-  const [sectionsData, setSectionsData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchAllSections = async () => {
-      try {
-        const headerRes = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-        const headers = headerRes.data?.data || [];
-
-        const results = await Promise.all(
-          sections.map(async (section) => {
-            const header = headers.find(h => h.hsec_sec === section.sec_id) || {};
-            const hsecAmount = header.hsec_amount ?? 4;
-
-            const endpoint = DATA_ENDPOINTS[section.sec_type] || `${API_ENDPOINTS.getPage}?section_id=`;
-            const res = await axiosInstance.get(`${endpoint}${section.sec_id}`);
-            const rawData = res.data?.data?.sections || res.data?.data || [];
-
-            const items = Array.isArray(rawData)
-              ? rawData
-              : rawData.sections
-              ? rawData.sections
-              : [rawData];
-
-            const transformedData = items.map(item => ({
-              id: item.id || item.e_id || item.sec_id || Math.random().toString(),
-              image: item.image || item.e_img || item.img || null,
-              title: item.title || item.e_title || item.hsec_title || 'Untitled',
-              subtitle: item.description || item.e_shorttitle || item.subtitle || 'No description',
-              tag: item.tag || item.e_tags || item.category || null,
-              buttons: item.buttons || [],
-              exploreText: 'Explore more',
-            }));
-
-            return {
-              id: section.sec_id,
-              sec_type: section.sec_type,
-              headerData: {
-                hsec_title: header.hsec_title || section.sec_type || 'Section',
-                hsec_subtitle: header.hsec_subtitle || '',
-                hsec_amount: hsecAmount,
-              },
-              data: transformedData.slice(0, hsecAmount),
-            };
-          })
-        );
-
-        setSectionsData(results);
-      } catch (err) {
-        console.error('ColController: Failed to fetch sections', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAllSections();
-  }, [sections]);
-
-  const renderSection = (sectionData) => {
-    const { headerData, data, sec_type } = sectionData;
-    const amount = headerData.hsec_amount || 4;
-    const props = {
-      researchData: data,
-      headerData,
-      baseRoute: sec_type.toLowerCase(),
-    };
-
-    if (amount === 1) return <OneCol key={sectionData.id} {...props} />;
-    if (amount === 2) return <TwoCol key={sectionData.id} {...props} />;
-    return <FourCol key={sectionData.id} {...props} />;
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-16">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (!Array.isArray(researchData) || researchData.length === 0) {
+    return null;
   }
 
   return (
-    <motion.div
-      className="space-y-16"
-      variants={sectionVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
-    >
-      {sectionsData.map(sectionData => (
-        <motion.div key={sectionData.id} variants={contentVariants}>
-          {renderSection(sectionData)}
+    <div className="my-12 lg:my-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="flex flex-col md:flex-row justify-between items-center mb-10"
+        >
+          <div className="text-center md:text-left">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+              {headerData?.hsec_title || 'Section'}
+            </h2>
+            {headerData?.hsec_subtitle && (
+              <p className="text-lg text-gray-500 max-w-2xl">
+                {headerData.hsec_subtitle}
+              </p>
+            )}
+          </div>
+          
+          {baseRoute && (
+            <motion.button
+              onClick={() => navigate(`/${baseRoute}`)}
+              className="mt-6 md:mt-0 flex items-center text-primary font-semibold hover:text-primary-dark group"
+              whileHover={{ x: 5 }}
+            >
+              <span className="border-b-2 border-primary mr-2">View All</span>
+              <MdExplore className="text-xl" />
+            </motion.button>
+          )}
         </motion.div>
-      ))}
-    </motion.div>
+
+        {/* Two Column Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+          {researchData.map((item, index) => (
+            <motion.div
+              key={item.id || index}
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="group"
+            >
+              <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col sm:flex-row h-full border border-gray-100">
+                {/* Image Section */}
+                <div className="w-full sm:w-2/5 relative overflow-hidden h-64 sm:h-auto">
+                  <img
+                    src={item.image || DEFAULT_IMAGE}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    onError={(e) => (e.target.src = DEFAULT_IMAGE)}
+                  />
+                  {item.tag && (
+                    <div className="absolute top-4 left-4 bg-primary/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
+                      {item.tag}
+                    </div>
+                  )}
+                </div>
+
+                {/* Content Section */}
+                <div className="w-full sm:w-3/5 p-6 lg:p-8 flex flex-col justify-center">
+                  <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm lg:text-base line-clamp-3 mb-6 flex-grow">
+                    {item.description}
+                  </p>
+                  
+                  <div className="flex items-center justify-between mt-auto">
+                    {baseRoute && (
+                      <Link
+                        to={`/${baseRoute}/${item.id}`}
+                        className="flex items-center text-sm font-bold text-primary hover:gap-2 transition-all"
+                      >
+                        {item.exploreText || 'Explore more'}
+                        <motion.span
+                          className="ml-2"
+                          initial={{ x: 0 }}
+                          whileHover={{ x: 5 }}
+                        >
+                          →
+                        </motion.span>
+                      </Link>
+                    )}
+                    
+                    {item.buttons && item.buttons.length > 0 && (
+                      <div className="flex gap-2">
+                        {item.buttons.slice(0, 1).map((btn, idx) => (
+                          <a
+                            key={idx}
+                            href={btn.url}
+                            className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full transition-colors"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {btn.text}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default ColController;
+export default TwoCol;

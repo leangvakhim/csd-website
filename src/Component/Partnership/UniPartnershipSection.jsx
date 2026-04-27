@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 import 'swiper/css';
 import 'swiper/css/autoplay';
 
@@ -25,53 +26,35 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const UniPartnerships = ({ section, headerTitle, menuLang }) => {
+const UniPartnerships = ({ section, headerTitle }) => {
+  const { globalData, isLoading } = useData();
   const [partners, setPartners] = useState([]);
-  const [currentLng, setCurrentLang] = useState(window.location.pathname.startsWith('/km') ? 2 : 1);
+  const currentLng = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
-    const fetchPartners = async () => {
-      try {
-        const res = await axiosInstance.get(`${API_ENDPOINTS.getPartnership}?section_id=${section.sec_id}`);
-        let data = res.data?.data ?? [];
+    if (globalData?.partners) {
+      const data = globalData.partners;
 
-        // Ensure data is an array
-        if (data && !Array.isArray(data)) {
-          data = [data];
-        }
+      const formatted = data
+        .filter((partner) => 
+          partner.active === 1 && 
+          partner.ps_type === 2 && 
+          partner.ps_sec === section.sec_id
+        )
+        .map((partner) => ({
+          src: partner.img?.img
+            ? `${API}/storage/uploads/${partner.img.img}`
+            : null,
+          alt: partner.ps_title || 'Partner Logo',
+        }));
 
-        const formatted = data
-          .filter((partner) => partner.active === 1 && partner.ps_type === 2) // Filter active partners
-          .map((partner) => ({
-            src: partner.img?.img
-              ? `${API}/storage/uploads/${partner.img.img}` // Use img.img for image file name
-              : null,
-            alt: partner.ps_title || 'Partner Logo', // Use title or fallback
-          }));
+      setPartners(formatted);
+    }
+  }, [section.sec_id, globalData]);
 
-        // Only update state if data has changed to prevent unnecessary re-renders
-        setPartners((prevPartners) => {
-          if (JSON.stringify(prevPartners) !== JSON.stringify(formatted)) {
-            return formatted;
-          }
-          return prevPartners;
-        });
-      } catch (error) {
-        console.error('UniPartnerships: Error fetching partners:', error);
-        setPartners([]); // Reset state on error
-      }
-    };
+  if (isLoading) return null;
 
-    fetchPartners();
-  }, [section.sec_id]); // Use specific property to avoid unnecessary re-runs
-
-  if (partners.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-600">
-        No Partnerships With Universities to display.
-      </div>
-    );
-  }
+  if (partners.length === 0) return null;
 
   return (
     <div className="bg-white my-16">

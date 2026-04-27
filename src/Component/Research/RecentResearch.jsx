@@ -1,102 +1,77 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { MdExplore, MdComputer } from 'react-icons/md';
-import { AiOutlineRobot } from 'react-icons/ai';
+import { MdExplore } from 'react-icons/md';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
 const RecentResearch = () => {
+  const { globalData, isLoading } = useData();
   const navigate = useNavigate();
   const [researchData, setResearchData] = useState([]);
-  const [headerData, setHeaderData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const location = useLocation();
   const currentLang = location.pathname.startsWith('/km') ? 2 : 1;
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    if (!globalData?.researchlab) return;
 
-        const researchResponse = await axiosInstance.get(API_ENDPOINTS.getResearchlab);
-        const researchData = researchResponse.data?.data || [];
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        const formattedResearchData = researchData
-          .filter((item) => {
-            if (item.display !== 1 || item.active !== 1) return false;
-            if (item.lang !== currentLang) return false;
+    const formattedResearchData = globalData.researchlab
+      .filter((item) => {
+        if (item.display !== 1 || item.active !== 1) return false;
+        if (item.lang !== currentLang) return false;
 
-            const itemDate = item.created_at
-              ? new Date(item.created_at)
-              : item.published_date
-              ? new Date(item.published_date)
-              : null;
+        const itemDate = item.created_at
+          ? new Date(item.created_at)
+          : item.published_date
+          ? new Date(item.published_date)
+          : null;
 
-            return itemDate ? itemDate >= thirtyDaysAgo : true;
-          })
-          .map((item) => ({
-            id: item.rsdl_id,
-            ref_id: item.ref_id,
-            title: item.rsdl_title || 'Untitled Research',
-            description: item.rsdl_subtitle || 'No description available',
-            image: item.img?.img
-              ? `${API}/storage/uploads/${item.img?.img}`
-              : '/placeholder-image.jpg',
-            lead: item.rsdl_lead || 'Unknown Lead',
-            created_at: new Date(item.created_at),
-          }))
-          .sort((a, b) => {
-            const dateA = a.created_at || 0;
-            const dateB = b.created_at || 0;
-            return dateB - dateA || b.id - a.id;
-          })
+        return itemDate ? itemDate >= thirtyDaysAgo : true;
+      })
+      .map((item) => ({
+        id: item.rsdl_id,
+        ref_id: item.ref_id,
+        title: item.rsdl_title || 'Untitled Research',
+        description: item.rsdl_subtitle || 'No description available',
+        image: item.img?.img
+          ? `${API}/storage/uploads/${item.img?.img}`
+          : '/placeholder-image.jpg',
+        lead: item.rsdl_lead || 'Unknown Lead',
+        created_at: new Date(item.created_at),
+      }))
+      .sort((a, b) => {
+        const dateA = a.created_at || 0;
+        const dateB = b.created_at || 0;
+        return dateB - dateA || b.id - a.id;
+      });
 
-          setResearchData(formattedResearchData);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load data. Please try again later.');
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [currentLang]);
+    setResearchData(formattedResearchData);
+  }, [currentLang, globalData?.researchlab]);
 
   useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const tagRes = await axiosInstance.get(API_ENDPOINTS.getResearchlabTag);
-        const allTags = tagRes.data?.data || [];
+    if (researchData.length > 0 && globalData?.researchlabTags) {
+      const allTags = globalData.researchlabTags;
+      const rsdlId = researchData[currentIndex]?.id;
+      if (!rsdlId) return;
 
-        const rsdlId = researchData[0]?.id;
-        if (!rsdlId) return;
+      const filteredTags = allTags
+        .filter(tag => tag.rsdlt_rsdl === rsdlId && tag.active === 1)
+        .map(tag => ({
+          title: tag.rsdlt_title,
+          image: tag.img?.img
+            ? `${API}/storage/uploads/${tag.img.img}`
+            : '/placeholder-image.jpg',
+        }));
 
-        const filteredTags = allTags
-          .filter(tag => tag.rsdlt_rsdl === rsdlId && tag.active === 1)
-          .map(tag => ({
-            title: tag.rsdlt_title,
-            image: tag.img?.img
-              ? `${API}/storage/uploads/${tag.img.img}`
-              : '/placeholder-image.jpg',
-          }));
-
-        setTags(filteredTags);
-      } catch (err) {
-        console.error('Failed to fetch research tags:', err);
-      }
-    };
-
-    if (researchData.length > 0) {
-      fetchTags();
+      setTags(filteredTags);
     }
-  }, [researchData]);
+  }, [researchData, currentIndex, globalData?.researchlabTags]);
 
-  // Navigation for carousel
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? researchData.length - 1 : prev - 1));
   };
@@ -105,31 +80,11 @@ const RecentResearch = () => {
     setCurrentIndex((prev) => (prev === researchData.length - 1 ? 0 : prev + 1));
   };
 
+  if (isLoading || researchData.length === 0) {
+    return null;
+  }
+
   const buttons = tags;
-
-  if (loading) {
-    return (
-      <div className="my-16 text-center text-gray-600">
-        Loading research data...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="my-16 text-center text-gray-600">
-        {error}
-      </div>
-    );
-  }
-
-  if (researchData.length === 0) {
-    return (
-      <div className="my-16 text-center text-gray-600">
-        No recent research found.
-      </div>
-    );
-  }
 
   return (
     <div className="my-16">
@@ -138,7 +93,6 @@ const RecentResearch = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
           <div className="mb-4 sm:mb-0">
             <h2 className={`${currentLang === 2 ? 'font-khmer' : 'font-semibold'} text-2xl sm:text-3xl font-semibold mb-2`}>{currentLang === 1 ? "Student Research" : "កិច្ចការស្រាវជ្រាវរបស់និស្សិត"}</h2>
-
           </div>
           <div className="flex gap-3 sm:gap-4 items-center">
             <button

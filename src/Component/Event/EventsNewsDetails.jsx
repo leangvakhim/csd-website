@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 import { motion } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import EventBanner from './EventBanner';
@@ -16,51 +17,40 @@ const EventsNewsDetails = ({ eventId, menuLang, eventDetailPage }) => {
     const currentLang = location.pathname.includes('/km') ? 2 : 1;
 
 
+    const { globalData, isLoading } = useData();
+
     useEffect(() => {
-        const fetchNews = async () => {
-            setLoading(true);
-            try {
-                const response = await axiosInstance.get(`${API_ENDPOINTS.getEvent}`);
-                const data = response.data?.data || [];
+        if (!globalData?.events || isLoading) return;
 
-                const selectedItem = data.find(item =>
-                    item.display === 1 &&
-                    item.lang === currentLang &&
-                    item.ref_id === Number(eventId)
-                );
+        const selectedItem = globalData.events.find(item =>
+            item.display === 1 &&
+            item.lang === currentLang &&
+            item.ref_id === Number(eventId)
+        );
 
-                if (selectedItem) {
-                    setNews({
-                        e_id: selectedItem.e_id,
-                        date: selectedItem.e_date && !isNaN(new Date(selectedItem.e_date).getTime())
-                            ? new Date(selectedItem.e_date).toLocaleDateString('en-GB', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                  year: 'numeric',
-                              })
-                            : 'TBD',
-                        title: selectedItem.e_title || 'Untitled News',
-                        shortTitle: selectedItem.e_shorttitle || '',
-                        detail: selectedItem.e_detail || 'No details available.',
-                        image: selectedItem.img?.img
-                            ? `${API}/storage/uploads/${selectedItem.img.img}`
-                            : '/placeholder-image.jpg',
-                    });
-                } else {
-                    setError('No relevant news found.');
-                }
-                setLoading(false);
-            } catch (err) {
-                const errorMessage = err.response?.status === 404
-                    ? 'News not found.'
-                    : `Failed to load news data: ${err.message}`;
-                console.error('Failed to fetch news data:', err);
-                setError(errorMessage);
-                setLoading(false);
-            }
-        };
-        fetchNews();
-    }, [eventId, currentLang]);
+        if (selectedItem) {
+            setNews({
+                e_id: selectedItem.e_id,
+                date: selectedItem.e_date && !isNaN(new Date(selectedItem.e_date).getTime())
+                    ? new Date(selectedItem.e_date).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                      })
+                    : 'TBD',
+                title: selectedItem.e_title || 'Untitled News',
+                shortTitle: selectedItem.e_shorttitle || '',
+                detail: selectedItem.e_detail || 'No details available.',
+                image: selectedItem.img?.img
+                    ? `${API}/storage/uploads/${selectedItem.img.img}`
+                    : '/placeholder-image.jpg',
+            });
+            setError(null);
+        } else {
+            setError('No relevant news found.');
+        }
+        setLoading(false);
+    }, [eventId, currentLang, globalData, isLoading]);
 
     return (
         <div className=" bg-white">

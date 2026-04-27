@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import { useLocation } from 'react-router-dom';
+import { useData } from "../../Context/DataContext";
+import { API } from '../../Service/APIconfig';
 
 // Animation variants for the section
 const sectionVariants = {
@@ -22,88 +23,38 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const PartnershipSection = ({ section, headerTitle, menuLang }) => {
+const PartnershipSection = ({ section, headerTitle }) => {
+  const { globalData, isLoading } = useData();
   const [partners, setPartners] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const location = useLocation();
-  const [currentLang, setCurrentLang] = useState(location.pathname.startsWith('/km') ? 2 : 1);
+  const currentLang = location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
-    setCurrentLang(location.pathname.startsWith('/km') ? 2 : 1);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    const fetchPartners = async () => {
-      try {
-        setIsLoading(true);
-        const res = await axiosInstance.get(`${API_ENDPOINTS.getPartnership}`);
-        const data = Array.isArray(res.data?.data) ? res.data.data : [];
+    if (globalData?.partners) {
+        const data = globalData.partners;
         const formatted = data
           .filter(
             (partner) =>
               partner.active === 1 &&
-              partner.ps_type === 1
+              partner.ps_type === 1 &&
+              partner.ps_sec === section.sec_id
             )
           .map((partner) => ({
-            src: partner.ps_img
+            src: partner.img?.img
               ? `${API}/storage/uploads/${partner.img.img}`
               : null,
             alt: partner.ps_title || (currentLang === 2 ? 'រូបសញ្ញាដៃគូ' : 'Partner Logo'),
           }));
 
         setPartners(formatted);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('PartnershipSection: Error fetching partners:', error);
-        setError(
-          currentLang === 2
-            ? 'បរាជ័យក្នុងការទាញយកទិន្នន័យដៃគូ'
-            : 'Failed to load partner data'
-        );
-        setPartners([]);
-        setIsLoading(false);
-      }
-    };
+    }
+  }, [currentLang, globalData?.partners, section.sec_id]);
 
-    fetchPartners();
-  }, [currentLang]);
 
-  if (isLoading) {
-    return (
-      <div
-        lang={currentLang === 2 ? 'km' : 'en'}
-        className={`text-center py-8 text-gray-600 ${
-          currentLang === 2 ? 'lang-khmer font-khmer' : 'lang-english font-sans'
-        }`}
-      >
-        {currentLang === 2 ? 'កំពុងផ្ទុក...' : 'Loading partners...'}
-      </div>
-    );
+  if (isLoading || partners.length === 0) {
+    return null;
   }
 
-  if (error || partners.length === 0) {
-    return (
-      <div
-        lang={currentLang === 2 ? 'km' : 'en'}
-        className={`text-center py-8 text-gray-600 ${
-          currentLang === 2 ? 'lang-khmer font-khmer' : 'lang-english font-sans'
-        }`}
-        role="region"
-        aria-label={currentLang === 2 ? 'ផ្នែកដៃគូ' : 'Partnership section'}
-      >
-        {error || (currentLang === 2 ? 'គ្មានដៃគូសម្រាប់បង្ហាញ' : 'No partners to display')}
-        {error && (
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700"
-          >
-            {currentLang === 2 ? 'សាកល្បងម្តងទៀត' : 'Retry'}
-          </button>
-        )}
-      </div>
-    );
-  }
 
   return (
     <div

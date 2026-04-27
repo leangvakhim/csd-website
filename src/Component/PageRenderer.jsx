@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import PageHeader from './PageHeader';
 import Footer from '../Component/footer/Footer'
-import { API_ENDPOINTS, axiosInstance } from '../Service/APIconfig';
+
 import Slideshow from './Slideshow/Slideshow';
 import ServiceSection from './Services/ServiceSection';
 import ProgramSection from './Program/ProgramSection';
@@ -61,11 +60,30 @@ import NewDetails from './New/NewDetails';
 import AnnouncementDetails from './Announcement/AnnouncementDetails';
 import CareerDetails from './Career/CareerDetails';
 import { Helmet } from 'react-helmet';
+import { useData } from '../Context/DataContext';
 
 
-const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings, facultyDetailPage, researchDetailPage, researchlabDetailPage, scholarshipDetailPage, newDetailPage, eventDetailPage, announcementDetailPage, careerDetailPage }) => {
+const PageRenderer = ({ 
+    page, 
+    pages, 
+    allSections, 
+    menus, 
+    allSearchData, 
+    currentLang, 
+    setCurrentLang, 
+    settings, 
+    setSettings, 
+    facultyDetailPage, 
+    researchDetailPage, 
+    researchlabDetailPage, 
+    scholarshipDetailPage, 
+    newDetailPage, 
+    eventDetailPage, 
+    announcementDetailPage, 
+    careerDetailPage 
+}) => {
+    const { isLoading } = useData();
     const location = useLocation();
-    const [sections, setSections] = useState([]);
     const [error, setError] = useState(null);
     const [onlyContentMode, setOnlyContentMode] = useState(false);
     const [shouldRender, setShouldRender] = useState(false);
@@ -74,6 +92,14 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
     const path = window.location.pathname;
     const lastSegment = path.split('/').pop();
 
+    // Local filtering of sections from allSections
+    const sections = React.useMemo(() => {
+        if (!page?.p_id || !allSections) return [];
+        return allSections
+            .filter((section) => section.sec_page === page.p_id && section.display === 1)
+            .sort((a, b) => a.sec_order - b.sec_order);
+    }, [page?.p_id, allSections]);
+
     useEffect(() => {
         if (page?.menu?.title) {
             document.title = `${page.menu.title} - Department of Computer Science`;
@@ -81,37 +107,26 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
     }, [page, page?.menu?.title, page?.p_id, location.pathname]);
 
     useEffect(() => {
-        const timer = setTimeout(() => setShouldRender(true), 0);
-        return () => clearTimeout(timer);
+        setShouldRender(true);
     }, []);
 
-    useEffect(() => {
-        if (page?.p_id) {
-            // console.log("PageRenderer: Fetching sections for page_id:", page);
-            axiosInstance
-                .get(`${API_ENDPOINTS.getSection}?page_id=${page.p_id}`)
-                .then((res) => {
-                    const pageSections = res.data.data
-                        .filter((section) => section.sec_page === page.p_id && section.display === 1)
-                        .sort((a, b) => a.sec_order - b.sec_order);
-                    setSections(pageSections);
-                    setError(null);
-                })
-                .catch((err) => {
-                    console.error('PageRenderer: Error fetching sections:', err);
-                    setError('Failed to load page sections. Please try again later.');
-                });
-        }
-    }, [page]);
 
     if (error) {
         return <div className="text-center py-8 text-red-600">{error}</div>;
     }
 
-    if (sections.length === 0 && !onlyContentMode && shouldRender) {
+    if (sections.length === 0 && !onlyContentMode && shouldRender && !isLoading) {
         return (
             <div lang={isKhmer ? 'km' : 'en'} className={isKhmer ? 'lang-khmer' : 'lang-english'}>
-                <PageHeader currentLang={currentLang} setCurrentLang={setCurrentLang} settings={settings} setSettings={setSettings} />
+                <PageHeader 
+                    currentLang={currentLang} 
+                    setCurrentLang={setCurrentLang} 
+                    settings={settings} 
+                    setSettings={setSettings} 
+                    menus={menus}
+                    pages={pages}
+                    searchData={allSearchData}
+                />
                 <div className="text-center py-8 text-gray-600">No sections available for this page.</div>
             </div>
         );
@@ -120,7 +135,15 @@ const PageRenderer = ({ page, currentLang, setCurrentLang, settings, setSettings
     return (
         <div lang={isKhmer ? 'km' : 'en'} className={isKhmer ? 'lang-khmer' : 'lang-english'}>
             <div className="sticky top-0 z-50">
-                <PageHeader currentLang={currentLang} setCurrentLang={setCurrentLang} settings={settings} setSettings={setSettings} />
+                <PageHeader 
+                    currentLang={currentLang} 
+                    setCurrentLang={setCurrentLang} 
+                    settings={settings} 
+                    setSettings={setSettings} 
+                    menus={menus}
+                    pages={pages}
+                    searchData={allSearchData}
+                />
             </div>
 
             {!onlyContentMode && (

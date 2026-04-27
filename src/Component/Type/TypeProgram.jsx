@@ -1,36 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { RiDoubleQuotesR } from 'react-icons/ri';
-import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 
 const TypeProgram = ({ section }) => {
+  const { globalData, isLoading } = useData();
   const [reasons, setReasons] = useState([]);
   const [mainTitle, setMainTitle] = useState('');
   const [description, setDescription] = useState('');
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
-    if (section && section.sec_id) {
-      // Fetch child items (reasons)
-      axiosInstance.get(`${API_ENDPOINTS.getSubType}?section_id=${section.sec_id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          const items = data?.data?.filter((item) => item.lang === section.lang);
-          setReasons(items || []);
-        })
-        .catch((err) => console.error('Error fetching reasons:', err));
+    if (globalData && section && section.sec_id) {
+      // 1. Get SubTypes (reasons)
+      if (globalData.subTypes) {
+        const items = (globalData.subTypes || []).filter(
+          (item) => item.stse_sec === section.sec_id && item.lang === currentLang
+        );
+        setReasons(items || []);
+      }
 
-      // Fetch section title and description
-      axiosInstance.get(`${API_ENDPOINTS.getType}?section_id=${section.sec_id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          const mainData = data?.data?.find((item) => item.lang === currentLang) || data?.data?.[0];
+      // 2. Get Types (main title and description)
+      if (globalData.types) {
+        const mainData = (globalData.types || []).find(
+          (item) => item.sec_id === section.sec_id && item.lang === currentLang
+        );
+        
+        if (mainData) {
           setMainTitle(mainData?.text?.title || 'Why Choose Us');
           setDescription(mainData?.text?.desc || '');
-        })
-        .catch((err) => console.error('Error fetching main section:', err));
+        } else {
+          // Fallback to searching by ref_id or section if needed, 
+          // but usually globalData should have it filtered correctly.
+          setMainTitle('Why Choose Us');
+          setDescription('');
+        }
+      }
     }
-  }, [section, currentLang]);
+  }, [section, currentLang, globalData]);
 
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -41,6 +48,8 @@ const TypeProgram = ({ section }) => {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
+
+  if (isLoading) return null;
 
   return (
     <motion.section

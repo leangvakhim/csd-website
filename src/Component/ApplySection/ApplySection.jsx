@@ -6,10 +6,13 @@ import {
   FaArrowRight,
   FaCalendarAlt,
 } from 'react-icons/fa';
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
-import { useLocation } from 'react-router-dom';
+import { API } from "../../Service/APIconfig";
 
-const ApplySection = ({key, section, menuLang}) => {
+import { useLocation } from 'react-router-dom';
+import { useData } from "../../Context/DataContext";
+
+const ApplySection = ({ section, menuLang}) => {
+  const { globalData } = useData();
   const location = useLocation();
   const [applyInfo, setApplyInfo] = useState(null);
   const [steps, setSteps] = useState([]);
@@ -18,80 +21,47 @@ const ApplySection = ({key, section, menuLang}) => {
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
-    const fetchApplyInfo = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getApply);
-        const data = res.data?.data || [];
+    if (globalData?.applies) {
+      const filtered = globalData.applies.find(item =>
+        item.section?.sec_type === 'Apply' &&
+        item.ha_sec === section?.sec_id
+      );
+      setApplyInfo(filtered);
+    }
 
-        const filtered = data.find(item =>
-          item.section?.sec_type === 'Apply' &&
-          item.ha_sec === section?.sec_id
-        );
+    if (globalData?.subApplies) {
+      const filteredSteps = globalData.subApplies
+        .filter(
+          (item) =>
+            item.ha?.ha_sec === section?.sec_id &&
+            item.display === 1 &&
+            item.active === 1
+        )
+        .sort((a, b) => a.sha_order - b.sha_order);
+      setSteps(filteredSteps.map(item => item.sha_title));
+    }
 
-        setApplyInfo(filtered);
-      } catch (err) {
-        console.error('Failed to fetch Apply Info:', err);
-      }
-    };
-
-    fetchApplyInfo();
-
-    // Fetch steps from subha endpoint
-    const fetchSteps = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getSubApply);
-        const subhaData = res.data?.data || [];
-
-        const filteredSteps = subhaData
-          .filter(
-            (item) =>
-              item.ha?.ha_sec === section?.sec_id &&
-              item.display === 1 &&
-              item.active === 1
-          )
-          .sort((a, b) => a.sha_order - b.sha_order);
-        setSteps(filteredSteps.map(item => item.sha_title));
-      } catch (error) {
-        console.error("Failed to fetch steps from subha:", error);
-      }
-    };
-
-    fetchSteps();
-
-    const fetchContactInfo = async () => {
-      try {
-        const langId = window.location.pathname.includes('/km') ? 2 : 1;
-        const res = await axiosInstance.get(`${API_ENDPOINTS.getContactByLang}/${langId}`);
-        const data = res.data?.data || {};
-        const subcontact2 = data.subcontact2;
-        const subcontact3 = data.subcontact3;
+    if (globalData?.contacts) {
+      const langId = window.location.pathname.includes('/km') ? 2 : 1;
+      const data = globalData.contacts.find(c => c.con_lang === langId);
+      if (data) {
         setContactDetails({
-          phone: subcontact2?.scon_detail || '',
-          email: subcontact3?.scon_detail || '',
+          phone: data.subcontact2?.scon_detail || '',
+          email: data.subcontact3?.scon_detail || '',
         });
-      } catch (error) {
-        console.error("Failed to fetch contact info:", error);
       }
-    };
+    }
 
-    fetchContactInfo();
+    if (globalData?.socialSettings) {
+      const socialData = globalData.socialSettings || [];
+      const filtered = Array.isArray(socialData)
+          ? socialData.filter(item => item.active === 1 && item.display === 1)
+          : [];
+      const sorted = filtered.sort((a, b) => a.setsoc_order - b.setsoc_order);
+      setSocialLinks(sorted);
+    }
+  }, [section?.sec_id, globalData?.applies, globalData?.subApplies, globalData?.contacts, globalData?.socialSettings]);
 
-    const fetchSocialLinks = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getSocialSetting);
-        const data = Array.isArray(res.data?.data) ? res.data.data : [];
-
-        const filtered = data
-          .filter(item => item.display === 1 && item.active === 1)
-          .sort((a, b) => a.setsoc_order - b.setsoc_order);
-        setSocialLinks(filtered);
-      } catch (error) {
-        console.error("Failed to fetch social links:", error);
-      }
-    };
-
-    fetchSocialLinks();
-  }, [section]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -111,110 +81,147 @@ const ApplySection = ({key, section, menuLang}) => {
 
   return (
     <div className="my-16">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row items-center justify-between">
-          {/* Left Side: Steps and Text */}
-
-          {/* Right Side: New Semester and Contact Info */}
+      <div className="container mx-auto px-4 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true, amount: 0.1 }}
+          className="flex flex-col lg:flex-row gap-8 w-full justify-between items-stretch"
+        >
+          {/* Column 1: Steps and Text */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true, amount: 0.5 }}
-            className="flex flex-col lg:flex-row gap-6 w-full justify-center  items-center"
-          >
-             <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true, amount: 0.5 }} // Trigger when 50% of the element is in view
-            className="lg:w-1/2  lg:mb-0"
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
+            className="w-full lg:w-5/12 flex flex-col justify-center"
           >
             {applyInfo && (
-            <motion.h2
-              initial={{ opacity: 0, y: -50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              viewport={{ once: true, amount: 0.5 }}
-              className={`text-3xl mb-6 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}
-            >
-              {applyInfo.ha_title}
-            </motion.h2>
+              <h2 className={`text-3xl lg:text-4xl mb-8 text-gray-900 ${menuLang === 2 ? "font-khmer leading-tight" : "font-bold"}`}>
+                {applyInfo.ha_title}
+              </h2>
             )}
             <ul className="list-none space-y-4">
               {steps.map((step, index) => (
                 <motion.li
                   key={index}
-                  initial={{ opacity: 0, y: 50 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.2 }}
-                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true, amount: 0.2 }}
                 >
-                  <div className="p-6 border rounded-2xl flex items-center justify-between">
-                    <span className={`lg:text-xl text-md ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"}`}>{step}</span>
-                    <FaArrowRight className="ml-2" />
+                  <div className="p-5 lg:p-6 border border-gray-200 shadow-sm rounded-2xl flex items-center justify-between bg-white hover:shadow-md transition-shadow">
+                    <span className={`text-base lg:text-lg text-gray-800 ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-medium"}`}>
+                      {step}
+                    </span>
+                    <FaArrowRight className="text-red-800 ml-4 flex-shrink-0" />
                   </div>
                 </motion.li>
               ))}
             </ul>
           </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              viewport={{ once: true, amount: 0.5 }}
-              className="bg-white  rounded-md space-y-4 lg:w-1/4 lg:order-2 order-1"
-            >
-              {applyInfo && (
-                <div className="bg-white p-6 rounded-md shadow-md">
-                  <h2 className={`text-xl font-semibold mb-4 ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>{applyInfo.ha_tagtitle}</h2>
-                  <p className={`mb-4 ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"} `}>{applyInfo.ha_subtitletag}</p>
-                  <p className={`${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"} mb-4 text-center text-lg lg:text-xl`}>
-                    <FaCalendarAlt className="inline-block mr-2" />
-                    {formatDate(applyInfo.ha_date)}
-                  </p>
+          {/* Column 2: Image */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true, amount: 0.2 }}
+            className="w-full lg:w-4/12 flex flex-col items-center justify-center h-[350px] lg:h-auto"
+          >
+             {applyInfo?.image?.img ? (
+                <img 
+                  src={`${API}/storage/uploads/${applyInfo.image.img}`} 
+                  alt="Admission Image" 
+                  className="rounded-3xl w-full h-full object-cover shadow-lg" 
+                />
+             ) : (
+                <div className="rounded-3xl w-full h-full bg-gray-200 flex items-center justify-center shadow-lg">
+                   <span className="text-gray-400">Image not found</span>
                 </div>
-              )}
+             )}
+          </motion.div>
 
-              <div className="py-6 w-full px-4 bg-red-900 text-white shadow-lg rounded-2xl flex justify-center">
-                <div className="space-y-5">
-                  <h2 className={`text-lg font-semibold ${menuLang === 2 ? "font-khmer" : "font-semibold"}`}>{currentLang === 1 ? "Contact Info" : "ទំនាកទំនងបន្ថែម"}</h2>
-                  <p className={`flex items-center ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"}`}>
-                    <FaPhoneAlt className="mr-2" />
-                    {contactDetails.phone}
-                  </p>
-                  <p className={`flex items-center ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"}`}>
-                    <FaEnvelope className="mr-2" />
-                    {contactDetails.email}
-                  </p>
-                  <div className="flex space-x-3">
-                    {socialLinks.map((link, index) => (
-                      <a key={index} href={link.setsoc_link || "#"} target="_blank" rel="noopener noreferrer">
-                        <div className="bg-gray-50 p-2 rounded-lg text-red-700">
-                          <img
-                            src={`${API}/storage/uploads/${link.img?.img}`}
-                            alt={link.setsoc_title}
-                            className="w-5 h-5 object-contain"
-                          />
-                        </div>
-                      </a>
-                    ))}
-                  </div>
+          {/* Column 3: Contact Info & Semester */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            viewport={{ once: true, amount: 0.2 }}
+            className="w-full lg:w-3/12 flex flex-col gap-6 justify-center"
+          >
+            {/* Semester Box */}
+            {applyInfo && (
+              <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 flex flex-col items-center text-center">
+                <h2 className={`text-xl text-gray-900 mb-2 ${menuLang === 2 ? "font-khmer" : "font-bold"}`}>
+                  {applyInfo.ha_tagtitle}
+                </h2>
+                <p className={`text-gray-600 mb-5 ${menuLang === 2 ? "fonts-khmer text-[16px]" : "font-medium"} `}>
+                  {applyInfo.ha_subtitletag}
+                </p>
+                <div className="bg-red-50 text-red-800 px-5 py-2.5 rounded-full flex items-center gap-3 w-full justify-center shadow-sm border border-red-100">
+                  <FaCalendarAlt className="text-lg flex-shrink-0" />
+                  <span className={`text-lg lg:text-xl font-semibold whitespace-nowrap ${menuLang === 2 ? "fonts-khmer text-[18px]" : "font-sans"}`}>
+                    {formatDate(applyInfo.ha_date)}
+                  </span>
                 </div>
               </div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              viewport={{ once: true, amount: 0.5 }}
-              className="lg:w-1/3 h-full lg:order-1 order-2"
-            >
-              <img src={`${API}/storage/uploads/${applyInfo?.image?.img}`} alt="Admission Image" className="rounded-2xl w-full h-full object-cover" />
-            </motion.div>
+            )}
+
+            {/* Contact Box */}
+            <div className="p-6 bg-red-900 text-white shadow-xl rounded-3xl flex flex-col justify-center relative overflow-hidden">
+              {/* Subtle background decoration */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 pointer-events-none"></div>
+              
+              <h2 className={`text-xl mb-6 text-center z-10 ${menuLang === 2 ? "font-khmer" : "font-bold"}`}>
+                {currentLang === 1 ? "Contact Info" : "ព័ត៌មានទំនាក់ទំនង"}
+              </h2>
+              
+              <div className="space-y-4 z-10">
+                <div className="flex items-center bg-red-800/60 p-3 rounded-xl border border-red-800/50">
+                  <div className="bg-white/10 p-2.5 rounded-full mr-4 flex-shrink-0">
+                    <FaPhoneAlt className="text-white text-sm" />
+                  </div>
+                  <p className={`text-sm lg:text-base ${menuLang === 2 ? "fonts-khmer" : "font-medium tracking-wide"}`}>
+                    {contactDetails.phone || "N/A"}
+                  </p>
+                </div>
+                
+                <div className="flex items-center bg-red-800/60 p-3 rounded-xl border border-red-800/50">
+                  <div className="bg-white/10 p-2.5 rounded-full mr-4 flex-shrink-0">
+                    <FaEnvelope className="text-white text-sm" />
+                  </div>
+                  <p className={`text-sm lg:text-base break-all ${menuLang === 2 ? "fonts-khmer" : "font-medium"}`}>
+                    {contactDetails.email || "N/A"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Socials */}
+              {socialLinks.length > 0 && (
+                <div className="mt-6 flex justify-center gap-3 z-10">
+                  {socialLinks.map((link, index) => (
+                    <a 
+                      key={index} 
+                      href={link.setsoc_link || "#"} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="bg-white p-2.5 rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 shadow-sm flex items-center justify-center group"
+                    >
+                      <img
+                        src={`${API}/storage/uploads/${link.img?.img}`}
+                        alt={link.setsoc_title}
+                        className="w-5 h-5 object-contain opacity-80 group-hover:opacity-100"
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
           </motion.div>
-        </div>
+
+        </motion.div>
       </div>
     </div>
   );

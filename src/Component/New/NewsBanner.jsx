@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaCalendarAlt } from 'react-icons/fa';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+import { useData } from "../../Context/DataContext";
+
 
 const NewsBanner = ({menuLang, newId}) => {
   const [bannerSection, setBannerSection] = useState(null);
@@ -10,62 +12,45 @@ const NewsBanner = ({menuLang, newId}) => {
 
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
+  const { globalData } = useData();
+
   useEffect(() => {
+    if (!globalData?.news) return;
 
-    const fetchBanner = async () => {
-      try {
-          const response = await axiosInstance.get(API_ENDPOINTS.getNews);
-          const data = response.data?.data || [];
-
-          const selectedItem = data.find(item =>
-            item.display === 1 &&
-            item.lang === currentLang &&
-            item.ref_id === Number(newId))
-
-          if (selectedItem) {
-              setBannerSection({
-                  title: selectedItem.n_title,
-                  description: selectedItem.n_shorttitle,
-                  postDate: selectedItem.n_date
-                      ? new Date(selectedItem.n_date).toLocaleDateString('en-GB', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                        })
-                      : 'TBD',
-                  image: selectedItem.img?.img
-                      ? `${API}/storage/uploads/${selectedItem.img.img}`
-                      : '/placeholder-image.jpg',
-              });
-          } else {
-              setError('No relevant news found.');
-          }
-          setLoading(false);
-      } catch (err) {
-          setError(err.response?.status === 404 ? 'News not found.' : 'Failed to load news banner.');
-          console.error('Error fetching news details:', err);
-          setLoading(false);
-      }
-  };
-        fetchBanner();
-
-}, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[600px] px-4 text-center">
-        <p className="text-base text-gray-500 animate-pulse">Loading...</p>
-      </div>
+    const data = globalData.news || [];
+    const selectedItem = data.find(item =>
+        item.display === 1 &&
+        item.lang === currentLang &&
+        item.ref_id === Number(newId)
     );
+
+    if (selectedItem) {
+        setBannerSection({
+            title: selectedItem.n_title,
+            description: selectedItem.n_shorttitle,
+            postDate: selectedItem.n_date
+                ? new Date(selectedItem.n_date).toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                  })
+                : 'TBD',
+            image: selectedItem.img?.img
+                ? `${API}/storage/uploads/${selectedItem.img.img}`
+                : '/placeholder-image.jpg',
+        });
+        setError(null);
+    } else {
+        setError('No relevant news found.');
+    }
+    setLoading(false);
+  }, [newId, currentLang, globalData?.news]);
+
+
+  if (!bannerSection) {
+    return null;
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-[600px] px-4 text-center">
-        <p className="text-base text-red-500">{error}</p>
-      </div>
-    );
-  }
 
   return (
     <motion.div

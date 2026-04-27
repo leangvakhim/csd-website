@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaArrowRight, FaCalendarAlt, FaSpinner } from 'react-icons/fa';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { FaArrowRight, FaCalendarAlt } from 'react-icons/fa';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
 const CareerSection = ({ section, menuLang, careerDetailPage }) => {
+    const { globalData, isLoading } = useData();
     const navigate = useNavigate();
     const [careers, setCareers] = useState([]);
-    const [loading, setLoading] = useState(true);
-
     const [headerData, setHeaderData] = useState({
         hsec_title: 'default title',
         hsec_subtitle: 'default subtitle',
@@ -18,31 +18,28 @@ const CareerSection = ({ section, menuLang, careerDetailPage }) => {
 
     const BASE_IMAGE_URL = `${API}/storage/uploads`;
     const DEFAULT_IMAGE = '/placeholder-image.jpg';
-
-
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        const fetchCareerData = async () => {
-            try {
-                const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-                const data = response.data;
-                if (Array.isArray(data.data)) {
-                    const filtered = data.data.find(
-                        item => item.hsec_sec === section?.sec_id && item.section?.sec_type === "Career"
-                    );
-                    if(filtered){
-                        setHeaderData({
-                            hsec_title: filtered.hsec_title || 'default title',
-                            hsec_subtitle: filtered.hsec_subtitle || 'default subtitle',
-                            hsec_btntitle: filtered.hsec_btntitle,
-                            hsec_routepage: filtered.hsec_routepage,
-                        });
-                    }
+        if (globalData) {
+            // 1. Get Header Section
+            if (Array.isArray(globalData.headers)) {
+                const filtered = globalData.headers.find(
+                    item => item.hsec_sec === section?.sec_id && item.section?.sec_type === "Career"
+                );
+                if (filtered) {
+                    setHeaderData({
+                        hsec_title: filtered.hsec_title || 'default title',
+                        hsec_subtitle: filtered.hsec_subtitle || 'default subtitle',
+                        hsec_btntitle: filtered.hsec_btntitle,
+                        hsec_routepage: filtered.hsec_routepage,
+                    });
                 }
+            }
 
-                const careerRes = await axiosInstance.get(API_ENDPOINTS.getCareer);
-                const formattedCareers = careerRes.data?.data
+            // 2. Get Career List
+            if (Array.isArray(globalData.career)) {
+                const formattedCareers = globalData.career
                     .filter(
                         (item) =>
                             item.display === 1 &&
@@ -63,15 +60,9 @@ const CareerSection = ({ section, menuLang, careerDetailPage }) => {
                     }));
 
                 setCareers(formattedCareers);
-            } catch (err) {
-                console.error('Error fetching careers:', err);
-            } finally {
-                setLoading(false);
             }
-        };
-
-        fetchCareerData();
-    }, [currentLang]); // Re-fetch data if the language changes
+        }
+    }, [currentLang, globalData, section]);
 
     const containerVariants = {
         hidden: { opacity: 0, y: 50 },
@@ -83,13 +74,15 @@ const CareerSection = ({ section, menuLang, careerDetailPage }) => {
         visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
     };
 
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <FaSpinner className="animate-spin text-4xl text-red-800" />
-            </div>
-        );
-    }
+    if (isLoading) return null;
+
+    const getDetailPath = (alias, refId) => {
+        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+        if (!alias) return '#';
+        const path = alias.startsWith('/') ? alias : `/${alias}`;
+        const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+        return `${fullPath}/${refId}`;
+    };
 
     return (
         <div className="my-16 py-4">
@@ -101,7 +94,6 @@ const CareerSection = ({ section, menuLang, careerDetailPage }) => {
                 viewport={{ once: true, amount: 0.5 }}
             >
                 <div className="flex flex-col sm:flex-row gap-8">
-                    {/* Header and description */}
                     <motion.div
                         className="w-full sm:w-1/2 text-center sm:text-left"
                         variants={itemVariants}
@@ -116,13 +108,12 @@ const CareerSection = ({ section, menuLang, careerDetailPage }) => {
                                     onClick={() => navigate(headerData.hsec_routepage)}
                                     className="bg-red-700 text-white p-3 rounded-lg flex items-center justify-center mt-4 sm:mt-0 hover:bg-red-800 transition duration-300"
                                 >
-                                <FaArrowRight className="h-6 w-6" />
-                            </button>
+                                    <FaArrowRight className="h-6 w-6" />
+                                </button>
                             )}
                         </div>
                     </motion.div>
 
-                    {/* Career cards scrollable */}
                     <motion.div
                         className="flex space-x-4 w-full sm:w-1/2 overflow-x-auto snap-x snap-mandatory"
                         variants={containerVariants}
@@ -132,8 +123,7 @@ const CareerSection = ({ section, menuLang, careerDetailPage }) => {
                                 <motion.div
                                     key={career.ref_id}
                                     onClick={() => {
-                                        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                                        navigate(`${prefix}${careerDetailPage.p_alias}/${career.ref_id}`);
+                                        navigate(getDetailPath(careerDetailPage?.p_alias, career.ref_id));
                                     }}
                                     className="snap-start cursor-pointer relative sm:w-80 w-70 flex-shrink-0 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
                                     variants={itemVariants}

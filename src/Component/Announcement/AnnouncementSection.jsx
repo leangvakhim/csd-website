@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaSearch, FaTimes, FaSpinner, FaArrowRight } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -21,7 +23,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
   const [loading, setLoading] = useState(true);
   const [headerLoading, setHeaderLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [headerError, setHeaderError] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -41,44 +43,40 @@ const AnnouncementSection = ({ section, menuLang }) => {
 
   const handleClearSearch = () => setSearchTerm('');
 
+  const { globalData } = useData();
+
+  const resolvePageAlias = (routePage) => {
+    if (!globalData?.pages) return null;
+    const pages = Array.isArray(globalData.pages) ? globalData.pages : [];
+    const matched = pages.find((page) => page.p_title === routePage);
+    return matched?.p_alias || null;
+  };
+
   useEffect(() => {
-    const fetchHeaderData = async () => {
-      try {
-        setHeaderLoading(true);
-        const response = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-        const headerList = response.data?.data || [];
+    if (!globalData) return;
 
-        const matchedHeader = headerList.find(
-          (item) =>
-            item.hsec_sec === section.sec_id &&
-            item.section?.sec_type === "Announcement" &&
-            item.section?.display === 1 &&
-            item.section?.active === 1
-        );
-        setHeaderData({
-          hsec_title: matchedHeader?.hsec_title || "Announcements",
-          hsec_amount: matchedHeader?.hsec_amount || 4,
-          hsec_subtitle: matchedHeader?.hsec_subtitle || "",
-          hsec_btntitle: matchedHeader?.hsec_btntitle || "",
-          hsec_routepage: await resolvePageAlias(matchedHeader?.hsec_routepage) || "",
-        });
-      } catch (error) {
-        console.error('Failed to fetch header data:', error);
-        setHeaderError('Failed to load section header. Using default values.');
-        setHeaderData({
-          hsec_title: "Announcements",
-          hsec_amount: 4
-        });
-      } finally {
-        setHeaderLoading(false);
-      }
-    };
+    // Handle header data
+    if (globalData.headers) {
+      const matchedHeader = globalData.headers.find(
+        (item) =>
+          item.hsec_sec === section.sec_id &&
+          item.section?.sec_type === "Announcement" &&
+          item.section?.display === 1 &&
+          item.section?.active === 1
+      );
 
-    const fetchAnnouncements = async () => {
-      try {
-        setLoading(true);
-        const response = await axiosInstance.get(API_ENDPOINTS.getAnnouncement);
-        const transformed = response.data.data
+      const headerObj = {
+        hsec_title: matchedHeader?.hsec_title || "Announcements",
+        hsec_amount: matchedHeader?.hsec_amount || 4,
+        hsec_subtitle: matchedHeader?.hsec_subtitle || "",
+        hsec_btntitle: matchedHeader?.hsec_btntitle || "",
+        hsec_routepage: resolvePageAlias(matchedHeader?.hsec_routepage) || "",
+      };
+      setHeaderData(headerObj);
+
+      // Handle announcements data
+      if (globalData.announcements) {
+        const transformed = globalData.announcements
           .filter((announcement) => {
             if (!announcement) return false;
             return (
@@ -88,7 +86,7 @@ const AnnouncementSection = ({ section, menuLang }) => {
             );
           })
           .sort((a, b) => b.am_orders - a.am_orders)
-          .slice(0, headerData.hsec_amount || 4)
+          .slice(0, headerObj.hsec_amount || 4)
           .map((announcement) => {
             let formattedDate = 'TBD';
             try {
@@ -116,51 +114,18 @@ const AnnouncementSection = ({ section, menuLang }) => {
           });
 
         setNewsItems(transformed);
-      } catch (error) {
-        console.error('Failed to fetch announcements:', error);
-        setError('Failed to load announcements. Please try again later.');
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchHeaderData().then(fetchAnnouncements);
-  }, [section.sec_id, currentLang]);
-
-  const resolvePageAlias = async (routePage) => {
-    try {
-      const res = await axiosInstance.get(API_ENDPOINTS.getPage);
-      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
-      const matched = pages.find((page) => page.p_title === routePage);
-      return matched?.p_alias || null;
-    } catch (error) {
-      console.error("Failed to fetch page alias:", error);
-      return null;
     }
-  };
 
-  if (headerLoading || loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <FaSpinner className="animate-spin text-4xl text-red-800" />
-      </div>
-    );
+    setLoading(false);
+    setHeaderLoading(false);
+  }, [section.sec_id, currentLang, globalData]);
+
+
+  if (newsItems.length === 0) {
+    return null;
   }
 
-  if (headerError || error) {
-    return (
-      <div className="text-center py-12 text-red-600">
-        {headerError && <p>{headerError}</p>}
-        {error && <p>{error}</p>}
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="my-8 sm:my-12 md:my-16">
