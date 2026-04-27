@@ -2,75 +2,47 @@ import React, { useState, useEffect } from 'react';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
 const RelatedCareer = ({ sectionId, menuLang, careerId, careerDetailPage }) => {
+    const { globalData, isLoading } = useData();
     const [events, setEvents] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const response = await axiosInstance.get(`${API_ENDPOINTS.getCareer}`);
-                const allCareers = response.data?.data || [];
+        if (globalData?.career) {
+            const allCareers = globalData.career || [];
 
-                // Filter careers by currentLang and exclude current careerId
-                const filteredCareers = allCareers.filter(item =>
-                    item.lang === currentLang && item.ref_id !== Number(careerId)
-                );
+            // Filter careers by currentLang and exclude current careerId
+            const filteredCareers = allCareers.filter(item =>
+                item.lang === currentLang && item.ref_id !== Number(careerId)
+            );
 
-                const formattedEvents = filteredCareers.map((item, index) => ({
-                    id: item.c_id || index + 1,
-                    ref_id: item.ref_id,
-                    title: item.c_title || 'Untitled Career',
-                    image: item.img?.img
-                        ? `${API}/storage/uploads/${item.img.img}`
-                        : '/placeholder-image.jpg',
-                    description: item.c_shorttitle || 'No description available.',
-                    date: item.c_date
-                        ? new Date(item.c_date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                        })
-                        : 'TBD',
-                    category: item.c_tags,
-                }));
+            const formattedEvents = filteredCareers.map((item, index) => ({
+                id: item.c_id || index + 1,
+                ref_id: item.ref_id,
+                title: item.c_title || 'Untitled Career',
+                image: item.img?.img
+                    ? `${API}/storage/uploads/${item.img.img}`
+                    : '/placeholder-image.jpg',
+                description: item.c_shorttitle || 'No description available.',
+                date: item.c_date
+                    ? new Date(item.c_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                    })
+                    : 'TBD',
+                category: item.c_tags,
+            }));
 
-                setEvents(formattedEvents);
-                setLoading(false);
-            } catch (err) {
-                console.error('Error fetching careers:', err);
-                setError('Failed to load careers.');
-                setLoading(false);
-            }
-        };
+            setEvents(formattedEvents);
+        }
+    }, [currentLang, careerId, globalData]);
 
-        fetchEvents();
-    }, [sectionId, currentLang, careerId]);
-
-    if (loading) {
-        return (
-            <div className="my-16">
-                <div className="container mx-auto px-4">
-                    <p>Loading events...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="my-16">
-                <div className="container mx-auto px-4">
-                    <p className="text-red-600">{error}</p>
-                </div>
-            </div>
-        );
-    }
+    if (isLoading) return null;
 
     if (!events.length) {
         return (
@@ -83,13 +55,19 @@ const RelatedCareer = ({ sectionId, menuLang, careerId, careerDetailPage }) => {
         );
     }
 
+    const getDetailPath = (alias, refId) => {
+        if (!alias) return '#';
+        const path = alias.startsWith('/') ? alias : `/${alias}`;
+        const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+        return `${fullPath}/${refId}`;
+    };
+
     return (
         <div className="my-16">
             <div className="container mx-auto px-4">
                 {/* Header Section */}
                 <div className={`flex flex-col sm:flex-row justify-between ${currentLang === 2 ? 'font-khmer' : 'font-sans'}`}>
                     <h2 className={`text-2xl mb-6 font-semibold ${currentLang === 2 ? 'font-khmer' : 'font-sans'}`}>{currentLang === 1 ? "Related Articles" : "អត្ថបទដែលទាក់ទង"}</h2>
-                    {/* Scroll buttons removed to match RelatedArtical */}
                 </div>
 
                 {/* Events Section */}
@@ -98,7 +76,7 @@ const RelatedCareer = ({ sectionId, menuLang, careerId, careerDetailPage }) => {
                         {events.map((event) => (
                             <Link
                                 key={event.id}
-                                to={`${prefix}${careerDetailPage.p_alias}/${event.ref_id}`}
+                                to={getDetailPath(careerDetailPage?.p_alias, event.ref_id)}
                                 className="text-start"
                             >
                                 <motion.div

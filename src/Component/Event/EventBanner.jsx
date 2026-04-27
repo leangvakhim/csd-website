@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaCalendarAlt } from 'react-icons/fa';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+import { useData } from "../../Context/DataContext";
+
 import { useLocation } from 'react-router-dom';
 
 const EventBanner = ({ eventId, menuLang}) => {
@@ -11,56 +13,41 @@ const EventBanner = ({ eventId, menuLang}) => {
     const location = useLocation();
     const currentLang = location.pathname.includes('/km') ? 2 : 1;
 
+    const { globalData } = useData();
+
     useEffect(() => {
-        if (eventId) {
-            const fetchBanner = async () => {
-                try {
-                    const response = await axiosInstance.get(`${API_ENDPOINTS.getEvent}`);
-                    const allEvents = response.data?.data || [];
-                    const selectedEvent = allEvents.find(
-                        item => item.ref_id === Number(eventId) && item.lang === currentLang
-                    );
-                    if (selectedEvent) {
-                        setBannerSection({
-                            title: selectedEvent.e_title || 'Untitled Event',
-                            postDate: selectedEvent.e_date
-                                ? new Date(selectedEvent.e_date).toLocaleDateString('en-GB', {
-                                      day: '2-digit',
-                                      month: 'short',
-                                      year: 'numeric',
-                                  })
-                                : 'TBD',
-                            image: selectedEvent.img?.img
-                                ? `${API}/storage/uploads/${selectedEvent.img?.img}`
-                                : '/placeholder-image.jpg',
-                        });
-                    }
-                    setLoading(false);
-                } catch (err) {
-                    setError('Failed to load event banner.');
-                    console.error('Error fetching event details:', err);
-                    setLoading(false);
-                }
-            };
-            fetchBanner();
+        if (eventId && globalData?.events) {
+            const allEvents = globalData.events || [];
+            const selectedEvent = allEvents.find(
+                item => item.ref_id === Number(eventId) && item.lang === currentLang
+            );
+            if (selectedEvent) {
+                setBannerSection({
+                    title: selectedEvent.e_title || 'Untitled Event',
+                    postDate: selectedEvent.e_date
+                        ? new Date(selectedEvent.e_date).toLocaleDateString('en-GB', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                          })
+                        : 'TBD',
+                    image: selectedEvent.img?.img
+                        ? `${API}/storage/uploads/${selectedEvent.img?.img}`
+                        : '/placeholder-image.jpg',
+                });
+                setError(null);
+            } else {
+                setError('Event not found.');
+            }
+            setLoading(false);
         }
-    }, [eventId]);
+    }, [eventId, currentLang, globalData?.events]);
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-[600px] px-4 text-center">
-                <p className="text-base text-gray-500 animate-pulse">Loading...</p>
-            </div>
-        );
+
+    if (!bannerSection) {
+        return null;
     }
 
-    if (error) {
-        return (
-            <div className="flex items-center justify-center h-[600px] px-4 text-center">
-                <p className="text-base text-red-500">{error}</p>
-            </div>
-        );
-    }
 
     return (
         <motion.div

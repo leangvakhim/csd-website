@@ -3,6 +3,7 @@ import Papa from "papaparse";
 import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
+import { useData } from "../../Context/DataContext";
 
 const AnnouncementDetails = ({announcementID, menuLang}) => {
   const [students, setStudents] = useState([]);
@@ -17,7 +18,10 @@ const AnnouncementDetails = ({announcementID, menuLang}) => {
   const indexOfFirstStudent = indexOfLastStudent - itemsPerPage;
   const displayedData = students.slice(indexOfFirstStudent, indexOfLastStudent);
 
+  const { globalData, isLoading } = useData();
+
   useEffect(() => {
+    // Student data is still fetched locally as it's not in globalData
     axiosInstance.get(API_ENDPOINTS.getAnnouncementStudent)
       .then(response => {
         const rawData = Array.isArray(response.data) ? response.data : [];
@@ -41,21 +45,17 @@ const AnnouncementDetails = ({announcementID, menuLang}) => {
         console.error("Error fetching data:", error);
       });
 
-    axiosInstance.get(API_ENDPOINTS.getAnnouncement)
-      .then(response => {
-        const allAnnouncements = response.data?.data || [];
-        const matched = allAnnouncements.find(
+    // Use globalData for announcement details
+    if (globalData?.announcements && !isLoading) {
+        const matched = globalData.announcements.find(
           item => item.ref_id ===  Number(announcementID) && item.lang === currentLang
         );
 
         if (matched && matched.am_title && matched.am_detail) {
           setAnnouncement({ title: matched.am_title, detail: matched.am_detail });
         }
-      })
-      .catch(error => {
-        console.error("Error fetching announcement detail:", error);
-      });
-  }, [announcementID, location.pathname]);
+    }
+  }, [announcementID, currentLang, globalData, isLoading]);
 
   const subjects = students.length > 0 ? Object.keys(students[0].subjects) : [];
 

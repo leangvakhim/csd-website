@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+import { useData } from "../../Context/DataContext";
+
 
 const SocialSection = ({ sectionId, menuLang }) => {
     const [settings, setSettings] = useState(null);
@@ -9,21 +11,23 @@ const SocialSection = ({ sectionId, menuLang }) => {
     const [currentLang, setCurrentLang] = useState(1);
     const [socialLinks, setSocialLinks] = useState([]);
 
-    useEffect(() => {
-      axiosInstance.get(API_ENDPOINTS.getSocialSetting)
-        .then(res => {
-          const socialData = res.data?.data || res.data || [];
-          const filtered = Array.isArray(socialData)
-            ? socialData.filter(item => item.active === 1 && item.display === 1)
-            : [];
-          const sorted = filtered.sort((a, b) => a.setsoc_order - b.setsoc_order);
-          setSocialLinks(sorted);
-        })
-        .catch(err => console.error("Failed to fetch social links:", err));
+    const { globalData } = useData();
 
-    }, []);
+    useEffect(() => {
+        if (globalData?.socialSettings) {
+            const socialData = globalData.socialSettings || [];
+            const filtered = Array.isArray(socialData)
+                ? socialData.filter(item => item.active === 1 && item.display === 1)
+                : [];
+            const sorted = filtered.sort((a, b) => a.setsoc_order - b.setsoc_order);
+            setSocialLinks(sorted);
+        }
+    }, [globalData?.socialSettings]);
+
+    if (socialLinks.length === 0) return null;
 
     return (
+
         <div className="my-16 ">
             <div className="container mx-auto px-4 ">
                 <div className="flex justify-start ">

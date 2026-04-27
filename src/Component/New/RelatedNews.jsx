@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { API } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 
 const RelatedNews = ({ sectionId, menuLang, newId, newDetailPage }) => {
     const [events, setEvents] = useState([]);
@@ -11,48 +12,39 @@ const RelatedNews = ({ sectionId, menuLang, newId, newDetailPage }) => {
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
+    const { globalData, isLoading: isDataLoading } = useData();
+
     useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const response = await axiosInstance.get(
-                    `${API_ENDPOINTS.getNews}`
-                );
-                const data = response.data?.data || [];
-                const eventData = Array.isArray(data) ? data : [data].filter(Boolean);
-                const filteredEvents = eventData.filter(
-                  item => item.lang === currentLang && item.ref_id !== Number(newId)
-                );
+        if (!globalData?.news || isDataLoading) return;
 
-                const formattedEvents = filteredEvents
-                  .map((item, index) => ({
-                    id: item.n_id || index + 1,
-                    title: item.n_title || 'Untitled Event',
-                    ref_id: item.ref_id,
-                    image: item.img?.img
-                      ? `${API}/storage/uploads/${item.img.img}`
-                      : '/placeholder-image.jpg',
-                    description: item.n_shorttitle || 'No description available.',
-                    date: item.n_date
-                        ? new Date(item.n_date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        })
-                        : 'TBD',
-                    category: item.n_tags,
-                  }))
-                  .slice(0, 4);
+        const data = globalData.news;
+        const filteredEvents = data.filter(
+            item => item.lang === currentLang && item.ref_id !== Number(newId) && item.display === 1
+        );
 
-                setEvents(formattedEvents);
-                setLoading(false);
-            } catch (err) {
-                console.error('Error fetching events:', err);
-                setError('Failed to load events.');
-                setLoading(false);
-            }
-        };
-        fetchEvents();
-    }, [sectionId, menuLang]);
+        const formattedEvents = filteredEvents
+            .map((item, index) => ({
+                id: item.n_id || index + 1,
+                title: item.n_title || 'Untitled Event',
+                ref_id: item.ref_id,
+                image: item.img?.img
+                    ? `${API}/storage/uploads/${item.img.img}`
+                    : '/placeholder-image.jpg',
+                description: item.n_shorttitle || 'No description available.',
+                date: item.n_date
+                    ? new Date(item.n_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    })
+                    : 'TBD',
+                category: item.n_tags,
+            }))
+            .slice(0, 4);
+
+        setEvents(formattedEvents);
+        setLoading(false);
+    }, [newId, currentLang, globalData, isDataLoading]);
 
     if (loading) {
         return (
@@ -85,6 +77,13 @@ const RelatedNews = ({ sectionId, menuLang, newId, newDetailPage }) => {
         );
     }
 
+    const getDetailPath = (alias, refId) => {
+        if (!alias) return '#';
+        const path = alias.startsWith('/') ? alias : `/${alias}`;
+        const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+        return `${fullPath}/${refId}`;
+    };
+
     return (
         <div className="my-16">
             <div className="container mx-auto px-4">
@@ -100,7 +99,7 @@ const RelatedNews = ({ sectionId, menuLang, newId, newDetailPage }) => {
                         {events.map((event) => (
                             <Link
                                 key={event.ref_id}
-                                to={`${prefix}${newDetailPage.p_alias}/${event.ref_id}`}
+                                to={getDetailPath(newDetailPage?.p_alias, event.ref_id)}
                                 className="text-start"
                             >
                                 <motion.div

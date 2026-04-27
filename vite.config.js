@@ -11,14 +11,14 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://aimostore.shop',
+        target: 'https://cs.fs.rupp.edu.kh/laravelapi',
         changeOrigin: true,
-        secure: false, // in case you use self-signed SSL on dev
-        rewrite: path => path.replace(/^\/api/, '/api'),
+        secure: false,
       },
-      '/storage/uploads': {
-        target: 'https://aimostore.shop',
+      '/storage': {
+        target: 'https://cs.fs.rupp.edu.kh/laravelapi',
         changeOrigin: true,
+        secure: false,
       },
     },
   },

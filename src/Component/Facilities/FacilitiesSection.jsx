@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+
+import { useData } from "../../Context/DataContext";
 
 // Animation variants
 const sectionVariants = {
@@ -21,6 +23,7 @@ const cardVariants = {
 };
 
 const FacilitiesSection = ({ section, menuLang }) => {
+  const { globalData } = useData();
   const [facilityData, setFacilityData] = useState({
     title: "",
     description: "",
@@ -28,26 +31,15 @@ const FacilitiesSection = ({ section, menuLang }) => {
     id: null,
   });
   const [subservices, setSubservices] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  const fetchFacilities = useCallback(async () => {
-    if (!section?.sec_page) {
-      setError("Missing page ID");
-      setIsLoading(false);
+
+  useEffect(() => {
+    if (!globalData?.facilities || !globalData?.subServices) {
       return;
     }
 
     try {
-      setIsLoading(true);
-      setError(null);
-
-      // Fetch facilities data
-      const facilitiesRes = await axiosInstance.get(
-        `${API_ENDPOINTS.getAcadFacilities}`
-      );
-
-      const data = facilitiesRes.data?.data || [];
+      const data = globalData.facilities;
       const validItems = data.filter(
         (item) =>
           item.section?.sec_page === section.sec_page &&
@@ -57,8 +49,7 @@ const FacilitiesSection = ({ section, menuLang }) => {
       );
 
       if (validItems.length === 0) {
-        setError("No facilities found for this page.");
-        setIsLoading(false);
+        setFacilityData({ title: "", description: "", image: "", id: null });
         return;
       }
 
@@ -67,22 +58,15 @@ const FacilitiesSection = ({ section, menuLang }) => {
         ? `${API}/storage/uploads/${facilityItem.image.img}`
         : "";
 
-      const newFacilityData = {
+      setFacilityData({
         title: facilityItem.text?.title || "Facilities",
         description: facilityItem.text?.desc || "",
         image: imagePath,
-        id: facilityItem.af_id || null, // Use af_id from JSON
-      };
+        id: facilityItem.af_id || null,
+      });
 
-      setFacilityData(newFacilityData);
-
-      // Fetch subservices for this facility
-      const subserviceRes = await axiosInstance.get(
-        `${API_ENDPOINTS.getSubserviceAF}?af_id=${facilityItem.af_id}`
-      );
-
-      const subserviceData = (subserviceRes.data?.data || []).filter(
-        (subservice) => subservice.ss_af === facilityItem.af_id // Filter by ss_af
+      const subserviceData = (globalData.subServices || []).filter(
+        (subservice) => subservice.ss_af === facilityItem.af_id
       );
 
       setSubservices(
@@ -96,41 +80,16 @@ const FacilitiesSection = ({ section, menuLang }) => {
         }))
       );
     } catch (err) {
-      console.error("API error:", err);
-      setError(err.response?.data?.message || "Failed to load data");
-    } finally {
-      setIsLoading(false);
+      console.error("Facilities processing error:", err);
     }
-  }, [section]);
+  }, [section.sec_page, globalData?.facilities, globalData?.subServices]);
 
-  useEffect(() => {
-    fetchFacilities();
-  }, [fetchFacilities]);
 
-  if (isLoading) {
-    return (
-      <div className="text-center py-8 text-gray-600">
-        <div className="animate-pulse flex space-x-4">
-          <div className="flex-1 space-y-4 py-1">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
-          </div>
-        </div>
-      </div>
-    );
+
+  if (!facilityData.id) {
+    return null;
   }
 
-  if (error) {
-    return <div className="text-center py-8 text-red-600">Error: {error}</div>;
-  }
-
-  if (!facilityData.title && !facilityData.description && !facilityData.image) {
-    return (
-      <div className="text-center py-8 text-gray-600">
-        No facilities available
-      </div>
-    );
-  }
 
   return (
     <div className="my-16">

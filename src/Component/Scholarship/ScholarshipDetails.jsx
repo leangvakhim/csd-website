@@ -1,47 +1,34 @@
-
 import React, { useEffect, useState } from 'react';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
 import ScholarshipBanner from './ScholarshipBanner';
 import ScholarshipApplication from './ScholarshipApplication';
 import ScholarshipOverview from './ScholarshipOverview';
+import { useData } from '../../Context/DataContext';
 
 const ScholarshipDetails = ({ scholarshipId }) => {
+    const { globalData, isLoading } = useData();
     const [sections, setSections] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchSections = async () => {
-            try {
-                const response = await axiosInstance.get(API_ENDPOINTS.getScholarship);
-                const sorted = response.data.data
-                    .filter(
-                        (item) =>
-                            item.display === 1 &&
-                            item.active === 1 &&
-                            item.ref_id === parseInt(scholarshipId)
-                    )
-
-                    .sort((a, b) => a.sc_orders - b.sc_orders);
-                setSections(sorted);
-                setLoading(false);
-            } catch (error) {
+        if (globalData?.scholarship) {
+            const sorted = (globalData.scholarship || [])
+                .filter(
+                    (item) =>
+                        item.display === 1 &&
+                        item.active === 1 &&
+                        item.ref_id === parseInt(scholarshipId)
+                )
+                .sort((a, b) => a.sc_orders - b.sc_orders);
+            setSections(sorted);
+            if (sorted.length === 0) {
                 setError('Failed to fetch scholarship details.');
-                console.error('Failed to fetch scholarship sections:', error);
-                setLoading(false);
+            } else {
+                setError(null);
             }
-        };
-        fetchSections();
-    }, [scholarshipId]);
+        }
+    }, [scholarshipId, globalData]);
 
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen px-4 text-center">
-                <p className="text-sm sm:text-base lg:text-lg text-gray-500 animate-pulse">Loading...</p>
-            </div>
-        );
-    }
+    if (isLoading) return null;
 
     if (error) {
         return (
@@ -57,7 +44,6 @@ const ScholarshipDetails = ({ scholarshipId }) => {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <ScholarshipOverview scholarshipId={scholarshipId} />
                 <ScholarshipApplication scholarshipId={scholarshipId} />
-
             </div>
         </div>
     );

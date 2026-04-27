@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+
+import { useData } from "../../Context/DataContext";
 
 // Animation variants for the section
 const sectionVariants = {
@@ -22,39 +24,34 @@ const cardVariants = {
 };
 
 const ServiceSection = ({ section, menuLang }) => {
+  const { globalData } = useData();
   const [services, setServices] = useState([]);
 
 
-  // Fetch services data based on section.sec_id
+  // Process services data from globalData
   useEffect(() => {
-    if (section?.sec_id) {
-      axiosInstance
-        .get(`${API_ENDPOINTS.getService}`)
-        .then((res) => {
-          const data = res.data?.data || [];
-          const formatted = data
-            .filter((service) => service.display === 1 &&
-              service.active === 1 &&
-              service.section?.sec_id === section.sec_id
-            )
-            .map((service) => ({
-              title: service.s_title,
-              description: service.s_subtitle,
-              image: service.image?.img ? `${API}/storage/uploads/${service.image.img}` : null,
-            }));
-          setServices(formatted);
-        })
-
-    } else {
-      console.log("ServiceSection: No section.sec_id provided, skipping API call");
+    if (globalData?.services) {
+      const data = globalData.services;
+      const formatted = data
+        .filter((service) => service.display === 1 &&
+          service.active === 1 &&
+          service.section?.sec_id === section.sec_id
+        )
+        .map((service) => ({
+          title: service.s_title,
+          description: service.s_subtitle,
+          image: service.image?.img ? `${API}/storage/uploads/${service.image.img}` : null,
+        }));
+      setServices(formatted);
     }
-  }, [section, menuLang]);
+  }, [section.sec_id, globalData?.services]);
+
 
 
   if (services.length === 0) {
-    // console.log("ServiceSection: No services to render (services array is empty)");
-    return <div className="text-center py-8 text-gray-600">No services available for this section.</div>;
+    return null;
   }
+
 
   // console.log("ServiceSection: Rendering services:", services);
   return (

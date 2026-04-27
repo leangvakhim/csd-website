@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaFilter, FaTimes, FaArrowRight } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaArrowRight } from 'react-icons/fa';
 import { MdExplore, MdComputer } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
 // Custom hook for debouncing
 const useDebounce = (value, delay) => {
@@ -22,120 +23,92 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-const ResearchSection = ({section, menuLang, researchDetailPage}) => {
+const ResearchSection = ({section, researchDetailPage}) => {
+  const { globalData, isLoading } = useData();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('');
   const [researchData, setResearchData] = useState([]);
   const [headerData, setHeaderData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Debounce the search term
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
-  const resolvePageAlias = async (routePage) => {
-    try {
-      const res = await axiosInstance.get(API_ENDPOINTS.getPage);
-      const pages = Array.isArray(res.data?.data) ? res.data.data : [];
+  useEffect(() => {
+    if (!globalData?.research) return;
 
-      const matched = pages.find((page) => page.p_title === routePage);
-      return matched?.p_alias || null;
-    } catch (error) {
-      console.error("Failed to fetch page alias:", error);
-      return null;
+    const formattedResearchData = globalData.research
+      .filter((item) => item.display === 1 && item.active === 1
+        && item.lang === currentLang)
+      .map((item) => ({
+        id: item.rsd_id,
+        ref_id: item.ref_id,
+        title: item.rsd_title || 'Untitled Research',
+        description: item.rsd_subtitle || 'No description available',
+        image: item.image?.img
+          ? `${API}/storage/uploads/${item.image.img}`
+          : '/placeholder-image.jpg',
+        lead: item.rsd_lead || 'Unknown Lead',
+      }));
+
+    setResearchData(formattedResearchData);
+
+    if (globalData?.headers) {
+      const headerList = globalData.headers;
+      const matchedHeader = headerList.find(
+        (item) =>
+          item.hsec_sec === section.sec_id &&
+          item.section?.sec_type === "Research" &&
+          item.section?.display === 1 &&
+          item.section?.active === 1
+      );
+
+      if (matchedHeader) {
+        const pages = globalData.pages || [];
+        const matchedPage = pages.find((page) => page.p_title === matchedHeader.hsec_routepage);
+        const routeAlias = matchedPage?.p_alias || "";
+
+        setHeaderData({
+          title: matchedHeader.hsec_title || '',
+          subtitle: matchedHeader.hsec_subtitle || '',
+          routepage: routeAlias,
+          btntitle: matchedHeader.hsec_btntitle || '',
+          amount: matchedHeader.hsec_amount || '',
+        });
+      } else {
+        setHeaderData({
+          title: '',
+          subtitle: '',
+        });
+      }
     }
+  }, [currentLang, globalData?.research, globalData?.headers, section.sec_id]);
+
+  if (isLoading || !headerData) {
+    return null;
   }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const researchResponse = await axiosInstance.get(API_ENDPOINTS.getResearch);
-        const researchData = researchResponse.data?.data || [];
-
-        const formattedResearchData = researchData
-          .filter((item) => item.display === 1 && item.active === 1
-            && item.lang === currentLang)
-          .map((item) => ({
-            id: item.rsd_id,
-            ref_id: item.ref_id,
-            title: item.rsd_title || 'Untitled Research',
-            description: item.rsd_subtitle || 'No description available',
-            image: item.image?.img
-              ? `${API}/storage/uploads/${item.image.img}`
-              : '/placeholder-image.jpg',
-            lead: item.rsd_lead || 'Unknown Lead',
-          }));
-
-        setResearchData(formattedResearchData);
-
-        const headerResponse = await axiosInstance.get(API_ENDPOINTS.getHeaderSection);
-        const headerList = headerResponse.data?.data || [];
-
-        const matchedHeader = headerList.find(
-          (item) =>
-            item.hsec_sec === section.sec_id &&
-            item.section?.sec_type === "Research" &&
-            item.section?.display === 1 &&
-            item.section?.active === 1
-        );
-
-        if (matchedHeader) {
-          setHeaderData({
-            title: matchedHeader.hsec_title || '',
-            subtitle: matchedHeader.hsec_subtitle || '',
-            routepage: await resolvePageAlias(matchedHeader.hsec_routepage) || "",
-            btntitle: matchedHeader.hsec_btntitle || '',
-            amount: matchedHeader.hsec_amount || '',
-          });
-        } else {
-          setHeaderData({
-            title: '',
-            subtitle: '',
-          });
-        }
-
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load data. Please try again later.');
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   const filteredSections = researchData
-    .filter((section) => {
+    .filter((item) => {
       const matchesSearch =
-        section.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        section.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        section.lead.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+        item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        item.lead.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
       return matchesSearch;
     })
-    .slice(0, headerData?.amount);
+    .slice(0, headerData?.amount || researchData.length);
 
   const handleClearSearch = () => {
     setSearchTerm('');
   };
 
-  if (loading) {
-    return (
-      <div className="my-8 text-center text-gray-600">
-        Loading research data...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="my-8 text-center text-gray-600">
-        {error}
-      </div>
-    );
-  }
+  const getDetailPath = (alias, refId) => {
+    const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
+    const defaultAlias = '/research';
+    const finalAlias = alias || defaultAlias;
+    const path = finalAlias.startsWith('/') ? finalAlias : `/${finalAlias}`;
+    const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+    return `${fullPath}/${refId}`;
+  };
 
   return (
     <div className="my-8 sm:my-12 lg:my-16">
@@ -145,7 +118,7 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
           <div className="mb-4 sm:mb-6 xl:mb-0">
             <div className='flex justify-between'>
               <h2 className={`text-2xl sm:text-3xl font-semibold mb-2 ${currentLang === 2 ? 'font-khmer' : 'font-semibold'}`}>
-                {headerData?.title || 'Students Research'}
+                {headerData?.title || (currentLang === 2 ? 'ការស្រាវជ្រាវរបស់និស្សិត' : 'Students Research')}
               </h2>
               <div className='block xl:hidden'>
                 {headerData.btntitle ? (
@@ -162,11 +135,10 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                     <div className="relative w-full ">
                         <input
                             type="text"
-                            placeholder="Search researchs"
+                            placeholder={currentLang === 2 ? "ស្វែងរកការស្រាវជ្រាវ" : "Search researchs"}
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                             className="border rounded-full py-2 px-4 pl-10 focus:outline-none w-full"
-                            aria-label="Search researchs"
                         />
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <FaSearch className="text-gray-400" />
@@ -175,7 +147,6 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                             <button
                                 onClick={handleClearSearch}
                                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                                aria-label="Clear search"
                             >
                                 <FaTimes className="text-sm" />
                             </button>
@@ -204,11 +175,10 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                 <div className="relative w-full hidden xl:block">
                     <input
                         type="text"
-                        placeholder="Search researchs"
+                        placeholder={currentLang === 2 ? "ស្វែងរកការស្រាវជ្រាវ" : "Search researchs"}
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                         className="border rounded-full py-2 px-4 pl-10 focus:outline-none w-full"
-                        aria-label="Search researchs"
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <FaSearch className="text-gray-400" />
@@ -217,7 +187,6 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                         <button
                             onClick={handleClearSearch}
                             className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                            aria-label="Clear search"
                         >
                             <FaTimes className="text-sm" />
                         </button>
@@ -282,8 +251,7 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                 <div className="mt-3 sm:mt-4">
                   <button
                     onClick={() => {
-                      const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                      navigate(`${prefix}${researchDetailPage.p_alias}/${filteredSections[0].ref_id}`);
+                      navigate(getDetailPath(researchDetailPage?.p_alias, filteredSections[0].ref_id));
                     }}
                     className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
                       }`}
@@ -300,9 +268,9 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
         {filteredSections.length === 2 && (
           <div className="mt-8 sm:mt-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
-              {filteredSections.map((section) => (
+              {filteredSections.map((item) => (
                 <motion.div
-                  key={section.id}
+                  key={item.id}
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
@@ -310,8 +278,8 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                   className="bg-white rounded-lg shadow-md relative group overflow-hidden"
                 >
                   <img
-                    src={section.image}
-                    alt={section.title}
+                    src={item.image}
+                    alt={item.title}
                     className="w-full h-48 sm:h-64 lg:h-80 object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       e.target.onerror = null;
@@ -324,21 +292,20 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                       <button className="text-black text-[9px] sm:text-[10px] lg:text-xs bg-gray-300 py-1 sm:py-1.5 px-2 sm:px-3 lg:px-4 shadow-md rounded-full flex items-center mb-2">
                         <MdComputer className="mr-1 text-xs sm:text-sm" />
                         <span className={`truncate w-full ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                          {section.lead}
+                          {item.lead}
                         </span>
                       </button>
                     </div>
                     <div>
                       <h3 className={`line-clamp-1 overflow-hidden text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans-serif'}`}>
-                        {section.title}
+                        {item.title}
                       </h3>
                       <p className={`line-clamp-2 overflow-hidden mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base sm:line-clamp-2 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                        {section.description}
+                        {item.description}
                       </p>
                       <button
                         onClick={() => {
-                          const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                          navigate(`${prefix}${researchDetailPage.p_alias}/${section.ref_id}`);
+                          navigate(getDetailPath(researchDetailPage?.p_alias, item.ref_id));
                         }}
                         className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
                           }`}
@@ -409,8 +376,7 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                   <div className="mt-3 sm:mt-4">
                     <button
                       onClick={() => {
-                        const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                        navigate(`${prefix}${researchDetailPage.p_alias}/${filteredSections[0].ref_id}`);
+                        navigate(getDetailPath(researchDetailPage?.p_alias, filteredSections[0].ref_id));
                       }}
                       className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
                         }`}
@@ -425,9 +391,9 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
 
             <div className="mt-8 sm:mt-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
-                {filteredSections.slice(1, 3).map((section) => (
+                {filteredSections.slice(1, 3).map((item) => (
                   <motion.div
-                    key={section.id}
+                    key={item.id}
                     initial={{ opacity: 0, y: 50 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -435,8 +401,8 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                     className="bg-white rounded-lg shadow-md relative group overflow-hidden"
                   >
                     <img
-                      src={section.image}
-                      alt={section.title}
+                      src={item.image}
+                      alt={item.title}
                       className="w-full h-48 sm:h-64 lg:h-80 object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         e.target.onerror = null;
@@ -449,21 +415,20 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                         <button className="text-black text-[9px] sm:text-[10px] lg:text-xs bg-gray-300 py-1 sm:py-1.5 px-2 sm:px-3 lg:px-4 shadow-md rounded-full flex items-center mb-2">
                           <MdComputer className="mr-1 text-xs sm:text-sm" />
                           <span className={`truncate w-full ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                            {section.lead}
+                            {item.lead}
                           </span>
                         </button>
                       </div>
                       <div>
                         <h3 className={`line-clamp-1 overflow-hidden text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans-serif'}`}>
-                          {section.title}
+                          {item.title}
                         </h3>
                         <p className={`line-clamp-2 overflow-hidden mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base sm:line-clamp-2 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                          {section.description}
+                          {item.description}
                         </p>
                         <button
                           onClick={() => {
-                            const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                            navigate(`${prefix}${researchDetailPage.p_alias}/${section.ref_id}`);
+                            navigate(getDetailPath(researchDetailPage?.p_alias, item.ref_id));
                           }}
                           className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
                             }`}
@@ -484,9 +449,9 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
         {filteredSections.length === 4 && (
           <div className="mt-8 sm:mt-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
-              {filteredSections.map((section) => (
+              {filteredSections.map((item) => (
                 <motion.div
-                  key={section.id}
+                  key={item.id}
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
@@ -494,8 +459,8 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                   className="bg-white rounded-lg shadow-md relative group overflow-hidden"
                 >
                   <img
-                    src={section.image}
-                    alt={section.title}
+                    src={item.image}
+                    alt={item.title}
                     className="w-full h-48 sm:h-64 lg:h-80 object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       e.target.onerror = null;
@@ -508,21 +473,20 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                       <button className="text-black text-[9px] sm:text-[10px] lg:text-xs bg-gray-300 py-1 sm:py-1.5 px-2 sm:px-3 lg:px-4 shadow-md rounded-full flex items-center mb-2">
                         <MdComputer className="mr-1 text-xs sm:text-sm" />
                         <span className={`truncate w-full ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                          {section.lead}
+                          {item.lead}
                         </span>
                       </button>
                     </div>
                     <div>
                       <h3 className={`line-clamp-1 overflow-hidden text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans-serif'}`}>
-                        {section.title}
+                        {item.title}
                       </h3>
                       <p className={`line-clamp-2 overflow-hidden mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base sm:line-clamp-2 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                        {section.description}
+                        {item.description}
                       </p>
                       <button
                         onClick={() => {
-                          const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                          navigate(`${prefix}${researchDetailPage.p_alias}/${section.ref_id}`);
+                          navigate(getDetailPath(researchDetailPage?.p_alias, item.ref_id));
                         }}
                         className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
                           }`}
@@ -542,9 +506,9 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
         {filteredSections.length > 4 && (
           <div className="mt-8 sm:mt-12">
             <div className="flex overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-transparent px-4 snap-x snap-mandatory space-x-4">
-              {filteredSections.map((section) => (
+              {filteredSections.map((item) => (
                 <motion.div
-                  key={section.id}
+                  key={item.id}
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
@@ -554,8 +518,8 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                   {/* Content wrapper for image + overlays */}
                   <div className="relative w-full h-full">
                     <img
-                      src={section.image}
-                      alt={section.title}
+                      src={item.image}
+                      alt={item.title}
                       className="w-full h-48 sm:h-64 lg:h-80 object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         e.target.onerror = null;
@@ -568,21 +532,20 @@ const ResearchSection = ({section, menuLang, researchDetailPage}) => {
                         <button className="text-black text-[9px] sm:text-[10px] lg:text-xs bg-gray-300 py-1 sm:py-1.5 px-2 sm:px-3 lg:px-4 shadow-md rounded-full flex items-center mb-2">
                           <MdComputer className="mr-1 text-xs sm:text-sm" />
                           <span className={`truncate w-full ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                            {section.lead}
+                            {item.lead}
                           </span>
                         </button>
                       </div>
                       <div>
                         <h3 className={`line-clamp-1 overflow-hidden text-sm sm:text-base lg:text-xl font-semibold mb-1 sm:mb-2 ${currentLang === 2 ? 'fonts-khmer text-[20px]' : 'font-sans-serif'}`}>
-                          {section.title}
+                          {item.title}
                         </h3>
                         <p className={`line-clamp-2 overflow-hidden mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base sm:line-clamp-2 ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'}`}>
-                          {section.description}
+                          {item.description}
                         </p>
                         <button
                           onClick={() => {
-                            const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
-                            navigate(`${prefix}${researchDetailPage.p_alias}/${section.ref_id}`);
+                            navigate(getDetailPath(researchDetailPage?.p_alias, item.ref_id));
                           }}
                           className={`bg-red-900 hover:bg-red-800 text-xs sm:text-sm lg:text-base text-white py-1 sm:py-1.5 px-3 sm:px-4 lg:px-6 rounded-full flex items-center gap-1 font-normal ${currentLang === 2 ? 'fonts-khmer' : 'font-sans-serif'
                             }`}

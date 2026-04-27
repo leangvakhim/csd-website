@@ -1,84 +1,49 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
 
-const BasicRequirements = ({ key, section, menuLang}) => {
+import { useData } from "../../Context/DataContext";
+
+const BasicRequirements = ({ section, menuLang}) => {
+  const { globalData } = useData();
   const [gcAddon, setGcAddon] = useState(null);
   const [gcData, setGcData] = useState(null);
   const [btnFileUrl, setBtnFileUrl] = useState('');
 
-  useEffect(() => {
-    const fetchGcAddon = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getSubRequirement);
-        const data = res.data?.data;
-        const filtered = data.find(
-          (item) =>
-            item.gc?.gc_sec === section.sec_id
-        );
-        setGcAddon(filtered || null);
-      } catch (error) {
-        console.error("Failed to fetch gcaddon:", error);
-      }
-    };
-
-
-    const fetchGcData = async () => {
-      try {
-        const res = await axiosInstance.get(API_ENDPOINTS.getCriteria);
-        const data = res.data?.data || [];
-        const filtered = data.find(
-          (item) =>
-            item.gc_sec === section.sec_id &&
-            item.section?.sec_type === "Requirement" &&
-            item.section?.display === 1 &&
-            item.section?.active === 1
-        );
-        setGcData(filtered || null);
-      } catch (error) {
-        console.error("Failed to fetch requirement:", error);
-      }
-    };
-
-    fetchGcAddon();
-    fetchGcData();
-  }, [section.sec_id]);
-
-  useEffect(() => {
-    const resolveBtnLink = async () => {
-      try {
-        if (!gcAddon?.gca_btnlink) {
-          setBtnFileUrl('');
-          return;
-        }
-        const fname = await getImageNameByID(parseInt(gcAddon.gca_btnlink));
-        if (!fname) {
-          setBtnFileUrl('');
-          return;
-        }
-        // If it's already a full URL, keep it; otherwise build URL from API base
-        const looksLikeUrl = /^https?:\/\//i.test(fname);
-        setBtnFileUrl(looksLikeUrl ? fname : `${API}/storage/uploads/${fname}`);
-      } catch (e) {
-        setBtnFileUrl('');
-        console.error('Failed to resolve button link:', e);
-      }
-    };
-    resolveBtnLink();
-  }, [gcAddon?.gca_btnlink]);
-
-  const getImageNameByID = async (id) => {
-    try {
-      const response = await axiosInstance.get(API_ENDPOINTS.getImages);
-      const images = Array.isArray(response.data) ? response.data : response.data.data;
-      const matchedImage = images.find((img) => img.image_id === id);
-      // console.log("matchedImage?.img is: ",matchedImage?.img)
-      return matchedImage?.img || null;
-    } catch (error) {
-      console.error('❌ Failed to fetch image ID:', error);
-      return null;
-    }
+  const resolveBtnLink = (gcaBtnlink) => {
+    if (!gcaBtnlink || !globalData?.images) return '';
+    const id = parseInt(gcaBtnlink);
+    const matchedImage = globalData.images.find((img) => img.image_id === id);
+    const fname = matchedImage?.img || null;
+    if (!fname) return '';
+    const looksLikeUrl = /^https?:\/\//i.test(fname);
+    return looksLikeUrl ? fname : `${API}/storage/uploads/${fname}`;
   };
+
+  useEffect(() => {
+    if (globalData?.subRequirements) {
+      const filtered = globalData.subRequirements.find(
+        (item) => item.gc?.gc_sec === section.sec_id
+      );
+      setGcAddon(filtered || null);
+      if (filtered?.gca_btnlink) {
+        setBtnFileUrl(resolveBtnLink(filtered.gca_btnlink));
+      }
+    }
+
+    if (globalData?.criterias) {
+      const filtered = globalData.criterias.find(
+        (item) =>
+          item.gc_sec === section.sec_id &&
+          item.section?.sec_type === "Requirement" &&
+          item.section?.display === 1 &&
+          item.section?.active === 1
+      );
+      setGcData(filtered || null);
+    }
+  }, [section.sec_id, globalData?.subRequirements, globalData?.criterias, globalData?.images]);
+
+  if (!gcData) return null;
 
   return (
     <div className="my-16">

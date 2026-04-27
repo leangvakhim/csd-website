@@ -4,144 +4,78 @@ import { IoMdSearch } from "react-icons/io";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { FiChevronDown } from "react-icons/fi";
 import PageSearch from "./PageSearch";
-import { API_ENDPOINTS, axiosInstance } from "../Service/APIconfig";
 import PageNavbar from "./PageNavbar";
+
 import Flag from "react-world-flags";
 
-const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
+const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings, menus: initialMenus, pages: pageData, searchData: initialSearchData }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [menus, setMenus] = useState([]);
   const [activeMenu, setActiveMenu] = useState(null);
   const [mobileDropdowns, setMobileDropdowns] = useState({});
-  const [menusWithAlias, setMenusWithAlias] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [searchData, setSearchData] = useState([]);
   const searchContainerRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const [
-          menuRes,
-          pageRes,
-          facultyRes,
-          eventRes,
-          newsRes,
-          announcementRes,
-          scholarshipRes,
-          careerRes,
-          researchRes,
-          researchlabRes,
-        ] = await Promise.all([
-          axiosInstance.get(API_ENDPOINTS.getMenu),
-          axiosInstance.get(API_ENDPOINTS.getPage),
-          axiosInstance.get(API_ENDPOINTS.getFaculty),
-          axiosInstance.get(API_ENDPOINTS.getEvent),
-          axiosInstance.get(API_ENDPOINTS.getNews),
-          axiosInstance.get(API_ENDPOINTS.getAnnouncement),
-          axiosInstance.get(API_ENDPOINTS.getScholarship),
-          axiosInstance.get(API_ENDPOINTS.getCareer),
-          axiosInstance.get(API_ENDPOINTS.getResearch),
-          axiosInstance.get(API_ENDPOINTS.getResearchlab)
-        ]);
-        const menuData = menuRes.data?.data || [];
-        const pageData = pageRes.data?.data || [];
-        // Filter menus by language and display status, sort by menu_order
-        const filteredMenus = menuData
-          .filter((menu) => menu.lang === currentLang && menu.display === 1)
-          .sort((a, b) => b.menu_order - a.menu_order);
-        // Build a menu tree with children and sanitized p_alias
-        const menuMap = new Map();
-        filteredMenus.forEach((menu) => {
-          menu.children = [];
-          menuMap.set(menu.menu_id, { ...menu });
-        });
-        filteredMenus.forEach((menu) => {
-          if (menu.menup_id) {
-            const parent = menuMap.get(menu.menup_id);
-            if (parent) {
-              parent.children.push(menuMap.get(menu.menu_id));
-            }
-          }
-        });
+  // Process menus and search data using useMemo to avoid redundant work
+  const { menusWithAlias, searchData } = React.useMemo(() => {
+    if (!initialMenus || !pageData) return { menusWithAlias: [], searchData: [] };
 
-        menuMap.forEach((menu) => {
-          if (menu.children && menu.children.length > 0) {
-            menu.children.sort((a, b) => a.menu_order - b.menu_order);
-          }
-        });
+    // Filter and sort menus
+    const filteredMenus = initialMenus
+      .filter((menu) => menu.lang === currentLang && menu.display === 1)
+      .sort((a, b) => b.menu_order - a.menu_order);
 
-        // Combine menus with page aliases, sanitizing p_alias
-        const combinedMenus = Array.from(menuMap.values())
-          .filter((menu) => !menu.menup_id) // Top-level menus only
-          .map((menu) => {
-            const matchedPage = pageData.find((page) => page.p_menu === menu.menu_id);
-            let p_alias = matchedPage ? matchedPage.p_alias : null;
-            if (p_alias) {
-              p_alias = p_alias.replace(/^\/?(km\/)?/, "").replace(/\/$/, "");
-              if (p_alias === "home") p_alias = "";
+    // Build a menu tree
+    const menuMap = new Map();
+    filteredMenus.forEach((menu) => {
+      menuMap.set(menu.menu_id, { ...menu, children: [] });
+    });
+
+    filteredMenus.forEach((menu) => {
+      if (menu.menup_id) {
+        const parent = menuMap.get(menu.menup_id);
+        if (parent) {
+          parent.children.push(menuMap.get(menu.menu_id));
+        }
+      }
+    });
+
+    // Combine menus with page aliases
+    const processedMenus = Array.from(menuMap.values())
+      .filter((menu) => !menu.menup_id)
+      .map((menu) => {
+        const matchedPage = pageData.find((page) => page.p_menu === menu.menu_id);
+        let p_alias = matchedPage ? matchedPage.p_alias : null;
+        if (p_alias) {
+          p_alias = p_alias.replace(/^\/?(km\/)?/, "").replace(/\/$/, "");
+          if (p_alias === "home") p_alias = "";
+        }
+        return {
+          ...menu,
+          p_alias,
+          children: (menu.children || []).map((child) => {
+            const childPage = pageData.find((page) => page.p_menu === child.menu_id);
+            let childAlias = childPage ? childPage.p_alias : null;
+            if (childAlias) {
+              childAlias = childAlias.replace(/^\/?(km\/)?/, "").replace(/\/$/, "");
+              if (childAlias === "home") childAlias = "";
             }
             return {
-              ...menu,
-              p_alias,
-              children: menu.children.map((child) => {
-                const childPage = pageData.find((page) => page.p_menu === child.menu_id);
-                let childAlias = childPage ? childPage.p_alias : null;
-                if (childAlias) {
-                  childAlias = childAlias.replace(/^\/?(km\/)?/, "").replace(/\/$/, "");
-                  if (childAlias === "home") childAlias = "";
-                }
-                return {
-                  ...child,
-                  p_alias: childAlias,
-                };
-              }),
+              ...child,
+              p_alias: childAlias,
             };
-          });
-        setMenus(filteredMenus);
-        setMenusWithAlias(combinedMenus);
+          }).sort((a, b) => a.menu_order - b.menu_order),
+        };
+      });
 
-        const allSearchData = [
-          ...(pageRes.data?.data || []),
-          ...(facultyRes.data?.data || []),
-          ...(eventRes.data?.data || []),
-          ...(newsRes.data?.data || []),
-          ...(announcementRes.data?.data || []),
-          ...(scholarshipRes.data?.data || []),
-          ...(careerRes.data?.data || []),
-          ...(researchRes.data?.data || []),
-          ...(researchlabRes.data?.data || []),
-        ];
-        setSearchData(allSearchData);
-      } catch (err) {
-        console.error("Error fetching menus or pages:", err);
-        setError("Failed to load navigation. Please try again.");
-        setSettings((prev) => ({
-          ...prev,
-          logoUrl: "/placeholder-icon.png",
-        }));
-        // Fallback menu structure
-        setMenusWithAlias([
-          {
-            menu_id: "fallback",
-            title: currentLang === 2 ? "ទំព័រដើម" : "Home",
-            p_alias: "",
-            children: [],
-          },
-        ]);
-      } finally {
-        setIsLoading(false);
-      }
+    return {
+      menusWithAlias: processedMenus,
+      searchData: initialSearchData || [],
     };
-    fetchData();
-  }, [currentLang, setSettings]);
+  }, [currentLang, initialMenus, pageData, initialSearchData]);
+
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
@@ -193,25 +127,18 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
     return `${basePath}${aliasPath}`;
   };
 
+  const getLogoLink = () => {
+    let base = settings?.baseUrl || "/";
+    if (base.startsWith('/km')) base = base.substring(3);
+    if (!base.startsWith('/')) base = '/' + base;
+    return currentLang === 2 ? (base === '/' ? '/km' : `/km${base}`) : base;
+  };
+
   return (
     <div
       lang={currentLang === 2 ? "km" : "en"}
       className={`bg-white shadow-md sticky top-0 z-50 ${currentLang === 2 ? "lang-khmer" : "lang-english"}`}
     >
-      {/* Loading State */}
-      {isLoading && (
-        <div className={`text-center py-2 text-gray-600 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
-          {currentLang === 2 ? "កំពុងផ្ទុក..." : "Loading navigation..."}
-        </div>
-      )}
-
-      {/* Error State */}
-      {error && (
-        <div className={`text-center py-2 text-red-600 ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
-          {error}
-        </div>
-      )}
-
       {/* Search Bar */}
       {isSearchOpen && (
         <div className="absolute top-0 left-0 w-full bg-red-800 py-4 z-50">
@@ -226,7 +153,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center py-2">
             {/* Logo */}
-            <Link to={settings.baseUrl || "/"} className="flex items-center space-x-2">
+            <Link to={getLogoLink()} className="flex items-center space-x-2">
               <img
                 src={settings.logoUrl}
                 alt="Logo"
@@ -307,7 +234,7 @@ const PageHeader = ({ currentLang, setCurrentLang, settings, setSettings }) => {
         >
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <Link to={settings.baseUrl || "/"} className="flex items-center space-x-2">
+              <Link to={getLogoLink()} className="flex items-center space-x-2">
                 <img
                   src={settings.logoUrl}
                   alt="Logo"

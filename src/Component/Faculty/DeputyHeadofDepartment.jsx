@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { RiDoubleQuotesR } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 
 const DeputyHeadofDepartment = ({section, facultyDetailPage}) => {
+    const { globalData, isLoading } = useData();
     const [deputyData, setDeputyData] = useState([]);
     const [socials, setSocials] = useState({});
     const prefix = window.location.pathname.startsWith('/km') ? '/km' : '';
@@ -12,34 +14,30 @@ const DeputyHeadofDepartment = ({section, facultyDetailPage}) => {
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        const fetchDeputies = async () => {
-            try {
-                // Fetch faculty data
-                const facultyRes = await axiosInstance.get(API_ENDPOINTS.getFaculty);
-                const allFaculty = facultyRes.data?.data || [];
-                const deputies = allFaculty
-                    .filter(item =>
-                        item.display === 1 &&
-                        item.active === 1 &&
-                        item.lang === currentLang
-                    )
-                    .sort((a, b) => a.f_order - b.f_order)
-                    .slice(1, 3);
-                const formattedDeputies = deputies.map(deputy => ({
-                    id: deputy.f_id,
-                    ref_id: deputy.ref_id,
-                    name: deputy.f_name,
-                    position: deputy.f_position,
-                    image: deputy.img?.img
-                        ? `${API}/storage/uploads/${deputy.img.img}`
-                        : "/placeholder-icon.png",
-                }));
+        if (globalData?.faculty) {
+            const allFaculty = globalData.faculty || [];
+            const deputies = allFaculty
+                .filter(item =>
+                    item.display === 1 &&
+                    item.active === 1 &&
+                    item.lang === currentLang
+                )
+                .sort((a, b) => a.f_order - b.f_order)
+                .slice(1, 3);
+            const formattedDeputies = deputies.map(deputy => ({
+                id: deputy.f_id,
+                ref_id: deputy.ref_id,
+                name: deputy.f_name,
+                position: deputy.f_position,
+                image: deputy.img?.img
+                    ? `${API}/storage/uploads/${deputy.img.img}`
+                    : "/placeholder-icon.png",
+            }));
 
-                setDeputyData(formattedDeputies);
+            setDeputyData(formattedDeputies);
 
-                // Fetch social media data
-                const socialRes = await axiosInstance.get(API_ENDPOINTS.getSocial);
-                const allSocials = socialRes.data?.data || [];
+            if (globalData?.socials) {
+                const allSocials = globalData.socials || [];
                 const socialsByDeputy = {};
 
                 formattedDeputies.forEach(deputy => {
@@ -52,13 +50,11 @@ const DeputyHeadofDepartment = ({section, facultyDetailPage}) => {
                 });
 
                 setSocials(socialsByDeputy);
-            } catch (error) {
-                console.error("Error fetching deputy heads or socials:", error);
             }
-        };
+        }
+    }, [currentLang, globalData?.faculty, globalData?.socials]);
 
-        fetchDeputies();
-    }, [currentLang]);
+    if (isLoading) return null;
 
     return (
         <div className='my-8 sm:my-12 md:my-16'>
@@ -162,13 +158,23 @@ const DeputyHeadofDepartment = ({section, facultyDetailPage}) => {
                                             </div>
                                         </div>
                                         <p className={`text-left ${currentLang === 2 ? "fonts-khmer" : "font-sans"}`}>{deputy.position}</p>
-                                        <Link
-                                            to={`${prefix}${facultyDetailPage.p_alias}/${deputy.ref_id}`}
-                                        >
-                                            <button className={`bg-red-900 px-4 sm:px-6 py-2 text-gray-50 rounded-2xl text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
-                                                {currentLang === 1 ? "View" : "មើលបន្ថែម"}
-                                            </button>
-                                        </Link>
+                                        {(() => {
+                                            const getDetailPath = (alias, refId) => {
+                                                if (!alias) return '#';
+                                                const path = alias.startsWith('/') ? alias : `/${alias}`;
+                                                const fullPath = (prefix && path.startsWith(prefix)) ? path : `${prefix}${path}`;
+                                                return `${fullPath}/${refId}`;
+                                            };
+                                            return (
+                                                <Link
+                                                    to={getDetailPath(facultyDetailPage?.p_alias, deputy.ref_id)}
+                                                >
+                                                    <button className={`bg-red-900 px-4 sm:px-6 py-2 text-gray-50 rounded-2xl text-sm sm:text-base ${currentLang === 2 ? "font-khmer" : "font-sans"}`}>
+                                                        {currentLang === 1 ? "View" : "មើលបន្ថែម"}
+                                                    </button>
+                                                </Link>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
                             </div>

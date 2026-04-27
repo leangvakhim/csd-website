@@ -1,76 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { FaCalendarAlt, FaListUl } from 'react-icons/fa';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
 
 const ScholarshipOverview = ({ scholarshipId }) => {
+  const { globalData, isLoading } = useData();
   const [scholarshipDetails, setScholarshipDetails] = useState({
     title: '',
     deadline: '',
     subjects: '',
     description: '',
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  console.log("scholarshipId is: ",scholarshipId);
 
   // Determine currentLang based on pathname
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
   useEffect(() => {
-    if (scholarshipId) {
-      const fetchScholarshipDetails = async () => {
-        try {
-          const response = await axiosInstance.get(`${API_ENDPOINTS.getScholarship}`);
-          const allScholarships = response.data?.data || [];
-          const data = allScholarships.find(item =>
-            item.ref_id === Number(scholarshipId) && item.lang === currentLang
-          );
+    if (globalData?.scholarship && scholarshipId) {
+      const allScholarships = globalData.scholarship || [];
+      const data = allScholarships.find(item =>
+        item.ref_id === Number(scholarshipId) && item.lang === currentLang
+      );
 
-          setScholarshipDetails({
-            title: data?.sc_title || '',
-            deadline: data?.sc_deadline
-              ? new Date(data.sc_deadline).toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: 'long',
-                  year: 'numeric',
-                }) // Format: "31 March 2025"
-              : 'N/A',
-            subjects: data?.sc_subjects || '',
-            description: data?.sc_shortdesc || '',
-          });
-
-          console.log("scholarshipDetails is: ",scholarshipDetails);
-          setLoading(false);
-        } catch (err) {
-          setError('Failed to load scholarship details.');
-          console.error('Error fetching scholarship details:', err);
-          setLoading(false);
-        }
-      };
-      fetchScholarshipDetails();
+      if (data) {
+        setScholarshipDetails({
+          title: data?.sc_title || '',
+          deadline: data?.sc_deadline
+            ? new Date(data.sc_deadline).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+              })
+            : 'N/A',
+          subjects: data?.sc_subjects || '',
+          description: data?.sc_shortdesc || '',
+        });
+      }
     }
-  }, [scholarshipId, currentLang]);
+  }, [scholarshipId, currentLang, globalData]);
 
-  if (loading) {
-    return (
-      <div className="bg-white py-12">
-        <div className="container mx-auto px-4 flex items-center justify-center h-[200px]">
-          <p className="text-base text-gray-500 animate-pulse">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white py-12">
-        <div className="container mx-auto px-4 flex items-center justify-center h-[200px]">
-          <p className="text-base text-red-500">{error}</p>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return null;
 
   return (
     <div className="bg-white py-12">

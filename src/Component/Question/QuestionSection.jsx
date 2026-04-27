@@ -3,8 +3,10 @@ import { motion } from "framer-motion";
 import contactImage from "../../assets/web-sample-1(3).jpg";
 import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
 import Swal from 'sweetalert2';
+import { useData } from "../../Context/DataContext";
 
 const QuestionSection = () => {
+  const { isLoading } = useData();
   const captchaCanvasRef = useRef(null);
   const [formData, setFormData] = useState({
     m_firstname: '',
@@ -124,6 +126,9 @@ const QuestionSection = () => {
   };
 
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
+
+  if (isLoading) return null;
+
   return (
     <div className="my-16">
       <motion.div
@@ -253,7 +258,7 @@ const QuestionSection = () => {
                     <div className="flex items-center gap-2 w-full mb-2">
                       <canvas ref={captchaCanvasRef} width="120" height="40" className="border rounded-md bg-white" />
                       <button type="button" onClick={generateCaptcha} className="text-sm text-red-800 underline">
-                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>
                       </button>
                     </div>
                     <div className="flex items-center gap-2 w-full">

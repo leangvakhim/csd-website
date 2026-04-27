@@ -2,14 +2,13 @@ import axios from "axios";
 
 // const API = "https://aimostore.shop";
 // const API = "https://www.aimostore.shop";
-const API = "https://cs.fs.rupp.edu.kh/laravelapi";
-// const API = "http://127.0.0.1:8000";
-// const API = "https://18.136.196.218";
+const API = ""; 
+// const API = "https://cs.fs.rupp.edu.kh/laravelapi";
 
-const API_BASEURL = `${API}/api`;
+const API_BASEURL = "";
 
 const axiosInstance = axios.create({
-  baseURL: API_BASEURL,
+  baseURL: "/api",
   withCredentials: true,
   headers: {
     'Accept': 'application/json',
@@ -53,203 +52,203 @@ axiosInstance.interceptors.response.use(
 const API_ENDPOINTS = {
 
     //guest-token
-    getGuestToken: `${API_BASEURL}/guest-token`,
+    getGuestToken: `/guest-token`,
 
     // images
-    getImages: `${API_BASEURL}/images`,
+    getImages: `/images`,
 
     // event
-    getEvent: `${API_BASEURL}/event`,
+    getEvent: `/event`,
 
     // menu
-    getMenu: `${API_BASEURL}/menu`,
+    getMenu: `/menu`,
 
     // page
-    getPage: `${API_BASEURL}/page`,
+    getPage: `/page`,
 
     // news
-    getNews: `${API_BASEURL}/news`,
+    getNews: `/news`,
 
     // banner
-    getBanner: `${API_BASEURL}/banner`,
+    getBanner: `/banner`,
 
     // academic
-    getAcademic: `${API_BASEURL}/academic`,
+    getAcademic: `/academic`,
 
     // headersection
-    getHeaderSection: `${API_BASEURL}/headersection`,
+    getHeaderSection: `/headersection`,
 
     // intro (introduction)
-    getIntroduction: `${API_BASEURL}/intro`,
+    getIntroduction: `/intro`,
 
     // idd (important)
-    getImportant: `${API_BASEURL}/idd`,
+    getImportant: `/idd`,
 
     // department
-    getDepartment: `${API_BASEURL}/department`,
+    getDepartment: `/department`,
 
     // faq
-    getFAQ: `${API_BASEURL}/faq`,
+    getFAQ: `/faq`,
 
     // apd (available)
-    getAvailable: `${API_BASEURL}/apd`,
+    getAvailable: `/apd`,
 
     // ha (apply)
-    getApply: `${API_BASEURL}/ha`,
+    getApply: `/ha`,
 
     // ufcsd (future)
-    getFuture: `${API_BASEURL}/ufcsd`,
+    getFuture: `/ufcsd`,
 
     // umd (unlock)
-    getUnlock: `${API_BASEURL}/umd`,
+    getUnlock: `/umd`,
 
     // fee
-    getFee: `${API_BASEURL}/fee`,
+    getFee: `/fee`,
 
     // study-degree (study)
-    getStudy: `${API_BASEURL}/study-degree`,
+    getStudy: `/study-degree`,
 
     // gc(criteria)
-    getCriteria: `${API_BASEURL}/gc`,
+    getCriteria: `/gc`,
 
     // rason(Add On of CSD)
-    getAddOnCSD: `${API_BASEURL}/rason`,
+    getAddOnCSD: `/rason`,
 
     // information
-    getText: `${API_BASEURL}/text`,
+    getText: `/text`,
 
     // testimonial
-    getTestimonial: `${API_BASEURL}/testimonial`,
+    getTestimonial: `/testimonial`,
 
     // gallery
-    getGallery: `${API_BASEURL}/gallery`,
+    getGallery: `/gallery`,
 
     // gcaddon (subrequirement)
-    getSubRequirement: `${API_BASEURL}/gcaddon`,
+    getSubRequirement: `/gcaddon`,
 
     // acad-facilities(facilities)
-    getAcadFacilities: `${API_BASEURL}/acad-facilities`,
+    getAcadFacilities: `/acad-facilities`,
 
     // ras(specialization)
-    getSpecialization: `${API_BASEURL}/ras`,
+    getSpecialization: `/ras`,
 
      // faculty
-     getFaculty: `${API_BASEURL}/faculty`,
+     getFaculty: `/faculty`,
 
     // tse(type)
-    getType: `${API_BASEURL}/tse`,
+    getType: `/tse`,
 
     // subtse(subtype)
-    getSubType: `${API_BASEURL}/subtse`,
+    getSubType: `/subtse`,
 
     // subidd(subimportant)
-    getSubImportant: `${API_BASEURL}/subidd`,
+    getSubImportant: `/subidd`,
 
     // subha(subapply)
-    getSubApply: `${API_BASEURL}/subha`,
+    getSubApply: `/subha`,
 
     // faqaddon(subFAQ)
-    getSubFAQ: `${API_BASEURL}/faqaddon`,
+    getSubFAQ: `/faqaddon`,
 
     // ufaddon(subfuture)
-    getSubFuture: `${API_BASEURL}/ufaddon`,
+    getSubFuture: `/ufaddon`,
 
     // subapd(subavailable)
-    getSubAvailable: `${API_BASEURL}/subapd`,
+    getSubAvailable: `/subapd`,
 
     // year(sub studydegree)
-    getSubStudyDegree: `${API_BASEURL}/year`,
+    getSubStudyDegree: `/year`,
 
     // setting
-    getSetting: `${API_BASEURL}/setting2`,
+    getSetting: `/setting2`,
 
     // socialsetting
-    getSocialSetting: `${API_BASEURL}/settingsocial`,
+    getSocialSetting: `/settingsocial`,
 
     // contact
-    getContact: `${API_BASEURL}/contact`,
-    getContactByLang: `${API_BASEURL}/contact/lang`,
+    getContact: `/contact`,
+    getContactByLang: `/contact/lang`,
 
     // subservice
-    getSubserviceAF: `${API_BASEURL}/subservice`,
+    getSubserviceAF: `/subservice`,
 
     // slideshow
-    getSlideshow: `${API_BASEURL}/slideshow`,
+    getSlideshow: `/slideshow`,
 
     // service
-    getService: `${API_BASEURL}/service`,
+    getService: `/service`,
 
     // btnss
-    getBtnss: `${API_BASEURL}/btnss`,
+    getBtnss: `/btnss`,
 
     // section
-    getSection: `${API_BASEURL}/section`,
-    getSectionByPage: `${API_BASEURL}/section/by-page`,
+    getSection: `/section`,
+    getSectionByPage: `/section/by-page`,
 
     // faculty
 
     // faculty-contact
-    getFacultyContact: `${API_BASEURL}/faculty-contact`,
-    getFacultyContactByFaculty: `${API_BASEURL}/faculty-contact/by-faculty`,
+    getFacultyContact: `/faculty-contact`,
+    getFacultyContactByFaculty: `/faculty-contact/by-faculty`,
 
     // faculty-bg
-    getFacultyBG: `${API_BASEURL}/faculty-bg`,
-    getFacultyBGByFaculty: `${API_BASEURL}/faculty-bg/by-faculty`,
+    getFacultyBG: `/faculty-bg`,
+    getFacultyBGByFaculty: `/faculty-bg/by-faculty`,
 
     // faculty-info
-    getFacultyInfo: `${API_BASEURL}/faculty-info`,
+    getFacultyInfo: `/faculty-info`,
 
     // social
-    getSocial: `${API_BASEURL}/social`,
+    getSocial: `/social`,
 
     // career
-    getCareer: `${API_BASEURL}/career`,
+    getCareer: `/career`,
 
     // feedback
-    getScholarship: `${API_BASEURL}/scholarship`,
+    getScholarship: `/scholarship`,
 
     // research
-    getResearch: `${API_BASEURL}/rsd`,
+    getResearch: `/rsd`,
 
     // researchlab
-    getResearchlab: `${API_BASEURL}/rsdl`,
+    getResearchlab: `/rsdl`,
 
     //rsdltag
-    getResearchlabTag: `${API_BASEURL}/rsdltag`,
+    getResearchlabTag: `/rsdltag`,
 
     // feedback
-    getFeedback: `${API_BASEURL}/feedback`,
+    getFeedback: `/feedback`,
 
     // partnership
-    getPartnership: `${API_BASEURL}/partnership`,
+    getPartnership: `/partnership`,
 
     // developer
-    getDevelopers: `${API_BASEURL}/developer`,
+    getDevelopers: `/developer`,
 
     // developersocial
-    getSocialDeveloper: `${API_BASEURL}/developersocial`,
+    getSocialDeveloper: `/developersocial`,
 
     // researchtitle
-    getResearchTitle: `${API_BASEURL}/rsd-title`,
+    getResearchTitle: `/rsd-title`,
 
     // subcontact
-    getSubContact: `${API_BASEURL}/subcontact`,
+    getSubContact: `/subcontact`,
 
     // rsd-desc (Research Description)
-    getRsdDescription: `${API_BASEURL}/rsd-desc`,
+    getRsdDescription: `/rsd-desc`,
 
     // rsd-project (Research Project)
-    getRsdProject: `${API_BASEURL}/rsd-project`,
+    getRsdProject: `/rsd-project`,
 
     // rsd-meet (Research Project)
-    getRsdMeeting: `${API_BASEURL}/rsd-meet`,
+    getRsdMeeting: `/rsd-meet`,
 
     // import announcement
-    getAnnouncementStudent: `${API_BASEURL}/announcement/student`,
-    getAnnouncement: `${API_BASEURL}/announcements`,
+    getAnnouncementStudent: `/announcement/student`,
+    getAnnouncement: `/announcements`,
 
     // submit email
-    createEmail: `${API_BASEURL}/emails/create`
+    createEmail: `/emails/create`
 };
 
 export { API_BASEURL, API_ENDPOINTS, API, axiosInstance };

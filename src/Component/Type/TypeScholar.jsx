@@ -1,47 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, axiosInstance } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
 
 const TypeScholar = ({ section }) => {
+  const { globalData, isLoading } = useData();
   const [scholarships, setScholarships] = useState([]);
   const [mainTitle, setMainTitle] = useState('');
   const [description, setDescription] = useState('');
   const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
-  // Fetching Scholarship Types (Full-Funded, Merit-Based, etc.)
   useEffect(() => {
-    if (section && section.sec_id) {
-      // Fetch data for both API endpoints
-      axiosInstance.get(`${API_ENDPOINTS.getSubType}?section_id=${section.sec_id}`)
-        .then((response) => response.json())
-        .then((data) => {
-          const scholarshipData = data?.data;
-          if (scholarshipData) {
-            // Filter scholarships by currentLang
-            const filteredScholarships = scholarshipData.filter(
-              (scholarship) => scholarship.lang === section.lang
-            );
-            setScholarships(filteredScholarships);
-          }
-        })
-        .catch((error) => console.error("Error fetching scholarships from getSubType:", error));
+    if (globalData && section && section.sec_id) {
+      // 1. Get SubTypes (scholarships categories)
+      if (globalData.subTypes) {
+        const items = (globalData.subTypes || []).filter(
+          (item) => item.stse_sec === section.sec_id && item.lang === currentLang
+        );
+        setScholarships(items || []);
+      }
 
-      axiosInstance.get(`${API_ENDPOINTS.getType}?section_id=${section.sec_id}`)
-        .then((response) => response.json())
-        .then((data) => {
-          const scholarshipData = data?.data;
-          if (scholarshipData && scholarshipData.length > 0) {
-            // Filter by currentLang or pick the first matching language
-            const mainData = scholarshipData.find(
-              (item) => item.lang === currentLang
-            ) || scholarshipData[0]; // Fallback to first item if no match
-            setMainTitle(mainData?.text?.title || 'Default Title');
-            setDescription(mainData?.text?.desc || 'No description available.');
-          }
-        })
-        .catch((error) => console.error("Error fetching scholarships from getType:", error));
+      // 2. Get Types (main title and description)
+      if (globalData.types) {
+        const mainData = (globalData.types || []).find(
+          (item) => item.sec_id === section.sec_id && item.lang === currentLang
+        );
+        
+        if (mainData) {
+          setMainTitle(mainData?.text?.title || 'Default Title');
+          setDescription(mainData?.text?.desc || 'No description available.');
+        } else {
+          setMainTitle('Scholarship Programs');
+          setDescription('');
+        }
+      }
     }
-  }, [section, currentLang]); // Add currentLang to dependency array
+  }, [section, currentLang, globalData]);
 
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -52,6 +45,8 @@ const TypeScholar = ({ section }) => {
     hidden: { opacity: 0, scale: 0.9 },
     visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
   };
+
+  if (isLoading) return null;
 
   return (
     <div className="my-16">

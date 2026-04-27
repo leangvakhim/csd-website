@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { API_ENDPOINTS, axiosInstance } from '../../Service/APIconfig';
-import ResearchInnovations from './ResearcInnovation';
+import { useData } from '../../Context/DataContext';
 import ResearchSection from './ResearchSection';
-import ColController from '../Col/FourCol';
 
 const sectionVariants = {
   hidden: { opacity: 0 },
@@ -23,33 +21,13 @@ const contentVariants = {
 };
 
 const ResearchController = ({ section }) => {
+  const { globalData, isLoading } = useData();
   const [researchData, setResearchData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchResearchData = async () => {
-      if (!section?.sec_id) {
-        setError('Invalid section data');
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const res = await axiosInstance.get(`${API_ENDPOINTS.getPage}?section_id=${section.sec_id}`);
-        const fetchedSections = res.data?.data?.sections || [];
-
-        const matchedSection = fetchedSections.find(sec => sec.page?.p_alias === section.page?.p_alias);
-        setResearchData(matchedSection || section);
-      } catch (err) {
-        console.error('ResearchController: Failed to fetch data', err);
-        setError('Failed to load research data. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResearchData();
+    if (section) {
+      setResearchData(section);
+    }
   }, [section]);
 
   const renderResearchContent = () => {
@@ -61,15 +39,10 @@ const ResearchController = ({ section }) => {
       );
     }
 
-    // Render based on page alias
-    // if (section.page.p_alias === '/home' || section.page.p_alias === "/km/home") {
-    //   return <ResearchInnovations section={section} />;
-    // }
     if (section.page.p_alias === '/research' || section.page.p_alias === "/km/research") {
       return <ResearchSection section={section} />;
     }
 
-    // Fallback for other page types
     return (
       <div className="text-center py-8 text-gray-600">
         No specific research content available for this page.
@@ -77,21 +50,7 @@ const ResearchController = ({ section }) => {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-16">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8 text-red-500">
-        {error}
-      </div>
-    );
-  }
+  if (isLoading) return null;
 
   if (!researchData) {
     return (

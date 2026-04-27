@@ -1,84 +1,69 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { API_ENDPOINTS, API, axiosInstance } from "../../Service/APIconfig";
+import { API } from "../../Service/APIconfig";
+import { useData } from "../../Context/DataContext";
 
 const ContactSection = ({ section, menuLang }) => {
-  const [contactData, setContactData] = useState(null); // No static fallback
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { globalData, isLoading } = useData();
+  const [contactData, setContactData] = useState(null); 
+
 
   useEffect(() => {
-    if (!section?.sec_id) {
-      console.log("GetInTouchSection: No section.sec_id provided, skipping API call");
-      setContactData(null);
+    if (!globalData?.contacts) {
       return;
     }
 
-    setIsLoading(true);
-    axiosInstance
-      .get(`${API_ENDPOINTS.getContactByLang}/${menuLang}`)
-      .then((res) => {
-        const data = res.data?.data;
-        if (!data) {
-          setContactData(null);
-          setIsLoading(false);
-          return;
-        }
-
-        const formattedContactData = {
-          heading: data.con_title || "",
-          description: data.con_subtitle || "",
-          image: data.image?.img ? `${API}/storage/uploads/${data.image.img}` : "",
-          contactDetails: [
-            {
-              id: data.subcontact1?.scon_id || 1,
-              title: data.subcontact1?.scon_title || "",
-              content: data.subcontact1?.scon_detail || "",
-              image: data.subcontact1?.image?.img
-                ? `${API}/storage/uploads/${data.subcontact1.image.img}`
-                : "",
-            },
-            {
-              id: data.subcontact2?.scon_id || 2,
-              title: data.subcontact2?.scon_title || "",
-              content: data.subcontact2?.scon_detail || "",
-              image: data.subcontact2?.image?.img
-                ? `${API}/storage/uploads/${data.subcontact2.image.img}`
-                : "",
-            },
-            {
-              id: data.subcontact3?.scon_id || 3,
-              title: data.subcontact3?.scon_title || "",
-              content: data.subcontact3?.scon_detail || "",
-              image: data.subcontact3?.image?.img
-                ? `${API}/storage/uploads/${data.subcontact3.image.img}`
-                : "",
-            },
-          ],
-        };
-
-        setContactData(formattedContactData);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching contact data:", error);
-        setError("Failed to load contact information.");
+    try {
+      const data = globalData.contacts.find(c => c.con_lang === menuLang);
+      if (!data) {
         setContactData(null);
-        setIsLoading(false);
-      });
-  }, [section?.sec_id, menuLang]);
+        return;
+      }
 
-  if (isLoading) {
-    return (
-      <div className="py-16 text-center text-gray-50 bg-red-900">
-        <p>Loading contact information...</p>
-      </div>
-    );
+      const formattedContactData = {
+        heading: data.con_title || "",
+        description: data.con_subtitle || "",
+        image: data.image?.img ? `${API}/storage/uploads/${data.image.img}` : "",
+        contactDetails: [
+          {
+            id: data.subcontact1?.scon_id || 1,
+            title: data.subcontact1?.scon_title || "",
+            content: data.subcontact1?.scon_detail || "",
+            image: data.subcontact1?.image?.img
+              ? `${API}/storage/uploads/${data.subcontact1.image.img}`
+              : "",
+          },
+          {
+            id: data.subcontact2?.scon_id || 2,
+            title: data.subcontact2?.scon_title || "",
+            content: data.subcontact2?.scon_detail || "",
+            image: data.subcontact2?.image?.img
+              ? `${API}/storage/uploads/${data.subcontact2.image.img}`
+              : "",
+          },
+          {
+            id: data.subcontact3?.scon_id || 3,
+            title: data.subcontact3?.scon_title || "",
+            content: data.subcontact3?.scon_detail || "",
+            image: data.subcontact3?.image?.img
+              ? `${API}/storage/uploads/${data.subcontact3.image.img}`
+              : "",
+          },
+        ],
+      };
+
+      setContactData(formattedContactData);
+    } catch (error) {
+      console.error("Contact processing error:", error);
+    }
+  }, [menuLang, globalData?.contacts]);
+
+
+  if (isLoading || !contactData) {
+    return null;
   }
 
-  if (error || !contactData) {
-    return null; // Render nothing if there's an error or no data
-  }
+
 
   return (
     <div className="py-16">

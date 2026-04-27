@@ -1,25 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { API_ENDPOINTS, API, axiosInstance } from '../../Service/APIconfig';
+import { useData } from '../../Context/DataContext';
+import { API } from '../../Service/APIconfig';
 import { motion } from 'framer-motion';
 
 const ResearchMeeting = ({rsdtId}) => {
+    const { globalData } = useData();
     const [professorData, setProfessorData] = useState(null);
     const currentLang = window.location.pathname.startsWith('/km') ? 2 : 1;
 
     useEffect(() => {
-        const fetchMeetingData = async () => {
-            try {
-                const response = await axiosInstance.get(API_ENDPOINTS.getRsdMeeting);
-                const matched = response.data.data.find(item => item.title.rsdt_id === rsdtId);
-                setProfessorData(matched);
-            } catch (error) {
-                console.error('Failed to fetch meeting data:', error);
-            }
-        };
-        fetchMeetingData();
-    }, [rsdtId]);
+        if (rsdtId && globalData?.researchMeetings) {
+            const matched = globalData.researchMeetings.find(item => item.title?.rsdt_id === rsdtId);
+            setProfessorData(matched);
+        }
+    }, [rsdtId, globalData?.researchMeetings]);
 
     if (!professorData) return null;
+
 
     const { rsdm_title, rsdm_detail, img } = professorData;
     const imageUrl = img?.img ? `${API}/storage/uploads/${img.img}` : '';
