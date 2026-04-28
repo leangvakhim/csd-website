@@ -1,5 +1,7 @@
 {
     "rewrites": [
+      { "source": "/api/(.*)", "destination": "https://cs.fs.rupp.edu.kh/laravelapi/api/$1" },
+      { "source": "/storage/(.*)", "destination": "https://cs.fs.rupp.edu.kh/laravelapi/storage/$1" },
       { "source": "/(.*)", "destination": "/" }
     ]
 }
